@@ -1,0 +1,98 @@
+generator usersClient {
+    provider = "prisma-client-js"
+    output   = "../../node_modules/@prisma-custom/users"
+}
+
+datasource usersDb {
+    provider = "mongodb"
+    url      = env("USERS_DB_URI") // This warning is for v7, you're on v6
+}
+
+// 1. Define the object structure as a Composite Type
+type AuthProvider {
+    provider        String // e.g., "google", "github", "linkedin"
+    providerId      String
+    providerEmail   String
+    profilePhotoUrl String? // Optional, using '?'
+    connectedAt     DateTime @default(now())
+}
+
+model User {
+    // MongoDB requires this exact setup for the primary key
+    id            String         @id @default(auto()) @map("_id") @usersDb.ObjectId
+    email         String         @unique
+    password      String?
+    emailVerified Boolean        @default(false)
+    authProviders AuthProvider[]
+    role          String         @default("USER")
+    accountStatus String         @default("PENDING_VERIFICATION")
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+    lastLoginAt   DateTime       @default(now())
+
+    // 1-to-1 Relation (Non-defining side) 
+    userProfile UserProfile?
+
+    @@map("user-auth")
+}
+
+model UserProfile {
+    id          String  @id @default(auto()) @map("_id") @usersDb.ObjectId
+    // Personal details
+    email       String  @unique
+    firstName   String
+    lastName    String
+    bio         String?
+    imageUrl    String?
+    phoneNumber String?
+
+    // Relationship to User (1:1)
+    userId String @unique @usersDb.ObjectId
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    // Relationship to Addresses (1:many)
+    addresses Address[]
+
+    // Array of Technology IDs (cross-database references)
+    // Store as strings since they're from a different DB
+    technologyIds String[] @usersDb.ObjectId
+
+    // Metadata
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("user-profile")
+}
+
+// Address types enum
+enum AddressType {
+    HOME
+    WORK
+    OTHER
+}
+
+model Address {
+    id       String  @id @default(auto()) @map("_id") @usersDb.ObjectId
+    // Address details
+    address1 String
+    address2 String?
+    address3 String?
+    city     String
+    pincode  String
+    state    String
+    country  String
+
+    // Address type (home, work, etc.)
+    type AddressType @default(HOME)
+
+    // Relationship to UserProfile
+    userProfileId String      @usersDb.ObjectId
+    userProfile   UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+
+    // Timestamps
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([userProfileId])
+    @@map("user-address")
+}

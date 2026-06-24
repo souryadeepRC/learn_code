@@ -1,0 +1,35 @@
+{
+  // 1. Format on save
+  "editor.formatOnSave": true,
+
+  // 2. Set Prettier as the default formatter
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // 3. Auto-remove unused imports and re-order them on save
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+
+  // 4. Force Prettier to use single quotes ('') instead of double quotes ("")
+  "prettier.singleQuote": true,
+
+  // Ensure specific languages always use Prettier
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit"
+    }
+  },
+  "prisma.lint": false,
+  "prisma.schemaPath": "prisma/users/schema.prisma"
+}

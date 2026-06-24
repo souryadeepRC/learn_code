@@ -1,0 +1,22 @@
+generator techClient {
+    provider = "prisma-client-js"
+    output   = "../../node_modules/@prisma-custom/technologies"
+}
+
+datasource techDb {
+    provider = "mongodb"
+    url      = env("CODING_TECH_DB_URI") // This warning is for v7, you're on v6
+}
+
+model Technologies {
+    // MongoDB requires this exact setup for the primary key
+    id             String   @id @default(auto()) @map("_id") @techDb.ObjectId
+    name           String   @unique
+    description    String?
+    icon           String?
+    quiz           String[]
+    mcqQuestion    Int
+    codingQuestion Int
+
+    @@map("technologies")
+}
