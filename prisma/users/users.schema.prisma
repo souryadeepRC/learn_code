@@ -19,16 +19,18 @@ type AuthProvider {
 
 model User {
     // MongoDB requires this exact setup for the primary key
-    id            String         @id @default(auto()) @map("_id") @usersDb.ObjectId
-    email         String         @unique
-    password      String?
-    emailVerified Boolean        @default(false)
-    authProviders AuthProvider[]
-    role          String         @default("USER")
-    accountStatus String         @default("PENDING_VERIFICATION")
-    createdAt     DateTime       @default(now())
-    updatedAt     DateTime       @updatedAt
-    lastLoginAt   DateTime       @default(now())
+    id                          String         @id @default(auto()) @map("_id") @usersDb.ObjectId
+    email                       String         @unique
+    password                    String?
+    passwordResetToken          String?
+    passwordResetTokenExpiresAt DateTime?
+    emailVerified               Boolean        @default(false)
+    authProviders               AuthProvider[]
+    role                        String         @default("USER")
+    accountStatus               String         @default("PENDING_VERIFICATION")
+    createdAt                   DateTime       @default(now())
+    updatedAt                   DateTime       @updatedAt
+    lastLoginAt                 DateTime       @default(now())
 
     // 1-to-1 Relation (Non-defining side) 
     userProfile UserProfile?

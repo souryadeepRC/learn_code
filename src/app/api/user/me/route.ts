@@ -1,6 +1,7 @@
 'use server';
 import { prismaUsers } from '@/lib/prisma-users';
 import { APIResponse, withAuth } from '@/utils/api';
+import { NextRequest } from 'next/server';
 
 // ==========================================
 // GET: Fetch the current user's profile
@@ -25,5 +26,96 @@ export const GET = withAuth(async (userId: string) => {
   return APIResponse.ok({
     message: 'Profile fetched successfully',
     user: user,
+  });
+});
+
+export const PATCH = withAuth(async (userId: string, request: NextRequest) => {
+  const rawBody = await request.json();
+
+  if (typeof rawBody !== 'object' || rawBody === null) {
+    return APIResponse.send(400).json({
+      message: 'Invalid request payload. Expected a JSON object.',
+    });
+  }
+
+  const payload = rawBody as Record<string, unknown>;
+
+  const allowedFields = [
+    'firstName',
+    'lastName',
+    'bio',
+    'imageUrl',
+    'phoneNumber',
+  ] as const;
+
+  const updateData: Record<string, string | null> = {};
+
+  for (const field of allowedFields) {
+    if (!(field in payload)) {
+      continue;
+    }
+
+    const value = payload[field];
+
+    if (value === undefined) {
+      continue;
+    }
+
+    if (value === null) {
+      if (field === 'bio' || field === 'imageUrl' || field === 'phoneNumber') {
+        updateData[field] = null;
+        continue;
+      }
+
+      return APIResponse.send(400).json({
+        message: `${field} cannot be null.`,
+      });
+    }
+
+    if (typeof value !== 'string') {
+      return APIResponse.send(400).json({
+        message: `Invalid type for ${field}. Expected string.`,
+      });
+    }
+
+    updateData[field] = value;
+  }
+
+  const hasValidUpdate = Object.keys(updateData).length > 0;
+  if (!hasValidUpdate) {
+    return APIResponse.send(400).json({
+      message:
+        'No valid profile fields provided. Allowed fields: firstName, lastName, bio, imageUrl, phoneNumber.',
+    });
+  }
+
+  const updatedProfile = await prismaUsers.userProfile.update({
+    where: {
+      userId,
+    },
+    data: updateData,
+    select: {
+      id: true,
+      userId: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      bio: true,
+      imageUrl: true,
+      phoneNumber: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  if (!updatedProfile) {
+    return APIResponse.error({
+      message: 'Unable to update profile at this time.',
+    });
+  }
+
+  return APIResponse.ok({
+    message: 'Profile updated successfully',
+    user: updatedProfile,
   });
 });
