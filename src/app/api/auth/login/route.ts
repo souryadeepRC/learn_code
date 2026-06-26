@@ -1,47 +1,61 @@
 'use server';
-import { prismaUsers } from '@/lib';
 import { APIResponse, handleAPI } from '@/utils/api';
-import { generateTokens } from '@/utils/jwt';
-import bcrypt from 'bcryptjs';
-import { cookies } from 'next/headers';
+import { loginSchema, loginWithCredentials } from '@/utils/auth';
+import { parseJsonBody, validateAuthPayload } from '@/utils/inputValidation';
+import { enforceRateLimit } from '@/utils/rateLimit';
 import { NextRequest } from 'next/server';
 
 export const POST = handleAPI(async (request: NextRequest) => {
-  const { email, password } = await request.json();
-  // 1. Validation: Ensure all fields are provided
-  if (!email || !password) {
-    return APIResponse.failed({ message: 'Missing required fields' });
+  const bodyResult = await parseJsonBody(request, 8 * 1024);
+
+  if (!bodyResult.success) {
+    return APIResponse.send(bodyResult.status).json({
+      message: bodyResult.message,
+    });
   }
 
-  const user = await prismaUsers.user.findUnique({
-    where: { email },
+  const reqBody = bodyResult.data;
+
+  const rateLimit = enforceRateLimit({
+    request: request as unknown as Request,
+    limit: 10,
+    windowMs: 15 * 60 * 1000,
   });
 
-  if (!user || !user.password) {
-    return APIResponse.send(401).json('Invalid credentials');
+  if (!rateLimit.allowed) {
+    return APIResponse.send(429).json({
+      message: 'Too many requests. Please try again later.',
+    });
   }
 
-  // Verify Password
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
-    return APIResponse.send(401).json('Invalid credentials');
+  if (!validateAuthPayload(reqBody)) {
+    return APIResponse.failed({
+      message: 'Invalid request payload. Expected a JSON object.',
+    });
   }
 
-  // Generate Tokens
-  const { accessToken, refreshToken } = generateTokens(user.id);
+  const parsedBody = loginSchema.safeParse(reqBody);
 
-  // Set Refresh Token as an HttpOnly, Secure cookie
-  (await cookies()).set('refreshToken', refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
-    path: '/',
-  });
+  if (!parsedBody.success) {
+    return APIResponse.failed({
+      message: 'Invalid login payload',
+      errors: parsedBody.error.issues.map((issue) => ({
+        path: issue.path.join('.'),
+        message: issue.message,
+      })),
+    });
+  }
+
+  const clientKey = request.headers.get('x-forwarded-for') || 'unknown';
+  const authResult = await loginWithCredentials(parsedBody.data, clientKey);
+
+  if (!authResult.success) {
+    return APIResponse.send(authResult.status).json(authResult.payload);
+  }
 
   return APIResponse.ok({
     message: 'Login successful',
-    accessToken,
-    email: user.email,
+    accessToken: authResult.accessToken,
+    email: authResult.email,
   });
 });

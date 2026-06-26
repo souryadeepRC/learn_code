@@ -1,0 +1,28 @@
+# Enterprise Authentication API Endpoints
+
+- `POST /api/auth/register` - Register a new user with email/password and return account creation response.
+- `POST /api/auth/login` - Authenticate a user and issue access and refresh tokens.
+- `POST /api/auth/logout` - Invalidate the current session and clear authentication cookies.
+- `POST /api/auth/refresh` - Exchange a valid refresh token for a new access token.
+- `POST /api/auth/forgot-password` - Initiate password reset for a registered email address.
+- `POST /api/auth/reset-password` - Complete password reset using a valid reset token.
+- `POST /api/auth/verify-email` - Verify a user email using a one-time verification token.
+- `POST /api/auth/resend-verification` - Resend the email verification link or code.
+- `POST /api/auth/change-password` - Change the authenticated user password securely.
+- `GET /api/auth/me` - Fetch the authenticated user profile and session metadata.
+- `POST /api/auth/oauth/google` - Start or complete Google OAuth authentication flow.
+- `POST /api/auth/oauth/github` - Start or complete GitHub OAuth authentication flow.
+- `POST /api/auth/oauth/linkedin` - Start or complete LinkedIn OAuth authentication flow.
+- `POST /api/auth/revoke-session` - Revoke a specific active session or device token.
+- `GET /api/auth/sessions` - List all active sessions for the authenticated user.
+- `DELETE /api/auth/sessions/:sessionId` - End a specific user session by ID.
+- `POST /api/auth/2fa/setup` - Initialize two-factor authentication for the user.
+- `POST /api/auth/2fa/verify` - Verify a two-factor authentication code.
+- `POST /api/auth/2fa/disable` - Disable two-factor authentication for the user.
+- `POST /api/auth/reauthenticate` - Re-authenticate the user for sensitive actions.
+- `POST /api/auth/check-username` - Check whether a requested username is available.
+- `POST /api/auth/verify-phone` - Verify a phone number using OTP.
+- `POST /api/auth/resend-phone-code` - Resend the phone verification code.
+- `POST /api/auth/device-approval` - Approve or register a new trusted device.
+- `GET /api/auth/consents` - Retrieve the user's consent and privacy preferences.
+- `PUT /api/auth/consents` - Update user consent and privacy preferences.

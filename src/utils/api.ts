@@ -29,6 +29,7 @@ export class APIResponse {
   }
 }
 
+const MAX_BODY_SIZE = 1024 * 8;
 export interface RouteContext<TParams = Record<string, string>> {
   params: TParams;
 }
@@ -38,6 +39,12 @@ export const handleAPI = <TParams = Record<string, string>>(
 ) => {
   return async (request: NextRequest, context?: any) => {
     try {
+      const contentLength = request.headers.get('content-length');
+      if (contentLength && Number(contentLength) > MAX_BODY_SIZE) {
+        return APIResponse.failed({
+          message: 'Payload too large',
+        });
+      }
       return await callback(request, context);
     } catch (error: unknown) {
       console.error('API Error Caught by Wrapper:', error);
