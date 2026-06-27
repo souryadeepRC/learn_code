@@ -8,24 +8,68 @@ datasource usersDb {
     url      = env("USERS_DB_URI") // This warning is for v7, you're on v6
 }
 
-// 1. Define the object structure as a Composite Type
-type AuthProvider {
-    provider        String // e.g., "google", "github", "linkedin"
-    providerId      String
-    providerEmail   String
-    profilePhotoUrl String? // Optional, using '?'
-    connectedAt     DateTime @default(now())
+// OAuth Account Linking Model
+model Account {
+  id            String    @id @default(auto()) @map("_id") @usersDb.ObjectId
+  userId        String    @usersDb.ObjectId
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // OAuth Provider Info
+  provider      String    // "google", "github", "linkedin"
+  providerAccountId String // Unique ID from provider
+  
+  // Additional OAuth Data
+  accessToken   String?   @usersDb.String
+  refreshToken  String?   @usersDb.String
+  expiresAt     Int?      // Token expiration timestamp
+  tokenType     String?
+  scope         String?   // Requested scopes
+  
+  // User Info from Provider
+  email         String?
+  phoneNumber String?
+  name          String?
+  image         String?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+
+  @@map("user-account")
+}
+
+// Session Management Model
+model Session {
+  id            String    @id @default(auto()) @map("_id") @usersDb.ObjectId
+  userId        String    @usersDb.ObjectId
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  token         String    @unique  // JWT token
+  userAgent     String?             // Browser info
+  ipAddress     String?             // For security tracking
+  
+  expiresAt     DateTime
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@index([userId])
+
+  @@map("user-session")
 }
 
 model User {
     // MongoDB requires this exact setup for the primary key
     id                          String         @id @default(auto()) @map("_id") @usersDb.ObjectId
-    email                       String         @unique
+    email                       String?         @unique
+    phoneNumber String?
     password                    String?
     passwordResetToken          String?
     passwordResetTokenExpiresAt DateTime?
     emailVerified               Boolean        @default(false)
-    authProviders               AuthProvider[]
+    accounts               Account[]
+    sessions Session[]
     role                        String         @default("USER")
     accountStatus               String         @default("PENDING_VERIFICATION")
     createdAt                   DateTime       @default(now())

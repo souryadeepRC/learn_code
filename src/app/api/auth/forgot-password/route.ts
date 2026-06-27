@@ -1,5 +1,6 @@
 'use server';
 
+import { HTTP_STATUS } from '@/constants/api';
 import { prismaUsers } from '@/lib/prisma-users';
 import { APIResponse, handleAPI } from '@/utils/api';
 import crypto from 'crypto';
@@ -32,7 +33,7 @@ export const POST = handleAPI(async (request: NextRequest) => {
   });
 
   if (!user) {
-    return APIResponse.ok({
+    return APIResponse.send(HTTP_STATUS.OK).json({
       message:
         'If an account with this email exists, a password reset link has been sent.',
     });
@@ -54,7 +55,7 @@ export const POST = handleAPI(async (request: NextRequest) => {
   // Note: Replace this log with a real email sender integration.
   console.info(`Password reset token for ${email}: ${resetToken}`);
 
-  return APIResponse.ok({
+  return APIResponse.send(HTTP_STATUS.OK).json({
     message:
       'If an account with this email exists, a password reset link has been sent.',
   });

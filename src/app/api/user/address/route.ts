@@ -1,4 +1,5 @@
 import { prismaUsers } from '@/lib/prisma-users';
+import { HTTP_STATUS } from '@/root/src/constants/api';
 import { APIResponse, withAuth } from '@/root/src/utils/api';
 import { NextRequest } from 'next/server';
 const VALID_ADDRESS_TYPES = ['HOME', 'WORK', 'OTHER'];
@@ -8,7 +9,7 @@ export const POST = withAuth(async (userId: string, request: NextRequest) => {
     body;
 
   if (type && !VALID_ADDRESS_TYPES.includes(type)) {
-    return APIResponse.error({
+    return APIResponse.send(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
       message: `Invalid address type. Expected one of: ${VALID_ADDRESS_TYPES.join(', ')}. Received: ${type}`,
     });
   }
@@ -38,11 +39,11 @@ export const POST = withAuth(async (userId: string, request: NextRequest) => {
     },
   });
   if (!updatedProfile) {
-    return APIResponse.error({
+    return APIResponse.send(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
       message: 'Error Creating Address',
     });
   }
-  return APIResponse.ok({
+  return APIResponse.send(HTTP_STATUS.OK).json({
     message: 'Address created successfully',
     profile: updatedProfile,
   });

@@ -1,5 +1,6 @@
 'use server';
 
+import { HTTP_STATUS } from '@/root/src/constants/api';
 import { APIResponse, withAuth } from '@/utils/api';
 import { revokeAuthSession } from '@/utils/authSessions';
 import { NextRequest } from 'next/server';
@@ -32,7 +33,7 @@ export const POST = withAuth(async (userId: string, request: NextRequest) => {
     });
   }
 
-  return APIResponse.ok({
+  return APIResponse.send(HTTP_STATUS.OK).json({
     message: 'Session revoked successfully',
     sessionId,
   });

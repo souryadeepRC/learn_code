@@ -1,4 +1,5 @@
 'use server';
+import { HTTP_STATUS } from '@/root/src/constants/api';
 import { prismaTechnologies } from '@/root/src/lib/prisma-technologies';
 import { APIResponse, handleAPI } from '@/utils/api';
 
@@ -15,7 +16,7 @@ export const GET = handleAPI(async () => {
     return APIResponse.send(404).json('User not found');
   }
 
-  return APIResponse.ok({
+  return APIResponse.send(HTTP_STATUS.OK).json({
     message: 'Profile fetched successfully',
     user: user,
   });

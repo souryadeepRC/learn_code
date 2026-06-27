@@ -1,9 +1,9 @@
 import { prismaUsers } from '@/lib';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import { generateTokens } from '../lib/auth/jwt';
 import { setRefreshTokenCookie } from './authCookies';
 import { clearFailureState, recordFailure } from './authRateLimit';
-import { generateTokens } from './jwt';
 
 export const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 export const passwordRegex =

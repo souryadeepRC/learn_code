@@ -1,12 +1,17 @@
 'use server';
 import { prismaUsers } from '@/lib';
+import {
+  generateTokens,
+  signRefreshToken,
+  verifyRefreshToken,
+} from '@/lib/auth/jwt';
+import { HTTP_STATUS } from '@/root/src/constants/api';
 import { APIResponse, handleAPI } from '@/utils/api';
 import {
   clearRefreshTokenCookie,
   isRefreshTokenRevoked,
   setRefreshTokenCookie,
 } from '@/utils/authCookies';
-import { generateTokens, verifyRefreshToken } from '@/utils/jwt';
 import { NextRequest } from 'next/server';
 
 export const POST = handleAPI(async (request: NextRequest) => {
@@ -36,10 +41,13 @@ export const POST = handleAPI(async (request: NextRequest) => {
     return APIResponse.send(404).json({ message: 'User not found' });
   }
 
-  const { accessToken: accessTokenNew, refreshToken: refreshTokenNew } =
-    generateTokens(user.id);
+  const accessToken = generateTokens(user.id, user.email ?? '');
+  const refreshTokenNew = signRefreshToken(user.id);
 
   await setRefreshTokenCookie(refreshTokenNew);
 
-  return APIResponse.ok({ accessToken: accessTokenNew, email: user.email });
+  return APIResponse.send(HTTP_STATUS.OK).json({
+    accessToken: accessToken,
+    email: user.email,
+  });
 });

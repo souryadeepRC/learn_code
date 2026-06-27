@@ -2,9 +2,10 @@
 import { prismaUsers } from '@/lib/prisma-users';
 import type { Prisma } from '@prisma-custom/users';
 
+import { HTTP_STATUS } from '@/root/src/constants/api';
+import { generateTokens } from '@/root/src/lib/auth/jwt';
 import { APIResponse, handleAPI } from '@/utils/api';
 import { parseJsonBody, validateAuthPayload } from '@/utils/inputValidation';
-import { generateTokens } from '@/utils/jwt';
 import { enforceRateLimit } from '@/utils/rateLimit';
 import bcrypt from 'bcryptjs';
 import { NextRequest } from 'next/server';
@@ -88,22 +89,21 @@ export const POST = handleAPI(async (request: NextRequest) => {
 
   const { email, password, authProviders } = parsedBody.data;
   const normalizedEmail = email.trim().toLowerCase();
-  const normalizedProviders: Prisma.AuthProviderCreateInput[] | undefined =
-    authProviders?.map((provider) => ({
-      provider: provider.provider,
-      providerId: provider.providerId,
-      providerEmail: provider.providerEmail,
-      ...(provider.profilePhotoUrl
-        ? { profilePhotoUrl: provider.profilePhotoUrl }
-        : {}),
-    }));
+  const normalizedProviders = authProviders?.map((provider) => ({
+    provider: provider.provider,
+    providerId: provider.providerId,
+    providerEmail: provider.providerEmail,
+    ...(provider.profilePhotoUrl
+      ? { profilePhotoUrl: provider.profilePhotoUrl }
+      : {}),
+  }));
 
   const existingUser = await prismaUsers.user.findUnique({
     where: { email: normalizedEmail },
   });
 
   if (existingUser) {
-    return APIResponse.created({
+    return APIResponse.send(HTTP_STATUS.CREATED).json({
       message: 'If the account does not exist, create a new one.',
     });
   }
@@ -125,10 +125,10 @@ export const POST = handleAPI(async (request: NextRequest) => {
     data: userCreateData,
   });
 
-  const token = generateTokens(createdUser.id);
+  const token = generateTokens(createdUser.id, createdUser?.email ?? '');
 
   // const createdUser = await db.insert<User>(TABLE.USER_AUTH,{id: new ObjectId().toString(),username,email,password})
-  return APIResponse.created({
+  return APIResponse.send(HTTP_STATUS.CREATED).json({
     email: createdUser.email,
     token,
   });

@@ -1,5 +1,6 @@
 'use server';
 
+import { HTTP_STATUS } from '@/root/src/constants/api';
 import { APIResponse, withAuth } from '@/utils/api';
 import { listAuthSessions, revokeAuthSession } from '@/utils/authSessions';
 import { NextRequest } from 'next/server';
@@ -7,7 +8,7 @@ import { NextRequest } from 'next/server';
 export const GET = withAuth(async (userId: string) => {
   const sessions = listAuthSessions(userId);
 
-  return APIResponse.ok({
+  return APIResponse.send(HTTP_STATUS.OK).json({
     message: 'Active sessions fetched successfully',
     sessions,
   });
@@ -41,7 +42,7 @@ export const POST = withAuth(async (userId: string, request: NextRequest) => {
     });
   }
 
-  return APIResponse.ok({
+  return APIResponse.send(HTTP_STATUS.OK).json({
     message: 'Session revoked successfully',
     sessionId,
   });

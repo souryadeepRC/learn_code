@@ -7,10 +7,10 @@ if (!ACCESS_SECRET || !REFRESH_SECRET) {
   throw new Error('ACCESS_TOKEN_SECRET and REFRESH_TOKEN_SECRET must be set');
 }
 
-type TokenSignId = { userId: string };
-export const generateTokens = (userId: string) => {
+type TokenSignId = { userId: string; email: string };
+export const generateTokens = (userId: string, email: string) => {
   // Access Token expires in 15 minutes
-  const accessToken = jwt.sign({ userId }, ACCESS_SECRET, {
+  const accessToken = jwt.sign({ userId, email }, ACCESS_SECRET, {
     expiresIn: '15m',
   });
 
@@ -19,7 +19,11 @@ export const generateTokens = (userId: string) => {
     expiresIn: '7d',
   });
 
-  return { accessToken, refreshToken };
+  return accessToken;
+};
+
+export const signRefreshToken = (userId: string) => {
+  return jwt.sign({ userId }, REFRESH_SECRET, { expiresIn: '7d' });
 };
 
 export const verifyAccessToken = (token: string) => {

@@ -1,31 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAccessToken } from './jwt';
+import { verifyAccessToken } from '../lib/auth/jwt';
+import { HTTP_STATUS } from '@/constants/api';
 
 export class APIResponse {
-  static statusCode: number = 400;
-  static ok<T>(data: T) {
-    return NextResponse.json(data, { status: 200 });
-  }
-  static created<T>(data: T) {
-    return NextResponse.json(data, { status: 201 });
-  }
-  static failed<T>(data: T) {
-    return NextResponse.json(data, { status: 400 });
-  }
-  static duplicate<T>(data: T) {
-    return NextResponse.json(data, { status: 409 });
-  }
-  static error<T>(data: T) {
-    return NextResponse.json(data, { status: 500 });
-  }
   static send(statusCode: number) {
-    this.statusCode = statusCode;
-    return this;
-  }
-  static json<T>(data: T) {
-    const status = this.statusCode;
-    this.statusCode = 400;
-    return NextResponse.json(data, { status });
+    return {
+      json: <T>(data: T) => {
+        return NextResponse.json(data, { status: statusCode });
+      },
+    };
   }
 }
 
@@ -41,7 +24,7 @@ export const handleAPI = <TParams = Record<string, string>>(
     try {
       const contentLength = request.headers.get('content-length');
       if (contentLength && Number(contentLength) > MAX_BODY_SIZE) {
-        return APIResponse.failed({
+        return APIResponse.send(HTTP_STATUS.PAYLOAD_TOO_LARGE).json({
           message: 'Payload too large',
         });
       }
@@ -52,7 +35,7 @@ export const handleAPI = <TParams = Record<string, string>>(
         error instanceof Error
           ? error.message
           : 'An unexpected internal server error occurred';
-      return APIResponse.error({ errorMessage });
+      return APIResponse.send(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ errorMessage });
     }
   };
 };

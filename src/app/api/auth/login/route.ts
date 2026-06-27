@@ -1,4 +1,5 @@
 'use server';
+import { HTTP_STATUS } from '@/constants/api';
 import { APIResponse, handleAPI } from '@/utils/api';
 import { loginSchema, loginWithCredentials } from '@/utils/auth';
 import { parseJsonBody, validateAuthPayload } from '@/utils/inputValidation';
@@ -29,7 +30,7 @@ export const POST = handleAPI(async (request: NextRequest) => {
   }
 
   if (!validateAuthPayload(reqBody)) {
-    return APIResponse.failed({
+    return APIResponse.send(HTTP_STATUS.BAD_REQUEST).json({
       message: 'Invalid request payload. Expected a JSON object.',
     });
   }
@@ -37,7 +38,7 @@ export const POST = handleAPI(async (request: NextRequest) => {
   const parsedBody = loginSchema.safeParse(reqBody);
 
   if (!parsedBody.success) {
-    return APIResponse.failed({
+    return APIResponse.send(HTTP_STATUS.BAD_REQUEST).json({
       message: 'Invalid login payload',
       errors: parsedBody.error.issues.map((issue) => ({
         path: issue.path.join('.'),
@@ -53,7 +54,7 @@ export const POST = handleAPI(async (request: NextRequest) => {
     return APIResponse.send(authResult.status).json(authResult.payload);
   }
 
-  return APIResponse.ok({
+  return APIResponse.send(HTTP_STATUS.OK).json({
     message: 'Login successful',
     accessToken: authResult.accessToken,
     email: authResult.email,

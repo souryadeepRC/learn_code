@@ -1,5 +1,6 @@
 'use server';
 import { prismaUsers } from '@/lib/prisma-users';
+import { HTTP_STATUS } from '@/root/src/constants/api';
 import { APIResponse, withAuth } from '@/utils/api';
 import { NextRequest } from 'next/server';
 
@@ -23,7 +24,7 @@ export const GET = withAuth(async (userId: string) => {
     return APIResponse.send(404).json('User not found');
   }
 
-  return APIResponse.ok({
+  return APIResponse.send(HTTP_STATUS.OK).json({
     message: 'Profile fetched successfully',
     user: user,
   });
@@ -109,12 +110,12 @@ export const PATCH = withAuth(async (userId: string, request: NextRequest) => {
   });
 
   if (!updatedProfile) {
-    return APIResponse.error({
+    return APIResponse.send(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
       message: 'Unable to update profile at this time.',
     });
   }
 
-  return APIResponse.ok({
+  return APIResponse.send(HTTP_STATUS.OK).json({
     message: 'Profile updated successfully',
     user: updatedProfile,
   });
