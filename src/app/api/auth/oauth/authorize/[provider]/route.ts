@@ -49,7 +49,6 @@ export async function GET(
       sameSite: 'lax',
     });
 
-    console.log({ response });
     return response;
   } catch (error) {
     return APIResponse.send(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({

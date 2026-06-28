@@ -1,26 +1,213 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/**
+ * Dark mode — driven by the .dark class on <html>
+ * ThemeContext adds/removes this class based on user selection.
+ * Using :where(.dark, .dark *) so the html element itself also gets dark styles.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
 
+/**
+ * Tailwind v4 semantic token aliases.
+ * All --color-* tokens here forward to the CSS custom properties defined below
+ * in :root / .dark, which are sourced from src/config/colors.ts.
+ *
+ * Single-token usage in components:
+ *   bg-background    → page background (auto-switches light/dark)
+ *   bg-primary       → brand accent (auto-switches light/dark)
+ *   bg-bg-primary    → explicit alias for page background
+ *   text-foreground  → main text (auto-switches)
+ *   border-border    → standard border (auto-switches)
+ */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+
+  /* Explicit page-background alias — use bg-bg-primary for clarity */
+  --color-bg-primary: var(--background);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-geist-sans);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/**
+ * ============================================================
+ * LIGHT THEME
+ * All values sourced from src/config/colors.ts → lightTheme
+ * ============================================================
+ *
+ * neutral-50  = #F9FAFB   neutral-100 = #F3F4F6   neutral-200 = #E5E7EB
+ * neutral-400 = #9CA3AF   neutral-500 = #6B7280   neutral-950 = #030712
+ * primary-50  = #F0F9FF   primary-500 = #0EA5E9   primary-600 = #0284C7
+ * secondary-500 = #8B5CF6
+ * error.DEFAULT = #EF4444
+ */
+:root {
+  /* Page & surface backgrounds */
+  --background: #f9fafb; /* colorPalette.neutral[50]  — lightTheme.background.primary */
+  --card: #ffffff; /* lightTheme.surface.base */
+  --popover: #ffffff;
+
+  /* Text */
+  --foreground: #030712; /* neutral-950 — lightTheme.text.primary */
+  --card-foreground: #030712;
+  --popover-foreground: #030712;
+
+  /* Brand primary — sky-blue CTA (lightTheme.interactive.primary) */
+  --primary: #0ea5e9; /* primary-500 */
+  --primary-foreground: #ffffff;
+
+  /* Brand secondary — violet (lightTheme.interactive.secondary) */
+  --secondary: #8b5cf6; /* secondary-500 */
+  --secondary-foreground: #ffffff;
+
+  /* Muted / subtle surfaces */
+  --muted: #f3f4f6; /* neutral-100 */
+  --muted-foreground: #6b7280; /* neutral-500 */
+
+  /* Accent (hover highlights, selected state backgrounds) */
+  --accent: #f0f9ff; /* primary-50 */
+  --accent-foreground: #030712;
+
+  /* Danger */
+  --destructive: #ef4444; /* colorPalette.semantic.error.DEFAULT */
+
+  /* Structural */
+  --border: #e5e7eb; /* neutral-200 — lightTheme.border.default */
+  --input: #e5e7eb;
+  --ring: #0ea5e9; /* primary-500 */
+  --radius: 0.625rem;
+
+  /* Charts — neutral scale */
+  --chart-1: #f9fafb; /* neutral-50  */
+  --chart-2: #9ca3af; /* neutral-400 */
+  --chart-3: #6b7280; /* neutral-500 */
+  --chart-4: #4b5563; /* neutral-600 */
+  --chart-5: #374151; /* neutral-700 */
+
+  /* Sidebar */
+  --sidebar: #f3f4f6; /* neutral-100 */
+  --sidebar-foreground: #030712;
+  --sidebar-primary: #0ea5e9;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f0f9ff;
+  --sidebar-accent-foreground: #030712;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #0ea5e9;
+}
+
+/**
+ * ============================================================
+ * DARK THEME
+ * All values sourced from src/config/colors.ts → darkTheme
+ * ============================================================
+ *
+ * neutral-50  = #F9FAFB   neutral-400 = #9CA3AF   neutral-800 = #1F2937
+ * neutral-900 = #111827   neutral-950 = #030712
+ * primary-400 = #38BDF8   primary-950 = #051E3E
+ * secondary-400 = #A78BFA
+ */
+.dark {
+  /* Page & surface backgrounds */
+  --background: #030712; /* neutral-950 — darkTheme.background.primary */
+  --card: #111827; /* neutral-900 — darkTheme.background.secondary */
+  --popover: #111827;
+
+  /* Text */
+  --foreground: #f9fafb; /* neutral-50 — darkTheme.text.primary */
+  --card-foreground: #f9fafb;
+  --popover-foreground: #f9fafb;
+
+  /* Brand primary — lighter sky-blue for dark bg (darkTheme.interactive.primary) */
+  --primary: #38bdf8; /* primary-400 */
+  --primary-foreground: #030712; /* neutral-950 — dark text on bright button */
+
+  /* Brand secondary — lighter violet (darkTheme.interactive.secondary) */
+  --secondary: #a78bfa; /* secondary-400 */
+  --secondary-foreground: #030712;
+
+  /* Muted / subtle surfaces */
+  --muted: #111827; /* neutral-900 */
+  --muted-foreground: #9ca3af; /* neutral-400 — darkTheme.text.secondary */
+
+  /* Accent */
+  --accent: #051e3e; /* primary-950 */
+  --accent-foreground: #f9fafb;
+
+  /* Danger */
+  --destructive: #ef4444;
+
+  /* Structural */
+  --border: #1f2937; /* neutral-800 — darkTheme.border.default */
+  --input: #1f2937;
+  --ring: #38bdf8; /* primary-400 */
+
+  /* Charts */
+  --chart-1: #f9fafb;
+  --chart-2: #9ca3af;
+  --chart-3: #6b7280;
+  --chart-4: #4b5563;
+  --chart-5: #374151;
+
+  /* Sidebar */
+  --sidebar: #111827; /* neutral-900 */
+  --sidebar-foreground: #f9fafb;
+  --sidebar-primary: #38bdf8;
+  --sidebar-primary-foreground: #030712;
+  --sidebar-accent: #051e3e;
+  --sidebar-accent-foreground: #f9fafb;
+  --sidebar-border: #1f2937;
+  --sidebar-ring: #38bdf8;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
 }

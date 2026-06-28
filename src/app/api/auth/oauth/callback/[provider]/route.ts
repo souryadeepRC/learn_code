@@ -31,10 +31,7 @@ export async function GET(
       return NextResponse.redirect(url);
     };
 
-    console.log({ req, params });
-    console.log({ nextUrl: req.nextUrl });
     const resData = req.nextUrl.searchParams;
-    console.log({ resData });
 
     if (resData.get('error')) {
       return redirectWithError(
@@ -92,14 +89,6 @@ export async function GET(
     const emailToUse =
       userInfo.email ||
       generatePseudoEmail(provider, userInfo.id, userInfo.name);
-
-    // console.log({
-    //   provider,
-    //   providerId: userInfo.id,
-    //   email: emailToUse,
-    //   isPseudo: isPseudoEmail(emailToUse),
-    //   hasPhone: !!userInfo.phoneNumber,
-    // });
 
     // Step 5: Find existing user
     let user = await prismaUsers.user.findFirst({

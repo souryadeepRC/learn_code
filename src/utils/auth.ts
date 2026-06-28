@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { generateTokens } from '../lib/auth/jwt';
 import { setRefreshTokenCookie } from './authCookies';
-import { clearFailureState, recordFailure } from './authRateLimit';
 
 export const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 export const passwordRegex =
@@ -49,18 +48,18 @@ export const loginWithCredentials = async (
   credentials: LoginCredentials,
   clientKey: string
 ): Promise<LoginServiceResult> => {
-  const failedState = recordFailure(clientKey);
+  // const failedState = recordFailure(clientKey);
 
-  if (failedState.blocked) {
-    return {
-      success: false,
-      status: 429,
-      payload: {
-        message: 'Too many failed login attempts. Please try again later.',
-        retryAfterMs: failedState.retryAfterMs,
-      },
-    };
-  }
+  // if (failedState.blocked) {
+  //   return {
+  //     success: false,
+  //     status: 429,
+  //     payload: {
+  //       message: 'Too many failed login attempts. Please try again later.',
+  //       retryAfterMs: failedState.retryAfterMs,
+  //     },
+  //   };
+  // }
 
   const normalizedEmail = credentials.email.trim().toLowerCase();
 
@@ -94,7 +93,7 @@ export const loginWithCredentials = async (
     };
   }
 
-  clearFailureState(clientKey);
+  // clearFailureState(clientKey);
 
   const { accessToken, refreshToken } = generateTokens(user.id);
 

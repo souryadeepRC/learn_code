@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { HTTP_STATUS } from '../constants/api';
 
 const emojiRegex = /[\p{Extended_Pictographic}\u200d\uFE0F]/u;
 const controlCharRegex = /[\u0000-\u001F\u007F]/;
@@ -78,9 +79,17 @@ export const parseJsonBody = async (
   }
 
   try {
+    const parsedBody = JSON.parse(rawBody);
+    if (!validateAuthPayload(parsedBody)) {
+      return {
+        success: false,
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: 'Invalid request payload. Expected a JSON object.',
+      };
+    }
     return {
       success: true,
-      data: JSON.parse(rawBody),
+      data: parsedBody,
     };
   } catch {
     return {
