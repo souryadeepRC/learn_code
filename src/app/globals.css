@@ -60,6 +60,7 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-geist-sans);
+  --font-poppins: var(--font-poppins);
 
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -70,144 +71,122 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/**
- * ============================================================
- * LIGHT THEME
- * All values sourced from src/config/colors.ts → lightTheme
- * ============================================================
- *
- * neutral-50  = #F9FAFB   neutral-100 = #F3F4F6   neutral-200 = #E5E7EB
- * neutral-400 = #9CA3AF   neutral-500 = #6B7280   neutral-950 = #030712
- * primary-50  = #F0F9FF   primary-500 = #0EA5E9   primary-600 = #0284C7
- * secondary-500 = #8B5CF6
- * error.DEFAULT = #EF4444
- */
 :root {
-  /* Page & surface backgrounds */
-  --background: #f9fafb; /* colorPalette.neutral[50]  — lightTheme.background.primary */
-  --card: #ffffff; /* lightTheme.surface.base */
+  /* Page & surface backgrounds (Fresh Sage Off-White) */
+  --background: #f4f9f6; /* Soft, incredibly crisp off-white with a hint of mint */
+  --card: #ffffff; /* Pure white surfaces for readability */
   --popover: #ffffff;
 
-  /* Text */
-  --foreground: #030712; /* neutral-950 — lightTheme.text.primary */
-  --card-foreground: #030712;
-  --popover-foreground: #030712;
+  /* Text (Deep Charcoal Pine) */
+  --foreground: #091710; /* Near-black with an organic undertone to minimize glare */
+  --card-foreground: #091710;
+  --popover-foreground: #091710;
 
-  /* Brand primary — sky-blue CTA (lightTheme.interactive.primary) */
-  --primary: #0ea5e9; /* primary-500 */
-  --primary-foreground: #ffffff;
+  /* Brand primary (Deep Accessible Mint-Emerald) */
+  --primary: #0b6e4f; /* Darkened version of your mint token, offering rich >4.5:1 contrast */
+  --primary-foreground: #ffffff; /* Crisp white text sits perfectly on top */
 
-  /* Brand secondary — violet (lightTheme.interactive.secondary) */
-  --secondary: #8b5cf6; /* secondary-500 */
+  /* Brand secondary (Deep Ocean Blue) */
+  --secondary: #003f5e; /* High-contrast blue for secondary actions and alternative syntax tags */
   --secondary-foreground: #ffffff;
 
-  /* Muted / subtle surfaces */
-  --muted: #f3f4f6; /* neutral-100 */
-  --muted-foreground: #6b7280; /* neutral-500 */
+  /* Muted / subtle elements */
+  --muted: #e8f2ed; /* Light gray-mint for code block backgrounds and table rows */
+  --muted-foreground: #4a6658; /* Balanced slate-sage for text descriptions and code comments */
 
-  /* Accent (hover highlights, selected state backgrounds) */
-  --accent: #f0f9ff; /* primary-50 */
-  --accent-foreground: #030712;
+  /* Accent (The Light Mode home for your Neon Mint) */
+  --accent: #d8f8e5; /* A beautiful, highly transparent wash of your neon mint */
+  --accent-foreground: #0b6e4f; /* Links and selected states remain perfectly legible */
 
   /* Danger */
-  --destructive: #ef4444; /* colorPalette.semantic.error.DEFAULT */
+  --destructive: #dc2626;
 
   /* Structural */
-  --border: #e5e7eb; /* neutral-200 — lightTheme.border.default */
-  --input: #e5e7eb;
-  --ring: #0ea5e9; /* primary-500 */
+  --border: #2b8a56; /* Light, organic borders that separate sections cleanly without being harsh */
+  --input: #d0e2d8;
+  --ring: #0b6e4f; /* Focus indicators stay identical to the primary theme color */
   --radius: 0.625rem;
-
-  /* Charts — neutral scale */
-  --chart-1: #f9fafb; /* neutral-50  */
-  --chart-2: #9ca3af; /* neutral-400 */
-  --chart-3: #6b7280; /* neutral-500 */
-  --chart-4: #4b5563; /* neutral-600 */
-  --chart-5: #374151; /* neutral-700 */
+  /* Charts */
+  --chart-1: #0b6e4f;
+  --chart-2: #0ea5e9;
+  --chart-3: #14b8a6;
+  --chart-4: #6366f1;
+  --chart-5: #f43f5e;
 
   /* Sidebar */
-  --sidebar: #f3f4f6; /* neutral-100 */
-  --sidebar-foreground: #030712;
-  --sidebar-primary: #0ea5e9;
+  --sidebar: #ebf3ef;
+  --sidebar-foreground: #091710;
+  --sidebar-primary: #0b6e4f;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f0f9ff;
-  --sidebar-accent-foreground: #030712;
-  --sidebar-border: #e5e7eb;
-  --sidebar-ring: #0ea5e9;
+  --sidebar-accent: #d8f8e5;
+  --sidebar-accent-foreground: #0b6e4f;
+  --sidebar-border: #d0e2d8;
+  --sidebar-ring: #0b6e4f;
 }
 
-/**
- * ============================================================
- * DARK THEME
- * All values sourced from src/config/colors.ts → darkTheme
- * ============================================================
- *
- * neutral-50  = #F9FAFB   neutral-400 = #9CA3AF   neutral-800 = #1F2937
- * neutral-900 = #111827   neutral-950 = #030712
- * primary-400 = #38BDF8   primary-950 = #051E3E
- * secondary-400 = #A78BFA
- */
 .dark {
-  /* Page & surface backgrounds */
-  --background: #030712; /* neutral-950 — darkTheme.background.primary */
-  --card: #111827; /* neutral-900 — darkTheme.background.secondary */
-  --popover: #111827;
+  /* Page & surface backgrounds (Obsidian Forest) */
+  --background: #050b07; /* Deep, near-black with a subtle dark green hue */
+  --card: #0c1510; /* Dark charcoal-sage for panels and code editors */
+  --popover: #0c1510;
 
-  /* Text */
-  --foreground: #f9fafb; /* neutral-50 — darkTheme.text.primary */
-  --card-foreground: #f9fafb;
-  --popover-foreground: #f9fafb;
+  /* Text (High-contrast Mint-Whites) */
+  --foreground: #e6f7ee; /* Clean, off-white with high readability */
+  --card-foreground: #e6f7ee;
+  --popover-foreground: #e6f7ee;
 
-  /* Brand primary — lighter sky-blue for dark bg (darkTheme.interactive.primary) */
-  --primary: #38bdf8; /* primary-400 */
-  --primary-foreground: #030712; /* neutral-950 — dark text on bright button */
+  /* Brand primary (Your Neon Mint) */
+  --primary: #5ef59a;
+  --primary-foreground: #021a0d; /* Ultra-dark green ensures a crisp > 7:1 contrast ratio */
 
-  /* Brand secondary — lighter violet (darkTheme.interactive.secondary) */
-  --secondary: #a78bfa; /* secondary-400 */
-  --secondary-foreground: #030712;
+  /* Brand secondary (Electric Tech Cyan) */
+  --secondary: #2dd4bf; /* Teal-400 for structural secondary tags or active item states */
+  --secondary-foreground: #021a0d;
 
-  /* Muted / subtle surfaces */
-  --muted: #111827; /* neutral-900 */
-  --muted-foreground: #9ca3af; /* neutral-400 — darkTheme.text.secondary */
+  /* Muted / subtle elements */
+  --muted: #0d1a12; /* Slightly lighter surface for code block backgrounds */
+  --muted-foreground: #7ea18f; /* Desaturated sage-gray for comments/subtitles */
 
-  /* Accent */
-  --accent: #051e3e; /* primary-950 */
-  --accent-foreground: #f9fafb;
+  /* Accent (Hover states and highlights) */
+  --accent: #0c2b1a; /* Rich dark translucent emerald for button hovers */
+  --accent-foreground: #5ef59a; /* Highlights match your primary mint */
 
-  /* Danger */
-  --destructive: #ef4444;
+  /* Danger (Accessible Vibrant Crimson) */
+  --destructive: #ff5565;
 
   /* Structural */
-  --border: #1f2937; /* neutral-800 — darkTheme.border.default */
-  --input: #1f2937;
-  --ring: #38bdf8; /* primary-400 */
+  --border: #215c3b; /* Clean, dark green-gray structural dividers */
+  --input: #182e22;
+  --ring: #5ef59a; /* Keyboard focus rings match primary for immediate recognition */
 
-  /* Charts */
-  --chart-1: #f9fafb;
-  --chart-2: #9ca3af;
-  --chart-3: #6b7280;
-  --chart-4: #4b5563;
-  --chart-5: #374151;
+  /* Charts & Visual Analytics */
+  --chart-1: #5ef59a; /* Primary Accent */
+  --chart-2: #2dd4bf; /* Secondary Teal */
+  --chart-3: #38bdf8; /* Sky Blue (Tech variable color) */
+  --chart-4: #a78bfa; /* Soft Violet (Great for keyword syntax) */
+  --chart-5: #fb7185; /* Soft Rose */
 
   /* Sidebar */
-  --sidebar: #111827; /* neutral-900 */
-  --sidebar-foreground: #f9fafb;
-  --sidebar-primary: #38bdf8;
-  --sidebar-primary-foreground: #030712;
-  --sidebar-accent: #051e3e;
-  --sidebar-accent-foreground: #f9fafb;
-  --sidebar-border: #1f2937;
-  --sidebar-ring: #38bdf8;
+  --sidebar: #070e0a;
+  --sidebar-foreground: #e6f7ee;
+  --sidebar-primary: #5ef59a;
+  --sidebar-primary-foreground: #021a0d;
+  --sidebar-accent: #0c2b1a;
+  --sidebar-accent-foreground: #5ef59a;
+  --sidebar-border: #12241a;
+  --sidebar-ring: #5ef59a;
 }
 
 @layer base {
-  * {
+  *,
+  ::before,
+  ::after {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
   }
   html {
-    @apply font-sans;
+    @apply font-poppins;
   }
 }

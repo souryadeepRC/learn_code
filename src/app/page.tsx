@@ -2,8 +2,7 @@
 
 import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { Button } from '@/components/ui/button';
-import { FaGithub } from 'react-icons/fa';
-import { RiLoginCircleLine } from 'react-icons/ri';
+import Link from 'next/link';
 
 /**
  * Home Page
@@ -39,12 +38,13 @@ export default function Home() {
      */
     <main className="min-h-screen bg-background text-foreground transition-colors duration-300">
       {/* ── Navigation ──────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-sm transition-colors duration-300">
+      <header className="sticky top-0 z-40 bg-card/80 backdrop-blur-sm transition-colors duration-300">
         <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
-          <span className="text-lg font-semibold tracking-tight">
+          <span className="text-lg font-semibold text-foreground ">
             Learn
-            {/* text-primary auto-switches: #0EA5E9 light → #38BDF8 dark */}
-            <span className="text-primary">Code</span>
+            <span className="text-primary transition-colors duration-300">
+              Code
+            </span>
           </span>
           <ThemeToggle />
         </div>
@@ -59,8 +59,8 @@ export default function Home() {
 
         <h1 className="text-5xl font-bold tracking-tight leading-tight max-w-2xl">
           Welcome to{' '}
-          {/* Gradient still uses hard values — these are decorative and brand-fixed */}
-          <span className="bg-gradient-to-r from-[#0EA5E9] to-[#8B5CF6] bg-clip-text text-transparent">
+          {/* Gradient now dynamically uses globals.css CSS variables (primary and secondary) */}
+          <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             Learn Code
           </span>
         </h1>
@@ -72,49 +72,10 @@ export default function Home() {
 
         {/* CTAs */}
         <div className="flex flex-wrap items-center justify-center gap-4 mt-2">
-          {/* variant="default" uses bg-primary which auto-switches */}
-          <Button size="lg" onClick={connectToGitHub} className="gap-2">
-            <FaGithub className="h-5 w-5" />
-            Connect with GitHub
-          </Button>
-          <Button variant="outline" size="lg" onClick={login} className="gap-2">
-            <RiLoginCircleLine className="h-5 w-5" />
-            Login
+          <Button variant="gradient" size="lg" asChild className="gap-2">
+            <Link href="/join">Join Us</Link>
           </Button>
         </div>
-      </section>
-
-      {/* ── Feature cards ───────────────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-6 pb-24 grid grid-cols-1 sm:grid-cols-3 gap-6">
-        {[
-          {
-            title: 'Structured Paths',
-            desc: 'Guided learning tracks from beginner to advanced.',
-            icon: '📚',
-          },
-          {
-            title: 'AI Assistant',
-            desc: 'Get instant help and code reviews powered by AI.',
-            icon: '✨',
-          },
-          {
-            title: 'Real Projects',
-            desc: 'Build a portfolio with hands-on, production-grade projects.',
-            icon: '🚀',
-          },
-        ].map(({ title, desc, icon }) => (
-          <div
-            key={title}
-            /* bg-card auto-switches: white light → neutral-900 dark */
-            className="rounded-xl border border-border bg-card text-card-foreground p-6 flex flex-col gap-3 shadow-sm hover:shadow-md transition-shadow duration-200"
-          >
-            <span className="text-3xl">{icon}</span>
-            <h2 className="text-base font-semibold text-primary">{title}</h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {desc}
-            </p>
-          </div>
-        ))}
       </section>
     </main>
   );
