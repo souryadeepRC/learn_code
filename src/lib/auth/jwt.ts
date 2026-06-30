@@ -8,18 +8,12 @@ if (!ACCESS_SECRET || !REFRESH_SECRET) {
 }
 
 type TokenSignId = { userId: string; email: string };
-export const generateTokens = (userId: string, email: string) => {
+
+export const signAccessTokens = (userId: string, email: string) => {
   // Access Token expires in 15 minutes
-  const accessToken = jwt.sign({ userId, email }, ACCESS_SECRET, {
+  return jwt.sign({ userId, email }, ACCESS_SECRET, {
     expiresIn: '15m',
   });
-
-  // Refresh Token expires in 7 days
-  const refreshToken = jwt.sign({ userId }, REFRESH_SECRET, {
-    expiresIn: '7d',
-  });
-
-  return accessToken;
 };
 
 export const signRefreshToken = (userId: string) => {
@@ -40,4 +34,11 @@ export const verifyRefreshToken = (token: string) => {
   } catch {
     return null;
   }
+};
+
+export const generateTokens = (userId: string, email: string) => {
+  return {
+    accessToken: signAccessTokens(userId, email),
+    refreshToken: signRefreshToken(userId),
+  };
 };

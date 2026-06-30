@@ -6,15 +6,15 @@ import {
   verifyRefreshToken,
 } from '@/lib/auth/jwt';
 import { HTTP_STATUS } from '@/root/src/constants/api';
-import { APIResponse, handleAPI } from '@/utils/api';
+import { APICallbackParams } from '@/root/src/types/auth';
+import { APIHandler, APIResponse } from '@/utils/api';
 import {
   clearRefreshTokenCookie,
   isRefreshTokenRevoked,
   setRefreshTokenCookie,
 } from '@/utils/authCookies';
-import { NextRequest } from 'next/server';
 
-export const POST = handleAPI(async (request: NextRequest) => {
+const postRefreshToken = async ({ request }: APICallbackParams) => {
   const refreshToken = request.cookies.get('refreshToken')?.value;
 
   if (!refreshToken) {
@@ -50,4 +50,6 @@ export const POST = handleAPI(async (request: NextRequest) => {
     accessToken: accessToken,
     email: user.email,
   });
-});
+};
+
+export const POST = APIHandler.authenticated(postRefreshToken);

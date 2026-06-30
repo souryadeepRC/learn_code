@@ -1,32 +1,24 @@
 'use server';
 
 import { HTTP_STATUS } from '@/root/src/constants/api';
-import { APIResponse, withAuth } from '@/utils/api';
+import { AuthAPICallbackParams } from '@/types/auth';
+import { APIHandler, APIResponse } from '@/utils/api';
 import { listAuthSessions, revokeAuthSession } from '@/utils/authSessions';
-import { NextRequest } from 'next/server';
 
-export const GET = withAuth(async (userId: string) => {
-  const sessions = listAuthSessions(userId);
+export const getSessions = async ({ userId }: AuthAPICallbackParams) => {
+  const sessions = listAuthSessions(userId as string);
 
   return APIResponse.send(HTTP_STATUS.OK).json({
     message: 'Active sessions fetched successfully',
     sessions,
   });
-});
+};
 
-export const POST = withAuth(async (userId: string, request: NextRequest) => {
-  const body = await request.json().catch(() => null);
-
-  if (!body || typeof body !== 'object' || Array.isArray(body)) {
-    return APIResponse.send(400).json({
-      message: 'Invalid request payload. Expected a JSON object.',
-    });
-  }
-
-  const sessionId =
-    typeof (body as { sessionId?: unknown }).sessionId === 'string'
-      ? (body as { sessionId: string }).sessionId.trim()
-      : '';
+export const postRevokeSession = async ({
+  userId,
+  payload,
+}: AuthAPICallbackParams) => {
+  const sessionId = (payload as { sessionId?: string })?.sessionId?.trim();
 
   if (!sessionId) {
     return APIResponse.send(400).json({
@@ -34,7 +26,7 @@ export const POST = withAuth(async (userId: string, request: NextRequest) => {
     });
   }
 
-  const revoked = revokeAuthSession(userId, sessionId);
+  const revoked = revokeAuthSession(userId as string, sessionId);
 
   if (!revoked) {
     return APIResponse.send(404).json({
@@ -46,4 +38,7 @@ export const POST = withAuth(async (userId: string, request: NextRequest) => {
     message: 'Session revoked successfully',
     sessionId,
   });
-});
+};
+
+export const GET = APIHandler.authenticated(getSessions);
+export const POST = APIHandler.authenticated(postRevokeSession);

@@ -1,37 +1,30 @@
-import { generateTokens, signRefreshToken } from '@/lib/auth/jwt';
+import { generateTokens } from '@/lib/auth/jwt';
 import { prismaUsers } from '@/lib/prisma-users';
-import { NextRequest, NextResponse } from 'next/server';
-//import { GoogleOAuth } from '@/lib/auth/oauth/google';
-import { GithubOAuth } from '@/lib/auth/oauth/github';
 import { HTTP_STATUS } from '@/root/src/constants/api';
+import { OAuthProviders } from '@/root/src/constants/Auth';
 import {
   generatePseudoEmail,
   isPseudoEmail,
 } from '@/root/src/lib/auth/oauth/utils';
-import { APIResponse } from '@/root/src/utils/api';
-//import { LinkedInOAuth } from '@/lib/auth/oauth/linkedin';
+import { APICallbackParams, OAuthProvider } from '@/root/src/types/auth';
+import { APIHandler, APIResponse } from '@/root/src/utils/api';
+import { NextResponse } from 'next/server';
 
-const providers = {
-  //google: new GoogleOAuth(),
-  github: new GithubOAuth(),
-  //linkedin: new LinkedInOAuth(),
-};
-
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { provider: string } }
-) {
+export const oauthCallback = async ({
+  request,
+  context,
+}: APICallbackParams<unknown, { provider: string }>) => {
   try {
-    const returnTo = req.cookies.get('oauth_return_to')?.value || '/';
+    const returnTo = request.cookies.get('oauth_return_to')?.value || '/';
 
     const redirectWithError = (message: string) => {
       console.error('OAuth Failed:', message);
-      const url = new URL(returnTo, req.url);
+      const url = new URL(returnTo, request.url);
       url.searchParams.set('error', 'OAuth_Failed');
       return NextResponse.redirect(url);
     };
 
-    const resData = req.nextUrl.searchParams;
+    const resData = request.nextUrl.searchParams;
 
     if (resData.get('error')) {
       return redirectWithError(
@@ -39,10 +32,10 @@ export async function GET(
       );
     }
 
-    const paramDetails = await params;
-    const provider = paramDetails.provider.toLowerCase();
-    const code = req.nextUrl.searchParams.get('code');
-    const state = req.nextUrl.searchParams.get('state');
+    const paramDetails = await context?.params;
+    const provider = paramDetails?.provider.toLowerCase() as OAuthProvider;
+    const code = request.nextUrl.searchParams.get('code');
+    const state = request.nextUrl.searchParams.get('state');
 
     // Validate code and state
     if (!code || !state) {
@@ -50,40 +43,21 @@ export async function GET(
     }
 
     // Verify CSRF token
-    const storedState = req.cookies.get(`oauth_state_${provider}`)?.value;
+    const storedState = request.cookies.get(`oauth_state_${provider}`)?.value;
     if (storedState !== state) {
       return redirectWithError('Invalid state parameter');
     }
 
-    if (!providers[provider as keyof typeof providers]) {
+    if (!OAuthProviders[provider]) {
       return redirectWithError('Invalid provider');
     }
 
-    const oauthProvider = providers[provider as keyof typeof providers];
+    const oauthProvider = OAuthProviders[provider];
 
     // Step 1: Exchange code for token
     const tokenData = await oauthProvider.exchangeCodeForToken(code);
     // Step 2: Get user info
     const userInfo = await oauthProvider.getUserInfo(tokenData.access_token);
-
-    // Step 3: Get email (might be in additional API call)
-    // if (!userInfo.email) {
-    //   console.log(`⚠️  Provider ${provider} didn't return email`);
-
-    //   // Try to fetch email from provider if available
-    //   if (typeof oauthProvider.getUserEmail === 'function') {
-    //     try {
-    //       userInfo.email = await oauthProvider.getUserEmail(
-    //         tokenData.access_token
-    //       );
-    //       console.log(
-    //         `✅ Fetched email from additional API: ${userInfo.email}`
-    //       );
-    //     } catch (error) {
-    //       console.log(`❌ Could not fetch email, will use pseudo-email`);
-    //     }
-    //   }
-    // }
 
     // Step 4: Generate pseudo-email if real email is missing
     const emailToUse =
@@ -120,19 +94,11 @@ export async function GET(
         data: {
           email: emailToUse,
           phoneNumber: userInfo.phoneNumber || null,
-          //name: userInfo.name,
-          // image: userInfo.picture || userInfo.avatar_url,
         },
         include: {
           accounts: true, // ✅ NOW accounts is included!
         },
       });
-      // } else if (!user.image) {
-      //   // Update image if not set
-      //   user = await prismaUsers.user.update({
-      //     where: { id: user.id },
-      //     data: { image: userInfo.image },
-      //   });
     } else {
       // Update user info if incomplete
       const updateData: any = {};
@@ -169,7 +135,6 @@ export async function GET(
           email: userInfo.email || null, // Store real email if available
           phoneNumber: userInfo.phoneNumber || null,
           name: userInfo.name,
-          //image: userInfo.picture || userInfo.avatar_url,
           accessToken: tokenData.access_token,
           refreshToken: tokenData.refresh_token || null,
           expiresAt: tokenData.expires_in
@@ -192,38 +157,11 @@ export async function GET(
       });
     }
 
-    // // Step 4: Create or update OAuth account
-    // await prismaUsers.account.upsert({
-    //   where: {
-    //     provider_providerAccountId: {
-    //       provider,
-    //       providerAccountId: userInfo.id.toString(),
-    //     },
-    //   },
-    //   create: {
-    //     userId: user.id,
-    //     provider,
-    //     providerAccountId: userInfo.id.toString(),
-    //     accessToken: tokenData.access_token,
-    //     refreshToken: tokenData.refresh_token || null,
-    //     expiresAt: tokenData.expires_in
-    //       ? Math.floor(Date.now() / 1000) + tokenData.expires_in
-    //       : null,
-    //     tokenType: tokenData.token_type,
-    //     scope: req.nextUrl.searchParams.get('scope') || undefined,
-    //   },
-    //   update: {
-    //     accessToken: tokenData.access_token,
-    //     refreshToken: tokenData.refresh_token || undefined,
-    //     expiresAt: tokenData.expires_in
-    //       ? Math.floor(Date.now() / 1000) + tokenData.expires_in
-    //       : undefined,
-    //   },
-    // });
-
     // Step 5: Generate JWT tokens
-    const accessToken = generateTokens(user.id, user.email ?? '');
-    const refreshToken = signRefreshToken(user.id);
+    const { accessToken, refreshToken } = generateTokens(
+      user.id,
+      user.email ?? ''
+    );
 
     // Step 6: Store session
     await prismaUsers.session.create({
@@ -231,13 +169,13 @@ export async function GET(
         userId: user.id,
         token: refreshToken,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        ipAddress: req.headers.get('x-forwarded-for') || '',
-        userAgent: req.headers.get('user-agent') || '',
+        ipAddress: request.headers.get('x-forwarded-for') || '',
+        userAgent: request.headers.get('user-agent') || '',
       },
     });
 
     // Step 7: Redirect to frontend without tokens in url
-    const redirectUrl = new URL('/dashboard', req.url);
+    const redirectUrl = new URL('/dashboard', request.url);
     const response = NextResponse.redirect(redirectUrl);
 
     // Set accessToken in cookie (httpOnly for security)
@@ -262,9 +200,11 @@ export async function GET(
     return response;
   } catch (error) {
     console.error('OAuth callback error:', error);
-    const returnTo = req.cookies.get('oauth_return_to')?.value || '/';
-    const errorUrl = new URL(returnTo, req.url);
+    const returnTo = request.cookies.get('oauth_return_to')?.value || '/';
+    const errorUrl = new URL(returnTo, request.url);
     errorUrl.searchParams.set('error', 'OAuth_Failed');
     return NextResponse.redirect(errorUrl);
   }
-}
+};
+
+export const GET = APIHandler.authOperations(oauthCallback);

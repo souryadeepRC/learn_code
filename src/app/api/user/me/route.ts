@@ -1,13 +1,12 @@
 'use server';
 import { prismaUsers } from '@/lib/prisma-users';
 import { HTTP_STATUS } from '@/root/src/constants/api';
-import { APIResponse, withAuth } from '@/utils/api';
-import { NextRequest } from 'next/server';
+import { APIHandler, APIResponse } from '@/utils/api';
 
 // ==========================================
 // GET: Fetch the current user's profile
 // ==========================================
-export const GET = withAuth(async (userId: string) => {
+export const GET = APIHandler.authenticated(async ({ userId }) => {
   // Use the userId extracted securely from the JWT token
 
   const user = await prismaUsers.userProfile.findUnique({
@@ -30,7 +29,7 @@ export const GET = withAuth(async (userId: string) => {
   });
 });
 
-export const PATCH = withAuth(async (userId: string, request: NextRequest) => {
+export const PATCH = APIHandler.authenticated(async ({ userId, request }) => {
   const rawBody = await request.json();
 
   if (typeof rawBody !== 'object' || rawBody === null) {

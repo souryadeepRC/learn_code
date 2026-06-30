@@ -1,23 +1,15 @@
 'use server';
 
 import { HTTP_STATUS } from '@/root/src/constants/api';
-import { APIResponse, withAuth } from '@/utils/api';
+import { AuthAPICallbackParams } from '@/root/src/types/auth';
+import { APIHandler, APIResponse } from '@/utils/api';
 import { revokeAuthSession } from '@/utils/authSessions';
-import { NextRequest } from 'next/server';
 
-export const POST = withAuth(async (userId: string, request: NextRequest) => {
-  const body = await request.json().catch(() => null);
-
-  if (!body || typeof body !== 'object' || Array.isArray(body)) {
-    return APIResponse.send(400).json({
-      message: 'Invalid request payload. Expected a JSON object.',
-    });
-  }
-
-  const sessionId =
-    typeof (body as { sessionId?: unknown }).sessionId === 'string'
-      ? (body as { sessionId: string }).sessionId.trim()
-      : '';
+export const revokeSession = async ({
+  userId,
+  payload,
+}: AuthAPICallbackParams) => {
+  const sessionId = (payload as { sessionId?: string })?.sessionId?.trim();
 
   if (!sessionId) {
     return APIResponse.send(400).json({
@@ -37,4 +29,6 @@ export const POST = withAuth(async (userId: string, request: NextRequest) => {
     message: 'Session revoked successfully',
     sessionId,
   });
-});
+};
+
+export const POST = APIHandler.authenticated(revokeSession);

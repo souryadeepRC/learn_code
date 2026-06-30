@@ -11,9 +11,9 @@ export const recordFailure = (key: string) => {
   }
 
   if (existing && existing.count >= 4) {
-    const lockedUntil = now + 15 * 60 * 1000;
+    const lockedUntil = now + 1 * 60 * 1000;
     failureStore.set(key, { count: 1, lockedUntil });
-    return { blocked: true, retryAfterMs: 15 * 60 * 1000 };
+    return { blocked: true, retryAfterMs: 1 * 60 * 1000 };
   }
 
   const nextCount = existing ? existing.count + 1 : 1;

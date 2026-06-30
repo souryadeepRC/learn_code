@@ -67,6 +67,8 @@ model User {
     password                    String?
     passwordResetToken          String?
     passwordResetTokenExpiresAt DateTime?
+    emailVerificationToken      String?
+    emailVerificationTokenExpiresAt DateTime?
     emailVerified               Boolean        @default(false)
     accounts               Account[]
     sessions Session[]

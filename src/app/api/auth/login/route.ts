@@ -1,35 +1,24 @@
 'use server';
 import { HTTP_STATUS } from '@/constants/api';
-//import { checkRateLimitFixed } from '@/root/src/lib/redis/rate-limit/redis-direct';
-import { APICallbackParams, APIResponse, handleAPI } from '@/utils/api';
-import { loginSchema, loginWithCredentials } from '@/utils/auth';
+import { loginSchema } from '@/root/src/schema/auth';
+import { APICallbackParams, LoginCredentials } from '@/root/src/types/auth';
+import { APIHandler, APIResponse } from '@/utils/api';
+import { loginWithCredentials } from '@/utils/auth';
 
-export const POST = handleAPI(
-  async ({ request, payload }: APICallbackParams) => {
-    const parsedBody = loginSchema.safeParse(payload);
+export const loginUser = async ({
+  payload,
+}: APICallbackParams<LoginCredentials>) => {
+  const authResult = await loginWithCredentials(payload);
 
-    if (!parsedBody.success) {
-      return APIResponse.send(HTTP_STATUS.BAD_REQUEST).json({
-        message: 'Invalid login payload',
-        errors: parsedBody.error.issues.map((issue) => ({
-          path: issue.path.join('.'),
-          message: issue.message,
-        })),
-      });
-    }
+  if (!authResult.success) {
+    return APIResponse.send(authResult.status).json(authResult.payload);
+  }
 
-    const clientKey = request.headers.get('x-forwarded-for') || 'unknown';
-    const authResult = await loginWithCredentials(parsedBody.data, clientKey);
+  return APIResponse.send(HTTP_STATUS.OK).json({
+    message: 'Login successful',
+    accessToken: authResult.accessToken,
+    email: authResult.email,
+  });
+};
 
-    if (!authResult.success) {
-      return APIResponse.send(authResult.status).json(authResult.payload);
-    }
-
-    return APIResponse.send(HTTP_STATUS.OK).json({
-      message: 'Login successful',
-      accessToken: authResult.accessToken,
-      email: authResult.email,
-    });
-  },
-  8 * 1024
-);
+export const POST = APIHandler.authOperations(loginUser, loginSchema);

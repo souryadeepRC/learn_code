@@ -1,3 +1,4 @@
+import { RateLimitConfig } from '@/root/src/types/common';
 import { Redis } from '@upstash/redis';
 
 const redis = Redis.fromEnv();
@@ -16,10 +17,9 @@ interface RateLimitResult {
  * - Best for: High traffic scenarios
  */
 export async function checkRateLimitFixed(
-  key: string,
-  maxRequests: number,
-  windowSeconds: number
+  config: RateLimitConfig
 ): Promise<RateLimitResult> {
+  const { key, maxRequests, windowSeconds } = config;
   const now = Date.now();
   const cacheKey = `rate:${key}`;
 

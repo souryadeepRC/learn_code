@@ -1,12 +1,12 @@
 import { HTTP_STATUS } from '@/constants/api';
-import { APIResponse, withAuth } from '@/utils/api';
+import { APICallbackParams } from '@/root/src/types/auth';
+import { APIHandler, APIResponse } from '@/utils/api';
 import {
   clearRefreshTokenCookie,
   revokeRefreshToken,
 } from '@/utils/authCookies';
-import { NextRequest } from 'next/server';
 
-export const POST = withAuth(async (_userId: string, request: NextRequest) => {
+export const logout = async ({ request }: APICallbackParams) => {
   const refreshToken = request.cookies.get('refreshToken')?.value;
 
   if (refreshToken) {
@@ -19,4 +19,6 @@ export const POST = withAuth(async (_userId: string, request: NextRequest) => {
     success: true,
     message: 'Logout successful',
   });
-});
+};
+
+export const POST = APIHandler.authenticated(logout);

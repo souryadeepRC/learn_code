@@ -1,5 +1,7 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import z from 'zod';
 import { HTTP_STATUS } from '../constants/api';
+import { APIResponse } from './api';
 
 const emojiRegex = /[\p{Extended_Pictographic}\u200d\uFE0F]/u;
 const controlCharRegex = /[\u0000-\u001F\u007F]/;
@@ -46,7 +48,7 @@ export const validateAuthPayload = (payload: unknown) => {
   return !containsForbiddenContent(payload);
 };
 
-export const parseJsonBody = async (
+export const validateRequestBody = async (
   request: NextRequest,
   maxBytes = 8 * 1024
 ): Promise<ParsedJsonBodyResult> => {
@@ -98,4 +100,21 @@ export const parseJsonBody = async (
       message: 'Invalid JSON payload',
     };
   }
+};
+export const getParsedPayload = <T>(
+  schema: z.ZodType<T>,
+  payload: unknown
+): T | NextResponse => {
+  const parsedBody = schema.safeParse(payload);
+
+  if (!parsedBody.success) {
+    return APIResponse.send(HTTP_STATUS.BAD_REQUEST).json({
+      message: 'Invalid payload',
+      errors: parsedBody.error.issues.map((issue) => ({
+        path: issue.path.join('.'),
+        message: issue.message,
+      })),
+    });
+  }
+  return parsedBody.data;
 };

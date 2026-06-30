@@ -1,102 +1,30 @@
 'use server';
 import { prismaUsers } from '@/lib/prisma-users';
-import type { Prisma } from '@prisma-custom/users';
 
+import { sendVerificationEmail } from '@/lib/resend';
 import { HTTP_STATUS } from '@/root/src/constants/api';
+import { generateExpiryToken, hashPassword } from '@/root/src/lib/auth/hash';
 import { generateTokens } from '@/root/src/lib/auth/jwt';
-import { APIResponse, handleAPI } from '@/utils/api';
-import { parseJsonBody, validateAuthPayload } from '@/utils/inputValidation';
-import { enforceRateLimit } from '@/utils/rateLimit';
-import bcrypt from 'bcryptjs';
-import { NextRequest } from 'next/server';
-import { z } from 'zod';
+import { registerSchema } from '@/root/src/schema/auth';
+import { APICallbackParams, RegisterCredentials } from '@/root/src/types/auth';
+import { getParsedPayload } from '@/root/src/utils/inputValidation';
+import { APIHandler, APIResponse } from '@/utils/api';
+import { NextResponse } from 'next/server';
 
-const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
-const passwordRegex =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,72}$/;
+export const registerUser = async ({
+  payload,
+}: APICallbackParams<RegisterCredentials>) => {
+  const parsedPayload = getParsedPayload<RegisterCredentials>(
+    registerSchema,
+    payload
+  );
 
-const MAX_BODY_SIZE = 1024 * 8;
-
-const authProviderSchema = z.object({
-  provider: z.string().trim().min(1, { message: 'Provider is required' }),
-  providerId: z.string().trim().min(1, { message: 'Provider ID is required' }),
-  providerEmail: z
-    .string()
-    .trim()
-    .min(1, { message: 'Provider email is required' }),
-  profilePhotoUrl: z.string().url().optional().or(z.literal('')).optional(),
-});
-
-const registerSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .min(1, { message: 'Email is required' })
-    .refine((value) => emailRegex.test(value), {
-      message: 'Please enter a valid email address',
-    }),
-  password: z
-    .string()
-    .min(8, { message: 'Password must be at least 8 characters long' })
-    .max(72, { message: 'Password must not exceed 72 characters' })
-    .refine((value) => passwordRegex.test(value), {
-      message:
-        'Password must include uppercase, lowercase, a number, and a special character',
-    }),
-  authProviders: z.array(authProviderSchema).optional(),
-});
-
-export const POST = handleAPI(async (request: NextRequest) => {
-  const bodyResult = await parseJsonBody(request, MAX_BODY_SIZE);
-
-  if (!bodyResult.success) {
-    return APIResponse.send(bodyResult.status).json({
-      message: bodyResult.message,
-    });
+  if (parsedPayload instanceof NextResponse) {
+    return parsedPayload;
   }
 
-  const rawBody = bodyResult.data;
-
-  const rateLimit = enforceRateLimit({
-    request: request as unknown as Request,
-    limit: 20,
-    windowMs: 15 * 60 * 1000,
-  });
-
-  if (!rateLimit.allowed) {
-    return APIResponse.send(429).json({
-      message: 'Too many requests. Please try again later.',
-    });
-  }
-
-  if (!validateAuthPayload(rawBody)) {
-    return APIResponse.send(400).json({
-      message: 'Invalid request payload. Expected a JSON object.',
-    });
-  }
-
-  const parsedBody = registerSchema.safeParse(rawBody);
-
-  if (!parsedBody.success) {
-    return APIResponse.send(400).json({
-      message: 'Invalid registration payload',
-      errors: parsedBody.error.issues.map((issue) => ({
-        path: issue.path.join('.'),
-        message: issue.message,
-      })),
-    });
-  }
-
-  const { email, password, authProviders } = parsedBody.data;
+  const { email, password } = parsedPayload;
   const normalizedEmail = email.trim().toLowerCase();
-  const normalizedProviders = authProviders?.map((provider) => ({
-    provider: provider.provider,
-    providerId: provider.providerId,
-    providerEmail: provider.providerEmail,
-    ...(provider.profilePhotoUrl
-      ? { profilePhotoUrl: provider.profilePhotoUrl }
-      : {}),
-  }));
 
   const existingUser = await prismaUsers.user.findUnique({
     where: { email: normalizedEmail },
@@ -104,32 +32,49 @@ export const POST = handleAPI(async (request: NextRequest) => {
 
   if (existingUser) {
     return APIResponse.send(HTTP_STATUS.CREATED).json({
-      message: 'If the account does not exist, create a new one.',
+      message: 'User already exists',
     });
   }
 
   // 3. Hash the password before saving
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
+  const hashedPassword = await hashPassword(password);
 
   // 4. Insert user (Let the Adapter handle the ID generation!)
-  const userCreateData: Prisma.UserCreateInput = {
+  const userCreateData = {
     email: normalizedEmail,
-    password: hashedPassword || null,
-    ...(normalizedProviders && normalizedProviders.length > 0
-      ? { authProviders: normalizedProviders }
-      : {}),
+    password: hashedPassword,
   };
 
   const createdUser = await prismaUsers.user.create({
     data: userCreateData,
   });
 
+  // Generate verification token
+  const { expiryToken, expiresAt } = generateExpiryToken(24);
+
+  await prismaUsers.user.update({
+    where: { id: createdUser.id },
+    data: {
+      emailVerificationToken: expiryToken,
+      emailVerificationTokenExpiresAt: expiresAt,
+    },
+  });
+
+  // Send verification email (non-blocking)
+  const verificationResponse = await sendVerificationEmail(
+    createdUser.email as string,
+    expiryToken
+  );
+
   const token = generateTokens(createdUser.id, createdUser?.email ?? '');
 
-  // const createdUser = await db.insert<User>(TABLE.USER_AUTH,{id: new ObjectId().toString(),username,email,password})
   return APIResponse.send(HTTP_STATUS.CREATED).json({
     email: createdUser.email,
     token,
+    verificationStatus: verificationResponse?.success
+      ? 'Verification email sent'
+      : 'Failed to send verification email',
   });
-});
+};
+
+export const POST = APIHandler.authOperations(registerUser, registerSchema);
