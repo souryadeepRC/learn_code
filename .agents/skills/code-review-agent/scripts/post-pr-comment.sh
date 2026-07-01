@@ -29,11 +29,20 @@ fi
 
 COMMENT_BODY=$(cat "$COMMENT_FILE")
 
+# Determine event type based on the content of the review
+EVENT="COMMENT"
+if grep -q "⛔️" "$COMMENT_FILE" || grep -q "⚠️" "$COMMENT_FILE"; then
+  EVENT="REQUEST_CHANGES"
+elif grep -q "✅ All OK" "$COMMENT_FILE"; then
+  EVENT="APPROVE"
+fi
+
 JSON_PAYLOAD=$(node -e "
 console.log(JSON.stringify({
-  body: process.argv[1]
+  body: process.argv[1],
+  event: process.argv[2]
 }))
-" "$COMMENT_BODY")
+" "$COMMENT_BODY" "$EVENT")
 
 curl -s -X POST \
   -H "Authorization: Bearer $GITHUB_TOKEN" \
@@ -41,4 +50,7 @@ curl -s -X POST \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   -H "Content-Type: application/json" \
   -d "$JSON_PAYLOAD" \
-  "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/issues/$PR_NUMBER/comments"
+  "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/pulls/$PR_NUMBER/reviews"
+
+# Automatically delete the comment file after successful post
+rm -f "$COMMENT_FILE"

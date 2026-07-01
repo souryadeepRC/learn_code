@@ -74,17 +74,13 @@ Wait for the code review report.
 
 ```
 For title show any of these based on response
-### ✅ All OK / ⚠️ Need to rectify / ⛔️ Strictly Restricted to Merge
+## ✅ All OK / ⚠️ Need to rectify / ⛔️ Strictly Restricted to Merge
 
 ---
 
 - 📦 Branch: feature/user-notes → develop
 - 📝 Commits: 8 ahead of develop
 - 📄 Files: 12 changed
-
----
-
-- 🔍 Code Review Summary
 - 🔴 Risk Level: Medium
 
 ---

@@ -12,6 +12,14 @@ fi
 SOURCE_BRANCH=$1
 DESTINATION_BRANCH=$2
 
+BRANCH_PREFIX=$(echo "$SOURCE_BRANCH" | cut -d'/' -f1)
+LABEL=""
+case "$BRANCH_PREFIX" in
+  feature|bug|improvement)
+    LABEL="$BRANCH_PREFIX"
+    ;;
+esac
+
 echo "=========================================="
 echo "Step 2: Resolving Repository Context"
 echo "=========================================="
@@ -77,6 +85,17 @@ EXISTING_PR_URL=$(node -e "
 
 if [ -n "$EXISTING_PR_URL" ]; then
   echo "An open PR already exists: $EXISTING_PR_URL — skipping PR creation."
+  if [ -n "$LABEL" ]; then
+    PR_NUMBER=$(echo "$EXISTING_PR_URL" | awk -F'/' '{print $NF}')
+    curl -s -X POST \
+      -H "Authorization: Bearer $GITHUB_TOKEN" \
+      -H "Accept: application/vnd.github+json" \
+      -H "X-GitHub-Api-Version: 2022-11-28" \
+      -H "Content-Type: application/json" \
+      -d "{\"labels\":[\"$LABEL\"]}" \
+      "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/issues/$PR_NUMBER/labels" > /dev/null
+    echo "Added label '$LABEL' to existing PR."
+  fi
   exit 0
 fi
 echo "No existing open PR found."
@@ -141,6 +160,24 @@ NEW_PR_URL=$(node -e "
 
 if [ -n "$NEW_PR_URL" ]; then
   echo "✅ PR Created Successfully: $NEW_PR_URL"
+  if [ -n "$LABEL" ]; then
+    PR_NUMBER=$(node -e "
+      try {
+        const data = JSON.parse(process.argv[1]);
+        if (data.number) { console.log(data.number); }
+      } catch(e) {}
+    " "$CREATE_RES")
+    if [ -n "$PR_NUMBER" ]; then
+      curl -s -X POST \
+        -H "Authorization: Bearer $GITHUB_TOKEN" \
+        -H "Accept: application/vnd.github+json" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+        -H "Content-Type: application/json" \
+        -d "{\"labels\":[\"$LABEL\"]}" \
+        "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/issues/$PR_NUMBER/labels" > /dev/null
+      echo "Added label '$LABEL' to new PR."
+    fi
+  fi
 else
   echo "❌ Failed to create PR. API Response:"
   echo "$CREATE_RES"
