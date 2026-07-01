@@ -1,16 +1,15 @@
 'use client';
 
-import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { IoArrowBack, IoCheckmarkCircleOutline } from 'react-icons/io5';
 import { LuEye, LuEyeOff } from 'react-icons/lu';
 
-function ResetPasswordForm() {
+const ResetPasswordForm = () => {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
   const router = useRouter();
@@ -18,7 +17,9 @@ function ResetPasswordForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<
+    'idle' | 'loading' | 'success' | 'error'
+  >('idle');
   const [message, setMessage] = useState('');
 
   if (!token) {
@@ -60,7 +61,7 @@ function ResetPasswordForm() {
         setStatus('error');
         setMessage(data.message || 'An error occurred. Please try again.');
       }
-    } catch (err) {
+    } catch {
       setStatus('error');
       setMessage('An error occurred. Please try again later.');
     }
@@ -128,33 +129,32 @@ function ResetPasswordForm() {
       <Button
         type="submit"
         className="w-full gap-2"
-        size="md"
+        size="lg"
         disabled={status === 'loading'}
       >
         {status === 'loading' ? 'Resetting...' : 'Reset Password'}
       </Button>
     </form>
   );
-}
+};
 
-export default function ResetPasswordPage() {
+const ResetPasswordPage = () => {
   return (
-    <main className="min-h-screen bg-background text-foreground flex flex-col md:flex-row transition-colors duration-300">
-      <section className="flex flex-1 flex-col items-center justify-center p-6 sm:p-12 relative h-screen overflow-y-auto">
-        <div className="absolute top-6 left-6 right-6 flex items-center justify-between">
+    <main className="flex-1 flex flex-col md:flex-row w-full bg-background text-foreground transition-colors duration-300">
+      <section className="flex flex-1 flex-col items-center justify-center p-6 sm:p-12 relative overflow-y-auto">
+        <div className="w-full max-w-md my-auto py-6">
           <Link
             href="/join"
-            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-6 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             <IoArrowBack className="h-4 w-4" />
             Back to Login
           </Link>
-          <ThemeToggle />
-        </div>
 
-        <div className="w-full max-w-md mt-16 md:mt-0">
           <div className="mb-8 text-center md:text-left">
-            <h2 className="text-3xl font-bold tracking-tight mb-2">Set New Password</h2>
+            <h2 className="text-3xl font-bold tracking-tight mb-2">
+              Set New Password
+            </h2>
             <p className="text-muted-foreground">
               Please enter your new password below.
             </p>
@@ -167,4 +167,6 @@ export default function ResetPasswordPage() {
       </section>
     </main>
   );
-}
+};
+
+export default ResetPasswordPage;

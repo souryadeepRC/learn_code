@@ -16,9 +16,9 @@ interface RateLimitResult {
  * - Less accurate but faster
  * - Best for: High traffic scenarios
  */
-export async function checkRateLimitFixed(
+export const checkRateLimitFixed = async (
   config: RateLimitConfig
-): Promise<RateLimitResult> {
+): Promise<RateLimitResult> => {
   const { key, maxRequests, windowSeconds } = config;
   const now = Date.now();
   const cacheKey = `rate:${key}`;
@@ -32,29 +32,29 @@ export async function checkRateLimitFixed(
       await redis.expire(cacheKey, windowSeconds);
     }
 
-    // Get TTL for reset time
+    // Get time remaining
     const ttl = await redis.ttl(cacheKey);
-    const resetTime = now + (ttl > 0 ? ttl : windowSeconds) * 1000;
+    const reset = now + (ttl > 0 ? ttl : windowSeconds) * 1000;
+
     const remaining = Math.max(0, maxRequests - count);
-    const allowed = count <= maxRequests;
 
     return {
-      allowed,
-      remaining,
-      resetTime,
+      allowed: count <= maxRequests,
       limit: maxRequests,
+      remaining,
+      resetTime: reset,
     };
   } catch (error) {
     console.error('Rate limit error:', error);
-    // Fail open: allow request if service is down
+    // Open fail-safe (allow request if Redis fails)
     return {
       allowed: true,
-      remaining: maxRequests,
-      resetTime: now + windowSeconds * 1000,
       limit: maxRequests,
+      remaining: 1,
+      resetTime: now + windowSeconds * 1000,
     };
   }
-}
+};
 
 /**
  * Sliding Window Counter (More Accurate)
@@ -62,65 +62,51 @@ export async function checkRateLimitFixed(
  * - More accurate but slower
  * - Best for: Security-sensitive endpoints
  */
-export async function checkRateLimitSliding(
+export const checkRateLimitSliding = async (
   key: string,
   maxRequests: number,
   windowSeconds: number
-): Promise<RateLimitResult> {
+): Promise<RateLimitResult> => {
   const now = Date.now();
   const cacheKey = `rate:sliding:${key}`;
   const windowMs = windowSeconds * 1000;
   const windowStart = now - windowMs;
 
   try {
-    // Use pipeline for atomic operations
-    const pipeline = redis.pipeline();
+    // 1. Remove timestamps outside the window
+    await redis.zremrangebyscore(cacheKey, 0, windowStart);
 
-    // Remove requests older than window
-    pipeline.zremrangebyscore(cacheKey, 0, windowStart);
+    // 2. Add current timestamp
+    await redis.zadd(cacheKey, {
+      score: now,
+      member: `${now}-${Math.random()}`,
+    });
 
-    // Count requests in current window
-    pipeline.zcard(cacheKey);
+    // 3. Count total requests in current window
+    const count = await redis.zcard(cacheKey);
 
-    // Get TTL
-    pipeline.ttl(cacheKey);
+    // 4. Set TTL to prevent memory leaks
+    await redis.expire(cacheKey, windowSeconds);
 
-    const results = await pipeline.exec();
-
-    const requestCount = (results[1] as number) || 0;
-    const ttl = (results[2] as number) || windowSeconds;
-    const remaining = Math.max(0, maxRequests - requestCount);
-    const allowed = requestCount < maxRequests;
-
-    if (allowed) {
-      // Add current request with timestamp as score
-      await redis.zadd(cacheKey, {
-        score: now,
-        member: `${now}-${Math.random()}`,
-      });
-
-      // Set expiration
-      await redis.expire(cacheKey, windowSeconds);
-    }
-
-    const resetTime = now + (ttl > 0 ? ttl : windowSeconds) * 1000;
+    const remaining = Math.max(0, maxRequests - count);
+    const reset = now + windowMs;
 
     return {
-      allowed,
-      remaining,
-      resetTime,
+      allowed: count <= maxRequests,
       limit: maxRequests,
+      remaining,
+      resetTime: reset,
     };
   } catch (error) {
-    console.error('Sliding window error:', error);
+    console.error('Sliding window rate limit error:', error);
     return {
       allowed: true,
-      remaining: maxRequests,
-      resetTime: now + windowSeconds * 1000,
       limit: maxRequests,
+      remaining: 1,
+      resetTime: now + windowMs,
     };
   }
-}
+};
 
 /**
  * Token Bucket Algorithm
@@ -128,59 +114,60 @@ export async function checkRateLimitSliding(
  * - Refills over time
  * - Best for: APIs with varying load
  */
-export async function checkRateLimitTokenBucket(
+export const checkRateLimitTokenBucket = async (
   key: string,
   maxTokens: number,
   refillRate: number, // tokens per second
   windowSeconds: number
-): Promise<RateLimitResult> {
+): Promise<RateLimitResult> => {
   const now = Date.now();
   const cacheKey = `bucket:${key}`;
 
   try {
-    // Get stored bucket state
-    const bucket = await redis.get(cacheKey);
-    let tokens: number;
-    let lastRefill: number;
+    // Get current bucket state
+    const bucketData = await redis.hgetall(cacheKey);
 
-    if (!bucket) {
-      // First request
-      tokens = maxTokens - 1;
-      lastRefill = now;
-    } else {
-      const [storedTokens, lastRefillStr] = (bucket as string).split(':');
-      lastRefill = parseInt(lastRefillStr);
+    let tokens = maxTokens;
+    let lastRefill = now;
 
-      // Calculate refilled tokens
-      const timePassed = (now - lastRefill) / 1000; // seconds
-      const refilled = Math.floor(timePassed * refillRate);
-      tokens = Math.min(maxTokens, parseInt(storedTokens) + refilled - 1);
+    if (bucketData && bucketData.tokens) {
+      tokens = parseFloat(bucketData.tokens as string);
+      lastRefill = parseInt(bucketData.lastRefill as string, 10);
+
+      // Calculate tokens to add based on elapsed time
+      const elapsedSeconds = (now - lastRefill) / 1000;
+      const tokensToAdd = elapsedSeconds * refillRate;
+      tokens = Math.min(maxTokens, tokens + tokensToAdd);
     }
 
-    const allowed = tokens > 0;
-    const remaining = Math.max(0, tokens);
-
-    // Store updated bucket
-    if (allowed) {
-      await redis.setex(cacheKey, windowSeconds, `${tokens}:${now}`);
+    const success = tokens >= 1;
+    if (success) {
+      tokens -= 1;
     }
+
+    // Update bucket state
+    await redis.hset(cacheKey, {
+      tokens: tokens.toString(),
+      lastRefill: now.toString(),
+    });
+    await redis.expire(cacheKey, windowSeconds);
 
     return {
-      allowed,
-      remaining,
-      resetTime: now + windowSeconds * 1000,
+      allowed: success,
       limit: maxTokens,
+      remaining: Math.floor(tokens),
+      resetTime: now + windowSeconds * 1000,
     };
   } catch (error) {
-    console.error('Token bucket error:', error);
+    console.error('Token bucket rate limit error:', error);
     return {
       allowed: true,
-      remaining: maxTokens,
-      resetTime: now + windowSeconds * 1000,
       limit: maxTokens,
+      remaining: 1,
+      resetTime: now + windowSeconds * 1000,
     };
   }
-}
+};
 
 /**
  * Leaky Bucket Algorithm (Queue-based)
@@ -188,12 +175,12 @@ export async function checkRateLimitTokenBucket(
  * - Requests processed at fixed rate
  * - Best for: Preventing sudden load spikes
  */
-export async function checkRateLimitLeakyBucket(
+export const checkRateLimitLeakyBucket = async (
   key: string,
   capacity: number,
   leakRate: number, // requests per second
   windowSeconds: number
-): Promise<RateLimitResult> {
+): Promise<RateLimitResult> => {
   const now = Date.now();
   const cacheKey = `leak:${key}`;
 
@@ -237,4 +224,4 @@ export async function checkRateLimitLeakyBucket(
       limit: capacity,
     };
   }
-}
+};

@@ -1,4 +1,4 @@
-export type AuthProvider = {};
+export type AuthProvider = Record<string, unknown>;
 export type Subsciption = {
   planId: string;
   activatedAt: Date;

@@ -1,8 +1,8 @@
 import { HTTP_STATUS } from '@/constants/api';
 import { verifyAccessToken } from '@/lib/auth/jwt';
-import { checkRateLimitFixed } from '@/lib/redis/rate-limit/redis-direct';
 import { NextRequest, NextResponse } from 'next/server';
 
+import { checkRateLimitFixed } from '@/lib/redis/rate-limit/redis-direct';
 import {
   APICallbackParams,
   APIConfig,
@@ -42,8 +42,11 @@ const createBaseHandler = <T, P = unknown>(
 
       let payload: unknown = undefined;
 
-      // Only parse body for methods that typically have payloads
-      if (!['GET', 'HEAD'].includes(request.method.toUpperCase())) {
+      // Only parse body for methods that typically have payloads and require schema validation
+      if (
+        !['GET', 'HEAD', 'DELETE'].includes(request.method.toUpperCase()) &&
+        config.schema
+      ) {
         const bodyResult = await validateRequestBody(
           request,
           config.maxPayloadSize
@@ -54,18 +57,14 @@ const createBaseHandler = <T, P = unknown>(
           });
         }
 
-        if (config.schema) {
-          const parsedPayload = getParsedPayload<T>(
-            config.schema,
-            bodyResult.data
-          );
-          if (parsedPayload instanceof NextResponse) {
-            return parsedPayload;
-          }
-          payload = parsedPayload;
-        } else {
-          payload = bodyResult.data;
+        const parsedPayload = getParsedPayload<T>(
+          config.schema,
+          bodyResult.data
+        );
+        if (parsedPayload instanceof NextResponse) {
+          return parsedPayload;
         }
+        payload = parsedPayload;
       }
 
       return await callback({
@@ -88,7 +87,16 @@ const createBaseHandler = <T, P = unknown>(
 
 const decodeTokenDetails = (request: NextRequest): string | NextResponse => {
   const authHeader = request.headers?.get?.('Authorization');
-  const token = authHeader?.split?.(' ')?.[1];
+  const token =
+    authHeader?.split?.(' ')?.[1] ||
+    request.cookies?.get?.('accessToken')?.value;
+
+  // Allow logout endpoint to always execute so cookies get cleared even if access token is expired or missing
+  if (request.nextUrl?.pathname?.endsWith('/logout')) {
+    if (!token) return '';
+    const decoded = verifyAccessToken(token);
+    return decoded?.userId || '';
+  }
 
   if (!token) {
     return APIResponse.send(401).json({
@@ -137,7 +145,7 @@ export class APIHandler {
       maxPayloadSize: 8 * 1024,
       rateLimitConfig: {
         maxRequests: 3,
-        windowSeconds: 4 * 60 * 1000, // 3 requests per 4 mins
+        windowSeconds: 4 * 60, // 3 requests per 4 mins (in seconds)
       },
     });
   }
@@ -152,7 +160,7 @@ export class APIHandler {
       maxPayloadSize: 8 * 1024,
       rateLimitConfig: {
         maxRequests: 10,
-        windowSeconds: 60 * 1000, // 10 requests per minute
+        windowSeconds: 60, // 10 requests per minute (in seconds)
       },
     });
   }
@@ -167,7 +175,7 @@ export class APIHandler {
       maxPayloadSize: 8 * 1024,
       rateLimitConfig: {
         maxRequests: 10,
-        windowSeconds: 60 * 1000, // 10 requests per minute
+        windowSeconds: 60, // 10 requests per minute (in seconds)
       },
     });
   }

@@ -12,11 +12,16 @@
     "format:all": "npm run format && npm run lint:fix",
     "prisma:generate:users": "prisma generate --schema=./prisma/users/users.schema.prisma",
     "prisma:generate:technologies": "prisma generate --schema=./prisma/technologies/technologies.schema.prisma",
-    "prisma:generate:all": "prisma generate --schema=./prisma/users/users.schema.prisma && prisma generate --schema=./prisma/technologies/technologies.schema.prisma"
+    "prisma:generate:all": "prisma generate --schema=./prisma/users/users.schema.prisma && prisma generate --schema=./prisma/technologies/technologies.schema.prisma",
+    "postinstall": "npm run prisma:generate:all"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.4.0",
     "@prisma/client": "^6.19.3",
+    "@reduxjs/toolkit": "^2.12.0",
+    "@tanstack/react-query": "^4.44.0",
     "@upstash/redis": "^1.38.0",
+    "axios": "^1.18.1",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -27,7 +32,9 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-email": "^6.6.5",
+    "react-hook-form": "^7.80.0",
     "react-icons": "^5.6.0",
+    "react-redux": "^9.3.0",
     "resend": "^6.16.0",
     "shadcn": "^4.12.0",
     "tailwind-merge": "^3.6.0",

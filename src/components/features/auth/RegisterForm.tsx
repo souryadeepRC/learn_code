@@ -8,7 +8,7 @@ import { LuEye, LuEyeOff } from 'react-icons/lu';
 import { RiUserAddLine } from 'react-icons/ri';
 import SocialAuth from './SocialAuth';
 
-export function RegisterForm() {
+export const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -77,7 +77,7 @@ export function RegisterForm() {
           </div>
         </div>
 
-        <Button type="submit" className="w-full gap-2 mt-4" size="md">
+        <Button type="submit" className="w-full gap-2 mt-4" size="lg">
           <RiUserAddLine className="h-5 w-5" />
           Create Account
         </Button>
@@ -103,4 +103,4 @@ export function RegisterForm() {
       </p>
     </div>
   );
-}
+};

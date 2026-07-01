@@ -1,6 +1,6 @@
+import { HTTP_STATUS } from '@/constants/api';
 import { NextRequest, NextResponse } from 'next/server';
 import z from 'zod';
-import { HTTP_STATUS } from '../constants/api';
 import { APIResponse } from './api';
 
 const emojiRegex = /[\p{Extended_Pictographic}\u200d\uFE0F]/u;
@@ -52,6 +52,14 @@ export const validateRequestBody = async (
   request: NextRequest,
   maxBytes = 8 * 1024
 ): Promise<ParsedJsonBodyResult> => {
+  const contentLength = request.headers.get('content-length');
+  if (contentLength === '0' || !request.body) {
+    return {
+      success: true,
+      data: {},
+    };
+  }
+
   const contentType = request.headers.get('content-type')?.toLowerCase() ?? '';
 
   if (!contentType.includes('application/json')) {

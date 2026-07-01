@@ -38,10 +38,15 @@ export const setRefreshTokenCookie = async (
 
 export const clearRefreshTokenCookie = async () => {
   const cookieStore = await cookies();
-  cookieStore.set(REFRESH_TOKEN_COOKIE_NAME, '', {
+  const options = {
     ...getRefreshTokenCookieOptions(),
     maxAge: 0,
-  });
+    expires: new Date(0),
+  };
+
+  cookieStore.set(REFRESH_TOKEN_COOKIE_NAME, '', options);
+  cookieStore.set('accessToken', '', options);
+  cookieStore.set('oauth_return_to', '', options);
 };
 
 export const revokeRefreshToken = (token: string) => {

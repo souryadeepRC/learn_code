@@ -32,8 +32,8 @@ export default function ResetPasswordEmail({
               Reset Password
             </Button>
             <Text style={text}>
-              If you didn't request a password reset, you can safely ignore this
-              email. Your password will remain unchanged.
+              If you didn&apos;t request a password reset, you can safely ignore
+              this email. Your password will remain unchanged.
             </Text>
             <Text style={text}>This link is valid for 1 hour.</Text>
           </Section>

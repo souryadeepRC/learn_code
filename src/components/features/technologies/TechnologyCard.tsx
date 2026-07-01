@@ -1,0 +1,47 @@
+'use client';
+
+import { Badge } from '@/components/ui/badge';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import type { Technology } from '@/types/technology';
+import { formatNumber } from '@/utils/common';
+import React from 'react';
+
+type Props = {
+  technology: Technology;
+};
+
+const TechnologyCardComponent = (props: Props) => {
+  const { name, description, mcqQuestion, codingQuestion, quiz } =
+    props.technology;
+
+  return (
+    <Card
+      className="py-4 sm:py-8 px-5
+      justify-between
+      transition-all duration-300 ease-out
+      cursor-pointer hover:shadow-xl hover:shadow-primary/10  hover:border-primary/50
+      focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 outline-none"
+      aria-label={`Technology: ${name}`}
+      tabIndex={0}
+    >
+      <CardHeader>
+        <CardTitle className="text-lg font-bold">{name}</CardTitle>
+        {description && <CardDescription>{description}</CardDescription>}
+      </CardHeader>
+      <CardContent className="pt-4 sm:pt-8 flex flex-wrap gap-2">
+        <Badge>{formatNumber(mcqQuestion)} MCQ</Badge>
+        <Badge>{formatNumber(codingQuestion)} Coding</Badge>
+        <Badge>{formatNumber(quiz.length)} Quiz</Badge>
+        <Badge className="opacity-30">Notes</Badge>
+      </CardContent>
+    </Card>
+  );
+};
+
+export const TechnologyCard = React.memo(TechnologyCardComponent);

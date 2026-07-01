@@ -32,7 +32,7 @@ export const passordResetSchema = z.object({
     }),
 });
 
-const authProviderSchema = z.object({
+export const authProviderSchema = z.object({
   provider: z.string().trim().min(1, { message: 'Provider is required' }),
   providerId: z.string().trim().min(1, { message: 'Provider ID is required' }),
   providerEmail: z

@@ -61,8 +61,7 @@ export const oauthCallback = async ({
 
     // Step 4: Generate pseudo-email if real email is missing
     const emailToUse =
-      userInfo.email ||
-      generatePseudoEmail(provider, userInfo.id, userInfo.name);
+      userInfo.email || generatePseudoEmail(provider, userInfo.id);
 
     // Step 5: Find existing user
     let user = await prismaUsers.user.findFirst({
@@ -101,7 +100,7 @@ export const oauthCallback = async ({
       });
     } else {
       // Update user info if incomplete
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
 
       if (!user.phoneNumber && userInfo.phoneNumber) {
         updateData.phoneNumber = userInfo.phoneNumber;
@@ -182,14 +181,14 @@ export const oauthCallback = async ({
     response.cookies.set('accessToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'strict',
       maxAge: 15 * 60, // 15 mins
     });
 
     response.cookies.set('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60, // 7 days
     });
 

@@ -57,6 +57,8 @@
   /* Explicit page-background alias — use bg-bg-primary for clarity */
   --color-bg-primary: var(--background);
 
+  --color-active: var(--active);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-geist-sans);
@@ -73,7 +75,7 @@
 
 :root {
   /* Page & surface backgrounds (Fresh Sage Off-White) */
-  --background: #f4f9f6; /* Soft, incredibly crisp off-white with a hint of mint */
+  --background: #f9fbfa; /* Soft, incredibly crisp off-white with a hint of mint */
   --card: #ffffff; /* Pure white surfaces for readability */
   --popover: #ffffff;
 
@@ -100,6 +102,8 @@
 
   /* Danger */
   --destructive: #dc2626;
+
+  --active: #043b29;
 
   /* Structural */
   --border: #2b8a56; /* Light, organic borders that separate sections cleanly without being harsh */
@@ -153,6 +157,8 @@
 
   /* Danger (Accessible Vibrant Crimson) */
   --destructive: #ff5565;
+
+  --active: #51c9a1;
 
   /* Structural */
   --border: #215c3b; /* Clean, dark green-gray structural dividers */

@@ -33,14 +33,14 @@ export const oauthAuthorize = async ({
     httpOnly: true,
     maxAge: 10 * 60, // 10 minutes
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: 'strict',
   });
 
   response.cookies.set('oauth_return_to', returnTo, {
     httpOnly: true,
     maxAge: 10 * 60, // 10 minutes
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: 'strict',
   });
 
   return response;

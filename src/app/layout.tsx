@@ -1,5 +1,6 @@
 import '@/app/globals.css';
 import { ThemeProvider } from '@/context/ThemeContext';
+import { AppProviders } from '@/providers/app-providers';
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono, Poppins } from 'next/font/google';
 
@@ -28,11 +29,7 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html
       lang="en"
@@ -40,8 +37,11 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} h-full antialiased`}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <AppProviders>
+          <ThemeProvider>{children}</ThemeProvider>
+        </AppProviders>
       </body>
     </html>
   );
-}
+};
+export default RootLayout;

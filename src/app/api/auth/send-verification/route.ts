@@ -1,10 +1,10 @@
 import { HTTP_STATUS } from '@/constants/api';
 import { prismaUsers } from '@/lib/prisma-users';
 import { sendVerificationEmail } from '@/lib/resend';
-import crypto from 'crypto';
 import { emailSchema } from '@/root/src/schema/common';
 import { APICallbackParams } from '@/root/src/types/auth';
 import { APIHandler, APIResponse } from '@/utils/api';
+import crypto from 'crypto';
 
 const VERIFICATION_TOKEN_EXPIRY_MINUTES = 60 * 24; // 24 hours
 
@@ -14,7 +14,6 @@ export const sendVerification = async ({
   payload,
 }: APICallbackParams<EmailVerification>) => {
   const { email } = payload;
-  console.log({ email });
 
   if (!email) {
     return APIResponse.send(400).json({

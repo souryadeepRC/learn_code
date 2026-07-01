@@ -7,6 +7,7 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 interface ThemeContextType {
   theme: 'light' | 'dark';
   themeMode: ThemeMode;
+  isDarkTheme: boolean;
   setTheme: (mode: ThemeMode) => void;
   toggleTheme: () => void;
 }
@@ -21,27 +22,48 @@ export const ThemeContext = createContext<ThemeContextType | undefined>(
  * Supports light, dark, and system preference modes
  * Prevents flash of unstyled content (FOUC) with script optimization
  */
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false);
-  const [themeMode, setThemeMode] = useState<ThemeMode>('system');
-  const [theme, setThemeState] = useState<'light' | 'dark'>('light');
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('themeMode') as ThemeMode) || 'system';
+    }
+    return 'system';
+  });
 
-  // Initialize theme from localStorage and system preference
-  useEffect(() => {
-    const storedMode = (localStorage.getItem('themeMode') ||
-      'system') as ThemeMode;
-    setThemeMode(storedMode);
+  const [theme, setThemeState] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      const storedMode = localStorage.getItem('themeMode') || 'system';
+      const prefersDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches;
+      return storedMode === 'system'
+        ? prefersDark
+          ? 'dark'
+          : 'light'
+        : (storedMode as 'light' | 'dark');
+    }
+    return 'light';
+  });
 
-    const prefersDark = window.matchMedia(
-      '(prefers-color-scheme: dark)'
-    ).matches;
-    const actualTheme =
-      storedMode === 'system' ? (prefersDark ? 'dark' : 'light') : storedMode;
+  const applyTheme = useCallback((themeVal: 'light' | 'dark') => {
+    if (typeof window === 'undefined') return;
+    const root = document.documentElement;
+    root.classList.remove('light', 'dark');
+    root.classList.add(themeVal);
 
-    setThemeState(actualTheme);
-    applyTheme(actualTheme);
-    setMounted(true);
+    if (themeVal === 'dark') {
+      root.style.colorScheme = 'dark';
+    } else {
+      root.style.colorScheme = 'light';
+    }
+
+    localStorage.setItem('theme', themeVal);
   }, []);
+
+  // Initialize theme on client mount
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme, applyTheme]);
 
   // Listen for system preference changes
   useEffect(() => {
@@ -56,23 +78,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [themeMode]);
-
-  const applyTheme = useCallback((theme: 'light' | 'dark') => {
-    const root = document.documentElement;
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
-
-    // Apply CSS variables for Tailwind
-    if (theme === 'dark') {
-      root.style.colorScheme = 'dark';
-    } else {
-      root.style.colorScheme = 'light';
-    }
-
-    // Store in localStorage for persistence
-    localStorage.setItem('theme', theme);
-  }, []);
+  }, [themeMode, applyTheme]);
 
   const handleSetTheme = useCallback(
     (mode: ThemeMode) => {
@@ -104,6 +110,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       value={{
         theme,
         themeMode,
+        isDarkTheme: theme === 'dark',
         setTheme: handleSetTheme,
         toggleTheme,
       }}
@@ -111,12 +118,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       {children}
     </ThemeContext.Provider>
   );
-}
+};
 
-export function useTheme() {
+export const useTheme = () => {
   const context = React.useContext(ThemeContext);
   if (context === undefined) {
     throw new Error('useTheme must be used within ThemeProvider');
   }
   return context;
-}
+};

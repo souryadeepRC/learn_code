@@ -1,23 +1,29 @@
 'use client';
 
-import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
-import { IoCheckmarkCircleOutline, IoCloseCircleOutline } from 'react-icons/io5';
+import {
+  IoCheckmarkCircleOutline,
+  IoCloseCircleOutline,
+} from 'react-icons/io5';
 
-function VerifyEmailContent() {
+const VerifyEmailContent = () => {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [message, setMessage] = useState('Verifying your email address...');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(() =>
+    !token ? 'error' : 'loading'
+  );
+  const [message, setMessage] = useState(() =>
+    !token
+      ? 'Invalid or missing verification token.'
+      : 'Verifying your email address...'
+  );
 
   useEffect(() => {
     if (!token) {
-      setStatus('error');
-      setMessage('Invalid or missing verification token.');
       return;
     }
 
@@ -28,17 +34,21 @@ function VerifyEmailContent() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token }),
         });
-        
+
         const data = await res.json();
 
         if (res.ok) {
           setStatus('success');
-          setMessage('Your email has been successfully verified! You can now log in.');
+          setMessage(
+            'Your email has been successfully verified! You can now log in.'
+          );
         } else {
           setStatus('error');
-          setMessage(data.message || 'Verification failed. The link may be expired.');
+          setMessage(
+            data.message || 'Verification failed. The link may be expired.'
+          );
         }
-      } catch (err) {
+      } catch {
         setStatus('error');
         setMessage('An error occurred during verification. Please try again.');
       }
@@ -66,28 +76,30 @@ function VerifyEmailContent() {
         {status === 'success' && 'Email Verified'}
         {status === 'error' && 'Verification Failed'}
       </h2>
-      
+
       <p className="text-muted-foreground mb-8">{message}</p>
 
       {status !== 'loading' && (
-        <Button asChild className="w-full" size="md">
+        <Button asChild className="w-full" size="lg">
           <Link href="/join">Return to Login</Link>
         </Button>
       )}
     </div>
   );
-}
+};
 
-export default function VerifyEmailPage() {
+const VerifyEmailPage = () => {
   return (
-    <main className="min-h-screen bg-background flex flex-col items-center justify-center p-6 relative">
-      <div className="absolute top-6 right-6">
-        <ThemeToggle />
-      </div>
-      
-      <Suspense fallback={<div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />}>
+    <main className="flex-1 flex flex-col items-center justify-center p-6 w-full bg-background">
+      <Suspense
+        fallback={
+          <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+        }
+      >
         <VerifyEmailContent />
       </Suspense>
     </main>
   );
-}
+};
+
+export default VerifyEmailPage;

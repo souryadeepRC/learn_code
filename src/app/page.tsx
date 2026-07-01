@@ -1,7 +1,7 @@
 'use client';
 
-import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { Button } from '@/components/ui/button';
+import { AppHeader } from '@/root/src/components/common/AppHeader';
 import Link from 'next/link';
 
 /**
@@ -15,21 +15,7 @@ import Link from 'next/link';
  * No "dark:" prefix needed anywhere — ThemeContext adds .dark to <html>
  * and CSS custom properties switch automatically.
  */
-export default function Home() {
-  const connectToGitHub = () => {
-    window.location.href = '/api/auth/oauth/authorize/github';
-  };
-
-  const login = async () => {
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email: 'test@email.com', password: 'Test@1234' }),
-      headers: { 'Content-Type': 'application/json' },
-    });
-    const data = await response.json();
-    alert(JSON.stringify(data));
-  };
-
+const Home = () => {
   return (
     /*
      * bg-background is the single token for page background.
@@ -38,17 +24,7 @@ export default function Home() {
      */
     <main className="min-h-screen bg-background text-foreground transition-colors duration-300">
       {/* ── Navigation ──────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 bg-card/80 backdrop-blur-sm transition-colors duration-300">
-        <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
-          <span className="text-lg font-semibold text-foreground ">
-            Learn
-            <span className="text-primary transition-colors duration-300">
-              Code
-            </span>
-          </span>
-          <ThemeToggle />
-        </div>
-      </header>
+      <AppHeader />
 
       {/* ── Hero ────────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-7xl px-6 pt-24 pb-16 flex flex-col items-center text-center gap-8">
@@ -79,4 +55,6 @@ export default function Home() {
       </section>
     </main>
   );
-}
+};
+
+export default Home;

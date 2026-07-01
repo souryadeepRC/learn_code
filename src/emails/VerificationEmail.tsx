@@ -32,7 +32,8 @@ export default function VerificationEmail({
               Verify Email Address
             </Button>
             <Text style={text}>
-              If you didn't create an account, you can safely ignore this email.
+              If you didn&apos;t create an account, you can safely ignore this
+              email.
             </Text>
           </Section>
         </Container>

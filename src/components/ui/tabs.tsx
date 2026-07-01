@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/utils/cn';
+import { cn } from '@/root/src/utils';
 import * as React from 'react';
 
 const TabsContext = React.createContext<{
@@ -9,19 +9,31 @@ const TabsContext = React.createContext<{
   tabsRef: React.MutableRefObject<Map<string, HTMLButtonElement | null>>;
 }>({ value: '', onValueChange: () => {}, tabsRef: { current: new Map() } });
 
-export function Tabs({
+type TabsProps = {
+  defaultValue?: string;
+  value?: string;
+  onValueChange?: (value: string) => void;
+  className?: string;
+  children?: React.ReactNode;
+};
+
+export const Tabs = ({
   defaultValue,
   value,
   onValueChange,
   className,
   children,
-}: any) {
-  const [current, setCurrent] = React.useState(value || defaultValue);
+}: TabsProps) => {
+  const [current, setCurrent] = React.useState(value || defaultValue || '');
+  const [prevValue, setPrevValue] = React.useState(value);
   const tabsRef = React.useRef(new Map<string, HTMLButtonElement | null>());
 
-  React.useEffect(() => {
-    if (value !== undefined) setCurrent(value);
-  }, [value]);
+  if (value !== prevValue) {
+    setPrevValue(value);
+    if (value !== undefined) {
+      setCurrent(value);
+    }
+  }
 
   const handleValueChange = (v: string) => {
     setCurrent(v);
@@ -35,9 +47,14 @@ export function Tabs({
       <div className={cn('w-full', className)}>{children}</div>
     </TabsContext.Provider>
   );
-}
+};
 
-export function TabsList({ className, children }: any) {
+type TabsListProps = {
+  className?: string;
+  children?: React.ReactNode;
+};
+
+export const TabsList = ({ className, children }: TabsListProps) => {
   return (
     <div
       role="tablist"
@@ -49,16 +66,30 @@ export function TabsList({ className, children }: any) {
       {children}
     </div>
   );
-}
+};
 
-export function TabsTrigger({ value, className, children }: any) {
-  const { value: selectedValue, onValueChange, tabsRef } = React.useContext(TabsContext);
+type TabsTriggerProps = {
+  value: string;
+  className?: string;
+  children?: React.ReactNode;
+};
+
+export const TabsTrigger = ({
+  value,
+  className,
+  children,
+}: TabsTriggerProps) => {
+  const {
+    value: selectedValue,
+    onValueChange,
+    tabsRef,
+  } = React.useContext(TabsContext);
   const isSelected = selectedValue === value;
-  
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     const tabs = Array.from(tabsRef.current.entries());
     const currentIndex = tabs.findIndex(([key]) => key === value);
-    
+
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
       e.preventDefault();
       const nextIndex = (currentIndex + 1) % tabs.length;
@@ -98,9 +129,19 @@ export function TabsTrigger({ value, className, children }: any) {
       {children}
     </button>
   );
-}
+};
 
-export function TabsContent({ value, className, children }: any) {
+type TabsContentProps = {
+  value: string;
+  className?: string;
+  children?: React.ReactNode;
+};
+
+export const TabsContent = ({
+  value,
+  className,
+  children,
+}: TabsContentProps) => {
   const { value: selectedValue } = React.useContext(TabsContext);
 
   if (selectedValue !== value) return null;
@@ -116,4 +157,4 @@ export function TabsContent({ value, className, children }: any) {
       {children}
     </div>
   );
-}
+};

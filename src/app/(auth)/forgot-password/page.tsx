@@ -1,6 +1,5 @@
 'use client';
 
-import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,9 +8,11 @@ import { useState } from 'react';
 import { IoArrowBack } from 'react-icons/io5';
 import { RiMailSendLine } from 'react-icons/ri';
 
-export default function ForgotPasswordPage() {
+const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<
+    'idle' | 'loading' | 'success' | 'error'
+  >('idle');
   const [message, setMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,19 +29,21 @@ export default function ForgotPasswordPage() {
 
       if (res.ok) {
         setStatus('success');
-        setMessage(data.message || 'If an account exists, a reset link has been sent.');
+        setMessage(
+          data.message || 'If an account exists, a reset link has been sent.'
+        );
       } else {
         setStatus('error');
         setMessage(data.message || 'An error occurred. Please try again.');
       }
-    } catch (err) {
+    } catch {
       setStatus('error');
       setMessage('An error occurred. Please try again later.');
     }
   };
 
   return (
-    <main className="min-h-screen bg-background text-foreground flex flex-col md:flex-row transition-colors duration-300">
+    <main className="flex-1 flex flex-col md:flex-row w-full bg-background text-foreground transition-colors duration-300">
       {/* ── Left Side Banner (Image) ── */}
       <section className="relative hidden md:flex flex-col flex-1 bg-muted overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-purple-500/20" />
@@ -60,23 +63,23 @@ export default function ForgotPasswordPage() {
       </section>
 
       {/* ── Right Side Form Area ── */}
-      <section className="flex flex-1 flex-col items-center justify-center p-6 sm:p-12 relative h-screen overflow-y-auto">
-        <div className="absolute top-6 left-6 right-6 flex items-center justify-between">
+      <section className="flex flex-1 flex-col items-center justify-center p-6 sm:p-12 relative overflow-y-auto">
+        <div className="w-full max-w-md my-auto py-6">
           <Link
             href="/join"
-            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-6 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             <IoArrowBack className="h-4 w-4" />
             Back to Login
           </Link>
-          <ThemeToggle />
-        </div>
 
-        <div className="w-full max-w-md mt-16 md:mt-0">
           <div className="mb-8 text-center md:text-left">
-            <h2 className="text-3xl font-bold tracking-tight mb-2">Forgot Password</h2>
+            <h2 className="text-3xl font-bold tracking-tight mb-2">
+              Forgot Password
+            </h2>
             <p className="text-muted-foreground">
-              Enter your email address and we'll send you a link to reset your password.
+              Enter your email address and we&apos;ll send you a link to reset
+              your password.
             </p>
           </div>
 
@@ -104,13 +107,15 @@ export default function ForgotPasswordPage() {
               </div>
 
               {status === 'error' && (
-                <p className="text-destructive text-sm font-medium">{message}</p>
+                <p className="text-destructive text-sm font-medium">
+                  {message}
+                </p>
               )}
 
               <Button
                 type="submit"
                 className="w-full gap-2"
-                size="md"
+                size="lg"
                 disabled={status === 'loading'}
               >
                 {status === 'loading' ? 'Sending...' : 'Send Reset Link'}
@@ -121,4 +126,6 @@ export default function ForgotPasswordPage() {
       </section>
     </main>
   );
-}
+};
+
+export default ForgotPasswordPage;

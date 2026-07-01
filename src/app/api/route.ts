@@ -1,8 +1,8 @@
 import { HTTP_STATUS } from '@/constants/api';
 import { APIResponse } from '@/utils/api';
 
-export async function GET() {
+export const GET = async () => {
   return APIResponse.send(HTTP_STATUS.OK).json({
     message: 'Welcome To Learn Code',
   });
-}
+};

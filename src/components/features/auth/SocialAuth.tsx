@@ -17,11 +17,11 @@ const SocialAuth = () => {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <Button variant="outline" size="md" type="button" className="gap-2">
+        <Button variant="outline" size="lg" type="button" className="gap-2">
           <FcGoogle className="h-5 w-5" />
           Google
         </Button>
-        <Button variant="outline" size="md" type="button" className="gap-2">
+        <Button variant="outline" size="lg" type="button" className="gap-2">
           <FaGithub className="h-5 w-5" />
           GitHub
         </Button>

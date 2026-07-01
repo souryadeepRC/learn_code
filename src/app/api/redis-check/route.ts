@@ -1,7 +1,7 @@
 import { Redis } from '@upstash/redis';
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+export const GET = async () => {
   // 1. Initialize the client (automatically looks for UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in env)
   const redis = Redis.fromEnv();
 
@@ -19,14 +19,15 @@ export async function GET() {
       readWriteTest: writeTest === 'success' ? 'working' : 'failed',
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error) {
+    const err = error as Error;
     return NextResponse.json(
       {
         status: 'error',
         message: 'Failed to connect to Upstash Redis',
-        details: error.message || error,
+        details: err.message || error,
       },
       { status: 500 }
     );
   }
-}
+};
