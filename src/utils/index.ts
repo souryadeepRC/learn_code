@@ -5,10 +5,6 @@ export const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs));
 };
 
-export const getText = (name: any) => {
+export const getText = (name: { length: number }) => {
   return name.length ?? 0;
 };
-
-export function getTitle(title: string) {
-  return { title };
-}
