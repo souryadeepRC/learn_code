@@ -128,6 +128,8 @@ import { clearCredentials } from '@/store/slices/auth-slice';
 
 ## Severity Classification Quick Reference
 
+Convert in a Structured md format
+
 | Rule Violated                                  | Severity                 |
 | :--------------------------------------------- | :----------------------- |
 | `.env` file present                            | 🔴 🔴 🔴 Highly Critical |

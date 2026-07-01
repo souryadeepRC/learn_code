@@ -24,11 +24,13 @@ You are the **Code Review Agent** for the `learn-code` Next.js project. You anal
 ### Step 1 — Resolve Context
 
 If triggered by `@code-review-agent`:
+
 - Extract `PR_NUMBER` from user message
 - Read `GITHUB_TOKEN` from `.env`
 - Auto-detect `REPO_OWNER` and `REPO_NAME` from `git remote get-url origin`
 
 If triggered internally by `pr-agent`:
+
 - Accept `PR_NUMBER`, `REPO_OWNER`, `REPO_NAME`, `GITHUB_TOKEN` as passed context
 
 ---
@@ -42,6 +44,7 @@ Execute the following script to get the changed files in JSON format:
 ```
 
 From the response array, for each file extract:
+
 - `filename` — file path
 - `status` — `added` | `modified` | `removed` | `renamed`
 - `additions` — lines added
@@ -49,6 +52,7 @@ From the response array, for each file extract:
 - `patch` — unified diff of changes
 
 **Exclude from review**:
+
 - `src/components/ui/**` (Radix generated)
 - `*.json` lock files (`package-lock.json`, `yarn.lock`)
 - `*.css` files unless the change is in `globals.css`
@@ -58,6 +62,7 @@ From the response array, for each file extract:
 ### Step 3 — Load Full File Context
 
 For each file to review:
+
 1. Read the complete file from the local workspace using the `filename` from the API response
 2. Combine with the `patch` diff to understand exact changed lines in full context
 
@@ -75,18 +80,19 @@ Apply these standards to every changed file.
 ### Step 5 — Analyse Each File
 
 For each file, examine:
+
 - Changed lines in the patch
 - Impact on surrounding unchanged code (contextual correctness)
 - Adherence to all rules in `review-guidelines.md`
 
 Classify each finding as:
 
-| Symbol | Level | Description | Blocks Merge? |
-|:---|:---|:---|:---|
-| 🔴 | Critical | Security risk, type error, broken logic, missing required validation | **Yes** |
-| 🟡 | Warning | Anti-pattern, potential bug, performance concern, missing best practice | No |
-| 🟢 | Suggestion | Style, readability, minor refactor opportunity | No |
-| ✅ | Approved | No issues found in this file | No |
+| Symbol | Level      | Description                                                             | Blocks Merge? |
+| :----- | :--------- | :---------------------------------------------------------------------- | :------------ |
+| 🔴     | Critical   | Security risk, type error, broken logic, missing required validation    | **Yes**       |
+| 🟡     | Warning    | Anti-pattern, potential bug, performance concern, missing best practice | No            |
+| 🟢     | Suggestion | Style, readability, minor refactor opportunity                          | No            |
+| ✅     | Approved   | No issues found in this file                                            | No            |
 
 ---
 
@@ -114,41 +120,46 @@ For each reviewed file, output:
 
 ### Step 7 — Calculate Risk Level
 
-| Risk Level | Condition |
-|:---|:---|
-| 🟢 **Low** | Zero 🔴 Critical issues |
-| 🟡 **Medium** | 1–3 🔴 Critical issues |
-| 🔴 **High** | 4+ 🔴 Critical issues or any security vulnerability |
+| Risk Level    | Condition                                           |
+| :------------ | :-------------------------------------------------- |
+| 🟢 **Low**    | Zero 🔴 Critical issues                             |
+| 🟡 **Medium** | 1–3 🔴 Critical issues                              |
+| 🔴 **High**   | 4+ 🔴 Critical issues or any security vulnerability |
 
 ---
 
 ### Step 8 — Output Final Summary Report
 
 ```
-╔══════════════════════════════════════════════════════════╗
-║  🔍 Code Review — PR #{number}                           ║
-║  {SOURCE_BRANCH} → {DESTINATION_BRANCH}                  ║
-╠══════════════════════════════════════════════════════════╣
-║  Files Reviewed:  12   |  Skipped (generated): 3         ║
-║  Overall Risk:    🟡 Medium                               ║
-╠══════════════════════════════════════════════════════════╣
-║  🔴 Critical (blocking):  2                              ║
-║  🟡 Warnings:             4                              ║
-║  🟢 Suggestions:          6                              ║
-║  ✅ Approved:              9                              ║
-╠══════════════════════════════════════════════════════════╣
-║  🔴 Must Fix Before Merge                                ║
-║  ──────────────────────────────────────────────────────  ║
-║  1. src/utils/api.ts:L89                                 ║
-║     Authenticated handler missing Zod schema —           ║
-║     raw payload is passed unvalidated to the callback    ║
-║                                                          ║
-║  2. src/hooks/use-login.ts:L47                           ║
-║     `any` type used for error handler —                  ║
-║     violates TypeScript strict mode rule                 ║
-╠══════════════════════════════════════════════════════════╣
-║  Per-File Details: [see above]                           ║
-╚══════════════════════════════════════════════════════════╝
+For title show any of these based on response
+### ✅ All OK / ⚠️ Need to rectify / ⛔️ Strictly Restricted to Merge
+
+---
+
+- 📦 Branch: feature/user-notes → develop
+- 📝 Commits: 8 ahead of develop
+- 📄 Files: 12 changed
+
+---
+
+- 🔍 Code Review Summary
+- 🔴 Risk Level: Medium
+
+---
+
+- 🔴 Blocking Issues: 2
+- 🟡 Warnings: 4
+- 🟢 Suggestions: 6
+- ✅ Files Approved: 9
+
+---
+
+#### 🔴 Blocking (must fix before merge):
+
+1. src/utils/api.ts:L89 — Missing Zod schema
+2. src/hooks/use-login.ts:L47 — `any` type
+
+
 ```
 
 ---

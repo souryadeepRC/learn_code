@@ -37,10 +37,11 @@ If either is missing, ask the user:
 Run the automated script to handle repository context, branch inspection, syncing, and PR creation via the GitHub REST API.
 
 ```bash
-./create-pr.sh {SOURCE_BRANCH} {DESTINATION_BRANCH}
+./.agents/skills/pr-agent/scripts/create-pr.sh {SOURCE_BRANCH} {DESTINATION_BRANCH}
 ```
 
 From the script's output, extract:
+
 - **Repository context**: Parse `Resolved repository: {REPO_OWNER}/{REPO_NAME}`
 - **PR URL**: Parse `✅ PR Created Successfully: {html_url}` or `An open PR already exists: {html_url}`
 - **PR Number**: Extract the number from the end of the `{html_url}`
@@ -48,6 +49,7 @@ From the script's output, extract:
 If the script fails (non-zero exit code) or reports a merge conflict, report the error to the user and stop execution.
 
 Read the `GITHUB_TOKEN` from the `.env` file to pass to the next step:
+
 ```bash
 GITHUB_TOKEN=$(grep '^GITHUB_TOKEN=' .env | cut -d '=' -f2-)
 ```
@@ -71,24 +73,33 @@ Wait for the code review report.
 ### Step 4 — Output Final Summary
 
 ```
-╔══════════════════════════════════════════════════╗
-║  ✅ PR #42 Created                               ║
-║  https://github.com/{owner}/{repo}/pull/42       ║
-╠══════════════════════════════════════════════════╣
-║  📦 Branch:  feature/user-notes → develop        ║
-║  📝 Commits: 8 ahead of develop                  ║
-║  📄 Files:   12 changed                          ║
-╠══════════════════════════════════════════════════╣
-║  🔍 Code Review Summary                          ║
-║  Risk Level: Medium                              ║
-║                                                  ║
-║  🔴 Blocking Issues: 2                           ║
-║  🟡 Warnings:        4                           ║
-║  🟢 Suggestions:     6                           ║
-║  ✅ Files Approved:   9                          ║
-╠══════════════════════════════════════════════════╣
-║  🔴 Blocking (must fix before merge):            ║
-║  1. src/utils/api.ts:L89 — Missing Zod schema   ║
-║  2. src/hooks/use-login.ts:L47 — `any` type      ║
-╚══════════════════════════════════════════════════╝
+For title show any of these based on response
+### ✅ All OK / ⚠️ Need to rectify / ⛔️ Strictly Restricted to Merge
+
+---
+
+- 📦 Branch: feature/user-notes → develop
+- 📝 Commits: 8 ahead of develop
+- 📄 Files: 12 changed
+
+---
+
+- 🔍 Code Review Summary
+- 🔴 Risk Level: Medium
+
+---
+
+- 🔴 Blocking Issues: 2
+- 🟡 Warnings: 4
+- 🟢 Suggestions: 6
+- ✅ Files Approved: 9
+
+---
+
+#### 🔴 Blocking (must fix before merge):
+
+1. src/utils/api.ts:L89 — Missing Zod schema
+2. src/hooks/use-login.ts:L47 — `any` type
+
+
 ```
