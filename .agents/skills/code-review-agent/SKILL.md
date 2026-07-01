@@ -35,12 +35,10 @@ If triggered internally by `pr-agent`:
 
 ### Step 2 — Fetch Changed Files via REST API
 
-```
-GET https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}/files
-Headers:
-  Authorization: Bearer {GITHUB_TOKEN}
-  Accept: application/vnd.github+json
-  X-GitHub-Api-Version: 2022-11-28
+Execute the following script to get the changed files in JSON format:
+
+```bash
+./.agents/skills/code-review-agent/scripts/get-pr-files.sh {REPO_OWNER} {REPO_NAME} {PR_NUMBER}
 ```
 
 From the response array, for each file extract:
@@ -151,4 +149,14 @@ For each reviewed file, output:
 ╠══════════════════════════════════════════════════════════╣
 ║  Per-File Details: [see above]                           ║
 ╚══════════════════════════════════════════════════════════╝
+```
+
+---
+
+### Step 9 — Post Review Comment
+
+After completing the code review and generating the summary report, save the report to a temporary file (e.g., `temp-comment.md`) and run the comment posting script:
+
+```bash
+./.agents/skills/code-review-agent/scripts/post-pr-comment.sh {REPO_OWNER} {REPO_NAME} {PR_NUMBER} temp-comment.md
 ```

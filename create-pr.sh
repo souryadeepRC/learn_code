@@ -28,7 +28,7 @@ fi
 
 REMOTE_URL=$(git remote get-url origin)
 REPO_OWNER=$(echo "$REMOTE_URL" | sed -E 's|.*github\.com[:/]([^/]+)/.*|\1|')
-REPO_NAME=$(echo "$REMOTE_URL" | sed -E 's|.*/([^/]+?)(\.git)?$|\1|')
+REPO_NAME=$(echo "$REMOTE_URL" | sed -E 's|.*/([^/]+)(\.git)?$|\1|' | sed 's/\.git$//')
 
 echo "Resolved repository: $REPO_OWNER/$REPO_NAME"
 echo ""
