@@ -9,7 +9,7 @@ These are the project-specific engineering standards that `code-review-agent` ap
 - `npm run build && npm run format:all` must have been run before PR creation.
 - Detect un-formatted code by checking for inconsistent indentation, trailing spaces, or single vs. double quote inconsistencies relative to the project Prettier config.
 - If any linting issue came or any build failure occured highlight as Critical
-- If .env, .env.* files present in pr files , highlight as Highly Critical
+- If important.md, .env, .env.* files present in pr files , highlight as Highly Critical
 
 ## 1. TypeScript Strict Mode
 
