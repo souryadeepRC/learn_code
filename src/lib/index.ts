@@ -1,2 +1,2 @@
-export { prismaTechnologies } from './prisma-technologies';
-export { prismaUsers } from './prisma-users';
+export { prismaTechnologies } from './prismaTechnologies';
+export { prismaUsers } from './prismaUsers';

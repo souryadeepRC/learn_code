@@ -1,4 +1,4 @@
-# Learn Code — Advanced Tech Learning & Practice Portal 🚀
+# Skill Track AI — Advanced Tech Learning & Practice Portal 🚀
 
 [![Next.js 16](https://img.shields.io/badge/Next.js-16.2.9-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
 [![React 19](https://img.shields.io/badge/React-19.2.4-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
@@ -75,8 +75,8 @@ Whenever schemas are modified, separate Prisma clients are generated using custo
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/souryadeepRC/learn_code.git
-cd learn-code
+git clone https://github.com/souryadeepRC/skill_track_ai.git
+cd skill-track-ai
 ```
 
 ### 2. Install Dependencies

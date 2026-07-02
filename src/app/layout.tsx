@@ -1,6 +1,6 @@
 import '@/app/globals.css';
 import { ThemeProvider } from '@/context/ThemeContext';
-import { AppProviders } from '@/providers/app-providers';
+import { AppProviders } from '@/providers/AppProviders';
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono, Poppins } from 'next/font/google';
 
@@ -20,8 +20,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'AI-Powered Application',
-  description: 'Enterprise-grade web application',
+  title: 'Skill Track AI',
+  description: 'Advanced Tech Learning & Practice Portal with Skill Track AI',
+  icons: {
+    icon: '/appLogo.png',
+    shortcut: '/appLogo.png',
+    apple: '/appLogo.png',
+  },
 };
 
 export const viewport: Viewport = {

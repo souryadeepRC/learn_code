@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { Address } from '@/types/user';
 
 export type UserProfile = {
   id: string;
@@ -9,6 +10,7 @@ export type UserProfile = {
   bio: string | null;
   imageUrl: string | null;
   phoneNumber: string | null;
+  addresses?: Address[];
 };
 
 export type UserState = {

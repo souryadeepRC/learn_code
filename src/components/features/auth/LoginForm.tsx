@@ -10,7 +10,7 @@ import { RiLoginCircleLine } from 'react-icons/ri';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useLogin } from '@/hooks/use-login';
+import { useLogin } from '@/hooks/useLogin';
 import { cn } from '@/root/src/utils';
 import { loginSchema } from '@/schema/auth';
 import type { LoginCredentials } from '@/types/auth';
@@ -60,9 +60,9 @@ export const LoginForm = () => {
     mode: 'onTouched',
   });
 
-  const { mutate: login, isLoading, error: apiError, isError } = useLogin();
+  const { mutate: login, isPending, error: apiError, isError } = useLogin();
 
-  const isBusy = isLoading || isSubmitting;
+  const isBusy = isPending || isSubmitting;
 
   const onSubmit = (data: LoginCredentials) => {
     login(data);

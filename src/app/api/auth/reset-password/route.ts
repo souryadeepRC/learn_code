@@ -1,5 +1,5 @@
 import { HTTP_STATUS } from '@/constants/api';
-import { prismaUsers } from '@/lib/prisma-users';
+import { prismaUsers } from '@/lib/prismaUsers';
 import { hashPassword } from '@/root/src/lib/auth/hash';
 import { passordResetSchema } from '@/root/src/schema/auth';
 import { APICallbackParams, PasswordReset } from '@/root/src/types/auth';

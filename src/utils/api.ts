@@ -2,7 +2,7 @@ import { HTTP_STATUS } from '@/constants/api';
 import { verifyAccessToken } from '@/lib/auth/jwt';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { checkRateLimitFixed } from '@/lib/redis/rate-limit/redis-direct';
+import { checkRateLimitFixed } from '@/lib/redis/rate-limit/redisDirect';
 import {
   APICallbackParams,
   APIConfig,

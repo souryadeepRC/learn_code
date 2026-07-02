@@ -5,7 +5,7 @@ import { TechnologiesGrid } from '@/root/src/components/features/technologies/Te
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Technologies | Learn Code',
+  title: 'Technologies | Skill Track AI',
   description:
     'Explore all available technologies, MCQ challenges, and coding problems. Browse our growing library to sharpen your skills.',
 };

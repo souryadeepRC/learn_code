@@ -3,9 +3,9 @@ import { NextResponse } from 'next/server';
 //import { GoogleOAuth } from '@/lib/auth/oauth/google';
 //import { LinkedInOAuth } from '@/lib/auth/oauth/linkedin';
 import { HTTP_STATUS } from '@/constants/api';
-import { OAuthProviders } from '@/root/src/constants/Auth';
-import { APICallbackParams, OAuthProvider } from '@/root/src/types/auth';
-import { APIHandler, APIResponse } from '@/root/src/utils/api';
+import { OAuthProviders } from '@/constants/auth';
+import { APICallbackParams, OAuthProvider } from '@/types/auth';
+import { APIHandler, APIResponse } from '@/utils/api';
 
 export const oauthAuthorize = async ({
   request,

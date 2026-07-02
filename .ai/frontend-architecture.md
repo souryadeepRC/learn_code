@@ -7,22 +7,22 @@
 
 ## Tech Stack
 
-| Layer | Technology | Version |
-| :--- | :--- | :--- |
-| Framework | Next.js App Router | 16.x |
-| UI Library | React | 19.x |
-| Language | TypeScript (strict) | 5.x |
-| Styling | TailwindCSS | v4 |
-| CSS Utilities | `class-variance-authority`, `clsx`, `tailwind-merge` | latest |
-| Component Primitives | Radix UI (`radix-ui`) | latest |
-| Component System | shadcn (radix-nova) | 4.x |
-| State Management | `@reduxjs/toolkit` + `react-redux` | 2.x / 9.x |
-| API Caching | `@tanstack/react-query` | 4.x |
-| HTTP Client | `axios` | 1.x |
-| Forms | `react-hook-form` + `@hookform/resolvers/zod` | 7.x / 5.x |
-| Schema Validation | `zod` | 4.x |
-| Icons | `react-icons` | 5.x |
-| Fonts | `next/font` (Poppins, Geist) | — |
+| Layer                | Technology                                           | Version   |
+| :------------------- | :--------------------------------------------------- | :-------- |
+| Framework            | Next.js App Router                                   | 16.x      |
+| UI Library           | React                                                | 19.x      |
+| Language             | TypeScript (strict)                                  | 5.x       |
+| Styling              | TailwindCSS                                          | v4        |
+| CSS Utilities        | `class-variance-authority`, `clsx`, `tailwind-merge` | latest    |
+| Component Primitives | Radix UI (`radix-ui`)                                | latest    |
+| Component System     | shadcn (radix-nova)                                  | 4.x       |
+| State Management     | `@reduxjs/toolkit` + `react-redux`                   | 2.x / 9.x |
+| API Caching          | `@tanstack/react-query`                              | 4.x       |
+| HTTP Client          | `axios`                                              | 1.x       |
+| Forms                | `react-hook-form` + `@hookform/resolvers/zod`        | 7.x / 5.x |
+| Schema Validation    | `zod`                                                | 4.x       |
+| Icons                | `react-icons`                                        | 5.x       |
+| Fonts                | `next/font` (Poppins, Geist)                         | —         |
 
 ---
 
@@ -69,6 +69,7 @@ src/
 ### 2. State Management
 
 **Client State → Redux Toolkit**
+
 - Use for synchronous, shared UI state: auth tokens, global modals, sidebar state.
 - **Never** store API response entities (user lists, tech data) in Redux — that is TanStack's domain.
 - Typed hooks only — import `useAppDispatch` / `useAppSelector` from `@/store/store-hooks`. Never use raw `useDispatch` / `useSelector`.
@@ -82,6 +83,7 @@ src/
 > 📄 Full example → [redux-slice-pattern.md](file:///Users/souryadeeprc/Documents/CODE/learn-code/.ai/references/redux-slice-pattern.md)
 
 **Server State → TanStack Query**
+
 - Use for all data fetching, caching, and mutations (POST/PUT/DELETE).
 - Encapsulate all query/mutation logic in custom hooks inside `src/hooks/`.
 - All HTTP calls MUST use `apiClient` from `@/lib/axios` — never raw `fetch`.
@@ -114,14 +116,15 @@ src/
 
 ### 5. Naming & File Conventions
 
-| What | Convention |
-| :--- | :--- |
-| Files | `kebab-case.tsx` / `kebab-case.ts` |
-| Components | `PascalCase` |
-| Custom hooks | `camelCase`, prefixed `use` (e.g., `useLogin`) |
-| Redux slices | `<feature>-slice.ts` |
-| Redux selectors | `<feature>-selectors.ts` (separate file, always) |
-| One component per file | ✅ enforced |
+| What                         | Convention                                                                           |
+| :--------------------------- | :----------------------------------------------------------------------------------- |
+| Components Files             | `PascalCase` (e.g. `HeaderSection.tsx`)                                              |
+| Custom hooks Files           | `camelCase`, prefixed `use` (e.g., `useLogin.ts`)                                    |
+| Redux slices                 | `<feature>Slice.ts` (e.g. `authSlice.ts`)                                            |
+| Redux selectors              | `<feature>Selectors.ts` (separate file, always) (e.g. `authSelectors.ts`)            |
+| Util / types/ constant Files | `camelCase` (e.g. `/types/user.ts` `/store/authUtils.ts`, `/store/authConstants.ts`) |
+| Other Files                  | `kebab-case.tsx` / `kebab-case.ts` / `user-task.md`                                  |
+| One component per file       | ✅ enforced                                                                          |
 
 ---
 
@@ -160,7 +163,13 @@ src/
 {
   "style": "radix-nova",
   "rsc": true,
-  "aliases": { "components": "@/components", "utils": "@/utils", "ui": "@/components/ui", "lib": "@/lib", "hooks": "@/hooks" }
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  }
 }
 ```
 
@@ -168,8 +177,8 @@ src/
 
 ## References (Load On-Demand)
 
-| Reference | Load when… |
-| :--- | :--- |
-| [redux-slice-pattern.md](file:///Users/souryadeeprc/Documents/CODE/learn-code/.ai/references/redux-slice-pattern.md) | Creating or modifying a Redux slice or selector |
-| [tanstack-query-pattern.md](file:///Users/souryadeeprc/Documents/CODE/learn-code/.ai/references/tanstack-query-pattern.md) | Writing a `useQuery` / `useMutation` hook |
-| [form-pattern.md](file:///Users/souryadeeprc/Documents/CODE/learn-code/.ai/references/form-pattern.md) | Building any user-facing form |
+| Reference                                                                                                                  | Load when…                                      |
+| :------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------- |
+| [redux-slice-pattern.md](file:///Users/souryadeeprc/Documents/CODE/learn-code/.ai/references/redux-slice-pattern.md)       | Creating or modifying a Redux slice or selector |
+| [tanstack-query-pattern.md](file:///Users/souryadeeprc/Documents/CODE/learn-code/.ai/references/tanstack-query-pattern.md) | Writing a `useQuery` / `useMutation` hook       |
+| [form-pattern.md](file:///Users/souryadeeprc/Documents/CODE/learn-code/.ai/references/form-pattern.md)                     | Building any user-facing form                   |

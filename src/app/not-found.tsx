@@ -1,8 +1,8 @@
 'use client';
 
-import { ROUTE_CONFIG } from '@/config/routes.config';
-import { selectIsAuthenticated } from '@/store/slices/auth-selectors';
-import { useAppSelector } from '@/store/store-hooks';
+import { ROUTE_CONFIG } from '@/config/routesConfig';
+import { selectIsAuthenticated } from '@/store/slices/authSelectors';
+import { useAppSelector } from '@/store/storeHooks';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 

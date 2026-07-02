@@ -1,5 +1,5 @@
 {
-  "name": "learn-code",
+  "name": "skill-track-ai",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -19,7 +19,7 @@
     "@hookform/resolvers": "^5.4.0",
     "@prisma/client": "^6.19.3",
     "@reduxjs/toolkit": "^2.12.0",
-    "@tanstack/react-query": "^4.44.0",
+    "@tanstack/react-query": "^5.101.2",
     "@upstash/redis": "^1.38.0",
     "axios": "^1.18.1",
     "bcryptjs": "^3.0.3",

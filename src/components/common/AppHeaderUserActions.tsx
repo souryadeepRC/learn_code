@@ -16,22 +16,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ROUTE_CONFIG } from '@/config/routes.config';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { ROUTE_CONFIG } from '@/config/routesConfig';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import apiClient from '@/lib/axios';
 import { cn } from '@/root/src/utils';
-import { clearCredentials } from '@/store/slices/auth-slice';
 import {
   selectIsAuthenticated,
   selectUserInitials,
-} from '@/store/slices/auth-selectors';
+} from '@/store/slices/authSelectors';
+import { clearCredentials } from '@/store/slices/authSlice';
 import {
   selectUserDisplayName,
   selectUserProfile,
   selectUserProfileInitials,
-} from '@/store/slices/user-selectors';
-import { clearUserProfile } from '@/store/slices/user-slice';
-import { useAppDispatch, useAppSelector } from '@/store/store-hooks';
+} from '@/store/slices/userSelectors';
+import { clearUserProfile } from '@/store/slices/userSlice';
+import { useAppDispatch, useAppSelector } from '@/store/storeHooks';
 import Link from 'next/link';
 import { LuLogOut, LuUser } from 'react-icons/lu';
 import { ThemeToggle } from './ThemeToggle';
@@ -130,11 +130,11 @@ export const AppHeaderUserActions = ({ vertical = false }: Props) => {
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
                 <Link
-                  href="/dashboard"
+                  href="/profile"
                   className="cursor-pointer flex items-center"
                 >
                   <LuUser className="mr-2 h-4 w-4" aria-hidden="true" />
-                  Dashboard
+                  Profile
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>

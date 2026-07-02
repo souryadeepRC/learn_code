@@ -1,4 +1,4 @@
-import { OAuthProviders } from '@/constants/Auth';
+import { OAuthProviders } from '@/constants/auth';
 import { loginSchema, passordResetSchema, registerSchema } from '@/schema/auth';
 import { RateLimitConfig } from '@/types/common';
 import { NextRequest, NextResponse } from 'next/server';
@@ -15,6 +15,7 @@ export type LoginServiceResult =
       status: 200;
       accessToken: string;
       email: string;
+      accountStatus: string;
     }
   | {
       success: false;

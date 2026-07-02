@@ -1,13 +1,11 @@
 import { generateTokens } from '@/lib/auth/jwt';
-import { prismaUsers } from '@/lib/prisma-users';
-import { HTTP_STATUS } from '@/root/src/constants/api';
-import { OAuthProviders } from '@/root/src/constants/Auth';
-import {
-  generatePseudoEmail,
-  isPseudoEmail,
-} from '@/root/src/lib/auth/oauth/utils';
-import { APICallbackParams, OAuthProvider } from '@/root/src/types/auth';
-import { APIHandler, APIResponse } from '@/root/src/utils/api';
+import { prismaUsers } from '@/lib/prismaUsers';
+import { HTTP_STATUS } from '@/constants/api';
+import { OAuthProviders } from '@/constants/auth';
+import { ROUTE_CONFIG } from '@/config/routesConfig';
+import { generatePseudoEmail, isPseudoEmail } from '@/lib/auth/oauth/utils';
+import { APICallbackParams, OAuthProvider } from '@/types/auth';
+import { APIHandler, APIResponse } from '@/utils/api';
 import { NextResponse } from 'next/server';
 
 export const oauthCallback = async ({
@@ -174,7 +172,7 @@ export const oauthCallback = async ({
     });
 
     // Step 7: Redirect to frontend without tokens in url
-    const redirectUrl = new URL('/dashboard', request.url);
+    const redirectUrl = new URL(ROUTE_CONFIG.defaultAuthRoute, request.url);
     const response = NextResponse.redirect(redirectUrl);
 
     // Set accessToken in cookie (httpOnly for security)

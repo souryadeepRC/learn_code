@@ -23,7 +23,7 @@ export default function VerificationEmail({
       <Body style={main}>
         <Container style={container}>
           <Section style={section}>
-            <Text style={heading}>Welcome to Learn Code!</Text>
+            <Text style={heading}>Welcome to Skill Track AI!</Text>
             <Text style={text}>
               Please click the button below to verify your email address and
               activate your account.

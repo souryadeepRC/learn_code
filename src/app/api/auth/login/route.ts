@@ -18,6 +18,7 @@ export const loginUser = async ({
     message: 'Login successful',
     accessToken: authResult.accessToken,
     email: authResult.email,
+    accountStatus: authResult.accountStatus,
   });
 };
 

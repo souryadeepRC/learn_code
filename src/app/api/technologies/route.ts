@@ -1,6 +1,6 @@
 'use server';
 import { HTTP_STATUS } from '@/constants/api';
-import { prismaTechnologies } from '@/lib/prisma-technologies';
+import { prismaTechnologies } from '@/lib/prismaTechnologies';
 import { APIHandler, APIResponse } from '@/utils/api';
 import { NextRequest } from 'next/server';
 

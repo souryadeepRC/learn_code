@@ -1,6 +1,6 @@
 import { HTTP_STATUS } from '@/constants/api';
-import { prismaUsers } from '@/lib/prisma-users';
-import { APICallbackParams } from '@/root/src/types/auth';
+import { prismaUsers } from '@/lib/prismaUsers';
+import { APICallbackParams } from '@/types/auth';
 import { APIHandler, APIResponse } from '@/utils/api';
 
 type EmailVerification = { token: string };

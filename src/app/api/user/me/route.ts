@@ -1,6 +1,6 @@
 'use server';
-import { prismaUsers } from '@/lib/prisma-users';
-import { HTTP_STATUS } from '@/root/src/constants/api';
+import { prismaUsers } from '@/lib/prismaUsers';
+import { HTTP_STATUS } from '@/constants/api';
 import { APIHandler, APIResponse } from '@/utils/api';
 
 // ==========================================
