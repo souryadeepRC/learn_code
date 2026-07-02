@@ -23,27 +23,8 @@ export const ThemeContext = createContext<ThemeContextType | undefined>(
  * Prevents flash of unstyled content (FOUC) with script optimization
  */
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
-    if (typeof window !== 'undefined') {
-      return (localStorage.getItem('themeMode') as ThemeMode) || 'system';
-    }
-    return 'system';
-  });
-
-  const [theme, setThemeState] = useState<'light' | 'dark'>(() => {
-    if (typeof window !== 'undefined') {
-      const storedMode = localStorage.getItem('themeMode') || 'system';
-      const prefersDark = window.matchMedia(
-        '(prefers-color-scheme: dark)'
-      ).matches;
-      return storedMode === 'system'
-        ? prefersDark
-          ? 'dark'
-          : 'light'
-        : (storedMode as 'light' | 'dark');
-    }
-    return 'light';
-  });
+  const [themeMode, setThemeMode] = useState<ThemeMode>('system');
+  const [theme, setThemeState] = useState<'light' | 'dark'>('light');
 
   const applyTheme = useCallback((themeVal: 'light' | 'dark') => {
     if (typeof window === 'undefined') return;
@@ -62,8 +43,26 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Initialize theme on client mount
   useEffect(() => {
-    applyTheme(theme);
-  }, [theme, applyTheme]);
+    const timer = setTimeout(() => {
+      const storedMode =
+        (localStorage.getItem('themeMode') as ThemeMode) || 'system';
+      setThemeMode(storedMode);
+
+      const prefersDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches;
+      const actualTheme =
+        storedMode === 'system'
+          ? prefersDark
+            ? 'dark'
+            : 'light'
+          : (storedMode as 'light' | 'dark');
+
+      setThemeState(actualTheme);
+      applyTheme(actualTheme);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [applyTheme]);
 
   // Listen for system preference changes
   useEffect(() => {

@@ -1,6 +1,6 @@
-import { prismaUsers } from '@/lib/prisma-users';
-import { HTTP_STATUS } from '@/root/src/constants/api';
-import { APIHandler, APIResponse } from '@/root/src/utils/api';
+import { prismaUsers } from '@/lib/prismaUsers';
+import { HTTP_STATUS } from '@/constants/api';
+import { APIHandler, APIResponse } from '@/utils/api';
 const VALID_ADDRESS_TYPES = ['HOME', 'WORK', 'OTHER'];
 export const POST = APIHandler.authenticated(async ({ userId, request }) => {
   const body = await request.json();

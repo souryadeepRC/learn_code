@@ -34,7 +34,7 @@ export type ContentProps = React.HTMLAttributes<HTMLParagraphElement> &
 export const Content = ({
   className,
   size = 'default',
-  as: Tag = 'p',
+  as: Tag = 'div',
   children,
   ...props
 }: ContentProps) => {

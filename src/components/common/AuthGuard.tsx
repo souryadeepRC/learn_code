@@ -3,13 +3,13 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useSyncExternalStore } from 'react';
 
-import { ROUTE_CONFIG } from '@/config/routes.config';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { ROUTE_CONFIG } from '@/config/routesConfig';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import {
   selectIsAuthenticated,
   selectIsPremium,
-} from '@/store/slices/auth-selectors';
-import { useAppSelector } from '@/store/store-hooks';
+} from '@/store/slices/authSelectors';
+import { useAppSelector } from '@/store/storeHooks';
 
 type Props = {
   children: React.ReactNode;

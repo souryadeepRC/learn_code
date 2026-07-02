@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useTheme } from '@/context/ThemeContext';
+import { useEffect, useState } from 'react';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
 
 /**
@@ -16,6 +17,22 @@ import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
  */
 export const ThemeToggle = () => {
   const { isDarkTheme, toggleTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <Button variant="ghost" size="icon" disabled aria-label="Toggle theme">
+        <span className="h-4 w-4" />
+      </Button>
+    );
+  }
 
   return (
     <Tooltip>

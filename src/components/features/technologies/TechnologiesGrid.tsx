@@ -1,7 +1,8 @@
 'use client';
 
-import { useInfiniteTechnologies } from '@/hooks/use-technologies';
+import { useInfiniteTechnologies } from '@/hooks/useTechnologies';
 import { cn } from '@/root/src/utils';
+import type { TechnologiesApiResponse, Technology } from '@/types/technology';
 import { useCallback, useEffect, useRef } from 'react';
 import { TechnologyCard } from './TechnologyCard';
 import { TechnologyCardSkeleton } from './TechnologyCardSkeleton';
@@ -91,7 +92,8 @@ export const TechnologiesGrid = () => {
     );
   }
 
-  const allTechnologies = data?.pages.flatMap((page) => page.data) ?? [];
+  const allTechnologies =
+    data?.pages.flatMap((page: TechnologiesApiResponse) => page.data) ?? [];
   const total = data?.pages[0]?.meta.total ?? 0;
 
   // ── Empty state ────────────────────────────────────────────────────────────
@@ -128,7 +130,7 @@ export const TechnologiesGrid = () => {
           'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3'
         )}
       >
-        {allTechnologies.map((tech) => (
+        {allTechnologies.map((tech: Technology) => (
           <TechnologyCard key={tech.id} technology={tech} />
         ))}
 

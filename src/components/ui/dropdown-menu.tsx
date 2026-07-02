@@ -3,7 +3,7 @@
 import { DropdownMenu as DropdownMenuPrimitive } from 'radix-ui';
 import * as React from 'react';
 
-import { IconPlaceholder } from '@/app/(create)/components/icon-placeholder';
+import { IconPlaceholder } from '@/app/(create)/components/IconPlaceholder';
 import { cn } from '@/root/src/utils';
 
 function DropdownMenu({

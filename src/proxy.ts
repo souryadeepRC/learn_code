@@ -5,7 +5,7 @@ import {
   ROUTE_CONFIG,
   isGuestOnlyRoute,
   isProtectedRoute,
-} from '@/config/routes.config';
+} from '@/config/routesConfig';
 
 /**
  * Next.js Edge Middleware for Route Protection

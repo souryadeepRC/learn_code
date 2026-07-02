@@ -15,6 +15,7 @@ export const loginWithCredentials = async (
       id: true,
       email: true,
       password: true,
+      accountStatus: true,
     },
   });
 
@@ -48,5 +49,6 @@ export const loginWithCredentials = async (
     status: 200,
     accessToken,
     email: user.email,
+    accountStatus: user.accountStatus,
   };
 };

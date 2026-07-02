@@ -1,4 +1,4 @@
-import { prismaUsers } from '@/lib/prisma-users';
+import { prismaUsers } from '@/lib/prismaUsers';
 /**
  * Generate a pseudo-email when provider doesn't return email
  * Examples:

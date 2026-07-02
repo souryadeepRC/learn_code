@@ -63,20 +63,3 @@ export type UpdateUserProfilePayload = Partial<
     'firstName' | 'lastName' | 'bio' | 'imageUrl' | 'phoneNumber'
   >
 >;
-
-export type UserJourneyStep = 'Account' | 'Done';
-export type UserInformation = {
-  id: string;
-  userId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  username: string;
-  imageUrl: string;
-  step: UserJourneyStep;
-};
-
-export type NewUserInformation = Pick<
-  UserInformation,
-  'userId' | 'email' | 'username' | 'step'
->;

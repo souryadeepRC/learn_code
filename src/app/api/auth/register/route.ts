@@ -1,5 +1,5 @@
 'use server';
-import { prismaUsers } from '@/lib/prisma-users';
+import { prismaUsers } from '@/lib/prismaUsers';
 
 import { sendVerificationEmail } from '@/lib/resend';
 import { HTTP_STATUS } from '@/root/src/constants/api';

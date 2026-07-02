@@ -14,13 +14,13 @@ import {
   NAV_ITEMS,
   type NavAccessLevel,
   type NavItem,
-} from '@/config/header-nav.config';
+} from '@/config/headerNavConfig';
 import { cn } from '@/root/src/utils';
 import {
   selectIsAuthenticated,
   selectIsPremium,
-} from '@/store/slices/auth-selectors';
-import { useAppSelector } from '@/store/store-hooks';
+} from '@/store/slices/authSelectors';
+import { useAppSelector } from '@/store/storeHooks';
 import { useCallback, useEffect, useState } from 'react';
 import { RiCloseLine, RiMenuLine } from 'react-icons/ri';
 import { AppHeaderLogo } from './AppHeaderLogo';

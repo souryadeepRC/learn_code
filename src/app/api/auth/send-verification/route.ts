@@ -1,5 +1,5 @@
 import { HTTP_STATUS } from '@/constants/api';
-import { prismaUsers } from '@/lib/prisma-users';
+import { prismaUsers } from '@/lib/prismaUsers';
 import { sendVerificationEmail } from '@/lib/resend';
 import { emailSchema } from '@/root/src/schema/common';
 import { APICallbackParams } from '@/root/src/types/auth';

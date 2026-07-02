@@ -1,4 +1,5 @@
 import { cn } from '@/root/src/utils';
+import Image from 'next/image';
 import Link from 'next/link';
 
 type Props = {
@@ -6,14 +7,14 @@ type Props = {
 };
 
 /**
- * AppHeaderLogo — "Learn**Code**" wordmark linked to the home page.
+ * AppHeaderLogo — "Skill Track **AI**" wordmark linked to the home page.
  * The second word uses the primary brand colour for instant recognition.
  */
 export const AppHeaderLogo = ({ className }: Props) => {
   return (
     <Link
       href="/"
-      aria-label="LearnCode — go to home page"
+      aria-label="Skill Track AI — go to home page"
       className={cn(
         'flex items-center gap-2 select-none outline-none',
         'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md',
@@ -21,21 +22,18 @@ export const AppHeaderLogo = ({ className }: Props) => {
       )}
     >
       {/* Icon mark */}
-      <span
-        className={cn(
-          'flex h-8 w-8 items-center justify-center rounded-lg text-sm font-black',
-          'bg-gradient-to-br from-primary to-secondary text-primary-foreground',
-          'shadow-lg shadow-primary/20'
-        )}
-        aria-hidden="true"
-      >
-        LC
-      </span>
+      <Image
+        src="/appLogo.png"
+        alt="Skill Track AI Logo"
+        width={60}
+        height={60}
+        className="h-20 w-20 object-contain shrink-0"
+        //priority
+      />
 
       {/* Word mark */}
       <span className="text-lg font-bold tracking-tight text-foreground">
-        Learn
-        <span className="text-primary">Code</span>
+        Skill Track <span className="text-primary">AI</span>
       </span>
     </Link>
   );

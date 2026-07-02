@@ -2,18 +2,23 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import axios from 'axios';
 
 import apiClient from '@/lib/axios';
-import { clearCredentials, setCredentials } from '@/store/slices/auth-slice';
-import { selectIsAuthenticated } from '@/store/slices/auth-selectors';
+import { clearCredentials, setCredentials } from '@/store/slices/authSlice';
+import {
+  selectAuthEmail,
+  selectIsAuthenticated,
+  selectIsPremium,
+} from '@/store/slices/authSelectors';
 import {
   clearUserProfile,
   setUserError,
   setUserLoading,
   setUserProfile,
   type UserProfile,
-} from '@/store/slices/user-slice';
-import { useAppDispatch, useAppSelector } from '@/store/store-hooks';
+} from '@/store/slices/userSlice';
+import { useAppDispatch, useAppSelector } from '@/store/storeHooks';
 
 type UserMeResponse = {
   message: string;
@@ -28,6 +33,8 @@ const fetchUserMe = async (): Promise<UserMeResponse> => {
 export const useCurrentUser = () => {
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const authEmail = useAppSelector(selectAuthEmail);
+  const isPremium = useAppSelector(selectIsPremium);
 
   // Restore session from sessionStorage on initial client load
   useEffect(() => {
@@ -39,14 +46,12 @@ export const useCurrentUser = () => {
     }
   }, [isAuthenticated, dispatch]);
 
-  const query = useQuery<UserMeResponse, Error>(['user', 'me'], fetchUserMe, {
+  const query = useQuery<UserMeResponse, Error>({
+    queryKey: ['user', 'me'],
+    queryFn: fetchUserMe,
     enabled: isAuthenticated,
     staleTime: 1000 * 60 * 10, // 10 mins
     retry: false,
-    onError: () => {
-      dispatch(clearCredentials());
-      dispatch(clearUserProfile());
-    },
   });
 
   useEffect(() => {
@@ -54,23 +59,40 @@ export const useCurrentUser = () => {
       dispatch(setUserLoading(true));
     } else if (query.data?.user) {
       dispatch(setUserProfile(query.data.user));
-      // Update email in auth slice if it was restored without email
+      // Update email in auth slice only if it was restored without email
       const token =
         typeof window !== 'undefined'
           ? sessionStorage.getItem('accessToken')
           : null;
-      if (token) {
+      if (token && !authEmail) {
         dispatch(
           setCredentials({
             accessToken: token,
             email: query.data.user.email,
+            isPremium,
           })
         );
       }
     } else if (query.isError && query.error) {
-      dispatch(setUserError(query.error.message));
+      if (
+        axios.isAxiosError(query.error) &&
+        query.error.response?.status === 401
+      ) {
+        dispatch(clearCredentials());
+        dispatch(clearUserProfile());
+      } else {
+        dispatch(setUserError(query.error.message));
+      }
     }
-  }, [query.data, query.isLoading, query.isError, query.error, dispatch]);
+  }, [
+    query.data,
+    query.isLoading,
+    query.isError,
+    query.error,
+    dispatch,
+    authEmail,
+    isPremium,
+  ]);
 
   return query;
 };

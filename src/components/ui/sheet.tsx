@@ -3,7 +3,7 @@
 import { Dialog as SheetPrimitive } from 'radix-ui';
 import * as React from 'react';
 
-import { IconPlaceholder } from '@/app/(create)/components/icon-placeholder';
+import { IconPlaceholder } from '@/app/(create)/components/IconPlaceholder';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/root/src/utils';
 

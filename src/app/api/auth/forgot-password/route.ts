@@ -1,9 +1,9 @@
 'use server';
 
 import { HTTP_STATUS } from '@/constants/api';
-import { prismaUsers } from '@/lib/prisma-users';
+import { prismaUsers } from '@/lib/prismaUsers';
 import { sendPasswordResetEmail } from '@/lib/resend';
-import { generateExpiryToken } from '@/root/src/lib/auth/hash';
+import { generateExpiryToken } from '@/lib/auth/hash';
 import { emailSchema } from '@/root/src/schema/common';
 import { APICallbackParams, Email } from '@/root/src/types/auth';
 import { APIHandler, APIResponse } from '@/utils/api';

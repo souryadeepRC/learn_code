@@ -19,13 +19,13 @@ import {
   selectAuthEmail,
   selectIsPremium,
   selectUserInitials,
-} from '@/store/slices/auth-selectors';
+} from '@/store/slices/authSelectors';
 import {
   selectUserDisplayName,
   selectUserProfile,
   selectUserProfileInitials,
-} from '@/store/slices/user-selectors';
-import { useAppSelector } from '@/store/store-hooks';
+} from '@/store/slices/userSelectors';
+import { useAppSelector } from '@/store/storeHooks';
 import Link from 'next/link';
 import {
   LuBookOpen,

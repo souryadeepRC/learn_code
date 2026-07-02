@@ -1,4 +1,4 @@
-# Learn Code — Advanced Tech Learning & Practice Portal 🚀
+# Skill Track AI — Advanced Tech Learning & Practice Portal 🚀
 
 [![Next.js 16](https://img.shields.io/badge/Next.js-16.2.9-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
 [![React 19](https://img.shields.io/badge/React-19.2.4-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
@@ -14,6 +14,7 @@ An enterprise-grade, interactive web application designed to help developers pra
 ## ✨ Key Features
 
 ### 🔐 Enterprise Authentication & Security
+
 - **Dual-Token JWT Architecture**: Short-lived access tokens (15 mins) paired with HttpOnly, `SameSite=Strict` refresh cookies (7 days) for seamless, secure session persistence.
 - **Social OAuth Integration**: Built-in OAuth 2.0 flows (e.g., GitHub) with automated pseudo-email fallback and secure redirection handling.
 - **Session Revocation & Monitoring**: Track active user sessions across devices with instant token hash revocation capabilities.
@@ -22,11 +23,13 @@ An enterprise-grade, interactive web application designed to help developers pra
 - **Email Verification & Password Reset**: Transactional HTML emails powered by **Resend** and custom **React Email** templates.
 
 ### 📚 Tech Learning & Practice Arena
+
 - **Interactive Technology Catalog**: Explore curated tech stacks and tools with pagination, search filtering, and responsive skeleton loaders (`/technologies`).
 - **Practice Arena**: Test coding knowledge and solve interactive technical challenges (`/practice`).
 - **Personalized Dashboard**: View real-time user profiles, verification statuses, subscription tiers, and quick navigation links (`/dashboard`).
 
 ### 🎨 Premium UI/UX & Design System
+
 - **Tailwind CSS v4 & Radix UI**: Sleek, accessible components built to WCAG 2.1 AA standards.
 - **Dynamic Dark/Light Mode**: Smooth theme transitions powered by a custom React theme context.
 - **Responsive Navigation**: Adaptive header featuring mobile sheet menus, user initials avatars, and instant clean-navigation logout flows.
@@ -35,16 +38,16 @@ An enterprise-grade, interactive web application designed to help developers pra
 
 ## 🛠️ Technology Stack
 
-| Layer | Technologies |
-| :--- | :--- |
-| **Framework** | Next.js 16 (App Router), React 19, TypeScript (Strict) |
-| **Styling & UI** | Tailwind CSS v4, Radix UI Primitives, Lucide Icons, React Icons |
-| **State Management** | Redux Toolkit (Session & User Slices), TanStack Query v4 (Server Sync) |
-| **Form & Validation** | React Hook Form, Zod Schema Validation |
-| **Database & ORM** | MongoDB Atlas, Prisma ORM (Multi-Schema Configuration) |
-| **Caching & Security** | Upstash Redis, Bcryptjs, JSON Web Tokens |
-| **Email Service** | Resend API, React Email Templates |
-| **Code Quality** | ESLint 9, Prettier (Automated Formatting Scripts) |
+| Layer                  | Technologies                                                           |
+| :--------------------- | :--------------------------------------------------------------------- |
+| **Framework**          | Next.js 16 (App Router), React 19, TypeScript (Strict)                 |
+| **Styling & UI**       | Tailwind CSS v4, Radix UI Primitives, Lucide Icons, React Icons        |
+| **State Management**   | Redux Toolkit (Session & User Slices), TanStack Query v4 (Server Sync) |
+| **Form & Validation**  | React Hook Form, Zod Schema Validation                                 |
+| **Database & ORM**     | MongoDB Atlas, Prisma ORM (Multi-Schema Configuration)                 |
+| **Caching & Security** | Upstash Redis, Bcryptjs, JSON Web Tokens                               |
+| **Email Service**      | Resend API, React Email Templates                                      |
+| **Code Quality**       | ESLint 9, Prettier (Automated Formatting Scripts)                      |
 
 ---
 
@@ -67,6 +70,7 @@ Whenever schemas are modified, separate Prisma clients are generated using custo
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - **Node.js** v20 or higher
 - **npm**, **yarn**, or **pnpm**
 - A running **MongoDB** instance or Atlas URI
@@ -74,18 +78,22 @@ Whenever schemas are modified, separate Prisma clients are generated using custo
 - A **Resend** API key (for emails)
 
 ### 1. Clone the Repository
+
 ```bash
-git clone https://github.com/souryadeepRC/learn_code.git
-cd learn-code
+git clone https://github.com/souryadeepRC/skill_track_ai.git
+cd skill-track-ai
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 npm install
 ```
-*(Note: The `postinstall` script will automatically trigger `npm run prisma:generate:all` to compile the Prisma clients).*
+
+_(Note: The `postinstall` script will automatically trigger `npm run prisma:generate:all` to compile the Prisma clients)._
 
 ### 3. Environment Setup
+
 Create a `.env` file in the root directory and configure the required environment variables:
 
 ```env
@@ -115,24 +123,26 @@ EMAIL_FROM="noreply@yourdomain.com"
 ```
 
 ### 4. Run Development Server
+
 ```bash
 npm run dev
 ```
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the application in action.
 
 ---
 
 ## 📜 Available Scripts
 
-| Command | Description |
-| :--- | :--- |
-| `npm run dev` | Starts the Next.js development server with Turbopack |
-| `npm run build` | Creates an optimized production build |
-| `npm run start` | Starts the compiled production server |
-| `npm run format:all` | Formats code with Prettier and automatically fixes ESLint issues |
-| `npm run prisma:generate:users` | Generates the Prisma client for the User domain |
-| `npm run prisma:generate:technologies` | Generates the Prisma client for the Technology domain |
-| `npm run prisma:generate:all` | Compiles all multi-schema Prisma clients concurrently |
+| Command                                | Description                                                      |
+| :------------------------------------- | :--------------------------------------------------------------- |
+| `npm run dev`                          | Starts the Next.js development server with Turbopack             |
+| `npm run build`                        | Creates an optimized production build                            |
+| `npm run start`                        | Starts the compiled production server                            |
+| `npm run format:all`                   | Formats code with Prettier and automatically fixes ESLint issues |
+| `npm run prisma:generate:users`        | Generates the Prisma client for the User domain                  |
+| `npm run prisma:generate:technologies` | Generates the Prisma client for the Technology domain            |
+| `npm run prisma:generate:all`          | Compiles all multi-schema Prisma clients concurrently            |
 
 ---
 
@@ -165,6 +175,7 @@ src/
 ---
 
 ## 🛡️ Security Best Practices Implemented
+
 - **No Sensitive Cookie Access in JS**: Refresh tokens are flagged with `HttpOnly` and `SameSite=Strict`, making them completely inaccessible to client-side scripts.
 - **Clean Logout Navigation**: Executing logout terminates server sessions, wipes all cookies with `maxAge: 0`, and triggers a hard browser navigation (`window.location.href`) to clear client-side router caches.
 - **Strict Input Validation**: Every mutating API request undergoes strict Zod schema parsing and payload inspection before execution.
@@ -172,4 +183,5 @@ src/
 ---
 
 ## 📄 License
+
 This project is licensed under the MIT License.

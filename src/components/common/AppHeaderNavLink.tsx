@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import type { NavItem } from '@/config/header-nav.config';
+import type { NavItem } from '@/config/headerNavConfig';
 import { cn } from '@/root/src/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';

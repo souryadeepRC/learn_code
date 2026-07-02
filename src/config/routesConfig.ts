@@ -35,7 +35,7 @@ export type RouteConfig = {
 
 export const ROUTE_CONFIG: RouteConfig = {
   // Configurable default route for logged-in users (Route-1)
-  defaultAuthRoute: '/dashboard',
+  defaultAuthRoute: '/profile',
 
   // Configurable default route for guest users (Route-1 or Route-2, e.g. '/technologies' or '/join')
   defaultGuestRoute: '/technologies',
@@ -49,7 +49,7 @@ export const ROUTE_CONFIG: RouteConfig = {
   ],
 
   // Protected routes requiring user authentication
-  protectedRoutes: ['/dashboard', '/practice'],
+  protectedRoutes: ['/dashboard', '/practice', '/profile'],
 };
 
 /**

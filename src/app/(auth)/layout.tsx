@@ -4,8 +4,9 @@ import type { Metadata } from 'next';
 import React from 'react';
 
 export const metadata: Metadata = {
-  title: 'Authentication | Learn Code',
-  description: 'Join Learn Code, recover your account, or verify your email.',
+  title: 'Authentication | Skill Track AI',
+  description:
+    'Join Skill Track AI, recover your account, or verify your email.',
 };
 
 /**

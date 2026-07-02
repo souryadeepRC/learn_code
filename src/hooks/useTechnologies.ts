@@ -37,13 +37,12 @@ const fetchTechnologies = async (
  *     = useInfiniteTechnologies();
  */
 export const useInfiniteTechnologies = () => {
-  return useInfiniteQuery<TechnologiesApiResponse, Error>(
-    ['technologies', 'infinite'],
-    ({ pageParam = 1 }) => fetchTechnologies(pageParam as number),
-    {
-      getNextPageParam: (lastPage) =>
-        lastPage.meta.hasNextPage ? lastPage.meta.page + 1 : undefined,
-      staleTime: 1000 * 60 * 5, // 5 minutes
-    }
-  );
+  return useInfiniteQuery<TechnologiesApiResponse, Error>({
+    queryKey: ['technologies', 'infinite'],
+    queryFn: ({ pageParam }) => fetchTechnologies((pageParam as number) ?? 1),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.hasNextPage ? lastPage.meta.page + 1 : undefined,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
 };
