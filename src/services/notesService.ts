@@ -1,11 +1,10 @@
-import { Prisma, PrismaClient } from '@prisma-custom/notes';
 import { prismaNotes } from '@/lib/prismaNotes';
 import {
   ArchiveNoteInput,
   CreateNoteInput,
   UpdateNoteInput,
 } from '@/schema/notes';
-import { NoteAuthorRole } from '@prisma-custom/notes';
+import { NoteAuthorRole, Prisma, PrismaClient } from '@prisma-custom/notes';
 
 // Suppress unused import — PrismaClient referenced for type narrowing only
 void PrismaClient;
@@ -42,7 +41,7 @@ export const getUserNotes = async (
           visibility: 'PUBLIC',
         },
       ],
-      ...(!includeArchived ? { isArchived: false } : {}),
+      isArchived: includeArchived,
     },
     select: NOTE_SELECT,
     orderBy: { updatedAt: 'desc' },

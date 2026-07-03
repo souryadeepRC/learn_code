@@ -23,7 +23,7 @@ export const CreateNoteSchema = z.object({
     .max(100, 'Title must be under 100 characters'),
   description: z
     .string()
-    .min(200, 'Description must be at least 200 characters'),
+    .max(200, 'Description must be at under 200 characters'),
   technologies: z.array(z.string()).default([]),
   questions: z.array(QuestionAnswerSchema).default([]),
   // USER role always sends PRIVATE; ADMIN can send PUBLIC or PRIVATE

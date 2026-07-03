@@ -3,6 +3,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Note } from '@/hooks/useNotes';
 import React from 'react';
+import { LiaStickyNoteSolid } from 'react-icons/lia';
 import { NoteCard } from './NoteCard';
 
 interface NotesListProps {
@@ -47,22 +48,9 @@ export const NotesList: React.FC<NotesListProps> = ({
 
   if (!notes || notes.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center px-4 border-2 border-dashed rounded-xl bg-card/10">
-        <div className="bg-muted h-16 w-16 rounded-full flex items-center justify-center mb-4">
-          <svg
-            className="w-8 h-8 text-muted-foreground"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-            />
-          </svg>
-        </div>
+      <div className="flex flex-col items-center justify-center py-20 text-center px-4  bg-card/10">
+        <LiaStickyNoteSolid className="h-15 w-15" />
+
         <h3 className="text-xl font-semibold mb-2">No notes found</h3>
         <p className="text-muted-foreground max-w-md">
           {isReadOnly
@@ -74,7 +62,7 @@ export const NotesList: React.FC<NotesListProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 items-stretch">
       {notes.map((note) => (
         <NoteCard
           key={note.id}

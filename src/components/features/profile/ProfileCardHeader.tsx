@@ -15,7 +15,7 @@ export const ProfileCardHeader: React.FC<ProfileCardHeaderProps> = ({
 }) => {
   return (
     <div className="border-b border-border/40 pb-4">
-      <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+      <h2 className="text-xl font-bold tracking-tight text-primary flex items-center gap-2">
         {icon}
         {title}
       </h2>

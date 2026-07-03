@@ -7,13 +7,18 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 // Types (You might want to extract these to a shared types file later)
+export type NoteQuestion = {
+  id: string;
+  question: string;
+  answer: Record<string, unknown>;
+};
 export interface Note {
   id: string;
   title: string;
   description: string;
   technologies: string[];
   visibility: 'PRIVATE' | 'PUBLIC';
-  questions: Record<string, unknown>[];
+  questions: NoteQuestion[];
   isArchived: boolean;
   authorId: string;
   authorRole: string;
