@@ -35,8 +35,14 @@ export const getUserNotes = async (
 ) => {
   return prismaNotes.note.findMany({
     where: {
-      authorId,
-      ...(includeArchived && { isArchived: false }),
+      OR: [
+        { authorId },
+        {
+          authorRole: NoteAuthorRole.ADMIN,
+          visibility: 'PUBLIC',
+        },
+      ],
+      ...(!includeArchived ? { isArchived: false } : {}),
     },
     select: NOTE_SELECT,
     orderBy: { updatedAt: 'desc' },

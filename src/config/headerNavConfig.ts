@@ -1,6 +1,11 @@
 /** Supported icon identifiers mapped in AppHeaderNavLink. */
 export type NavIconType =
-  'github' | 'technologies' | 'scorecard' | 'dashboard' | 'practice';
+  | 'github'
+  | 'technologies'
+  | 'scorecard'
+  | 'dashboard'
+  | 'practice'
+  | 'notes';
 
 /** Who is allowed to see a nav item. */
 export type NavAccessLevel = 'public' | 'auth' | 'premium';
@@ -34,6 +39,13 @@ export const NAV_ITEMS: NavItem[] = [
     icon: 'technologies',
     label: 'Technologies',
     href: '/technologies',
+    requiredAccess: 'public',
+  },
+  {
+    id: 'notes',
+    icon: 'notes',
+    label: 'Notes',
+    href: '/notes',
     requiredAccess: 'public',
   },
   {

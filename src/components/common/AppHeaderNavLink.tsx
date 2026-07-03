@@ -11,6 +11,7 @@ import {
   RiCodeBoxLine,
   RiDashboardLine,
   RiStackLine,
+  RiStickyNoteLine,
 } from 'react-icons/ri';
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -19,6 +20,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   scorecard: RiBarChartLine,
   dashboard: RiDashboardLine,
   practice: RiCodeBoxLine,
+  notes: RiStickyNoteLine,
 };
 
 type Props = {

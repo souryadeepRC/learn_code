@@ -148,8 +148,8 @@ export class APIHandler {
       schema,
       maxPayloadSize: 8 * 1024,
       rateLimitConfig: {
-        maxRequests: 3,
-        windowSeconds: 4 * 60, // 3 requests per 4 mins (in seconds)
+        maxRequests: 20,
+        windowSeconds: 60, // 3 requests per 4 mins (in seconds)
       },
     });
   }
@@ -163,7 +163,7 @@ export class APIHandler {
       schema,
       maxPayloadSize: 8 * 1024,
       rateLimitConfig: {
-        maxRequests: 10,
+        maxRequests: 100,
         windowSeconds: 60, // 10 requests per minute (in seconds)
       },
     });
@@ -178,7 +178,7 @@ export class APIHandler {
       schema,
       maxPayloadSize: 8 * 1024,
       rateLimitConfig: {
-        maxRequests: 10,
+        maxRequests: 100,
         windowSeconds: 60, // 10 requests per minute (in seconds)
       },
     });

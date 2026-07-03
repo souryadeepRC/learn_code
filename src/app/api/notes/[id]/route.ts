@@ -33,6 +33,29 @@ const getOwnedNote = async (id: string, userId: string) => {
   return note;
 };
 
+const getAccessibleNote = async (id: string, userId: string) => {
+  const note = await getNoteById(id);
+
+  if (!note) {
+    return APIResponse.send(HTTP_STATUS.NOT_FOUND).json({
+      success: false,
+      message: 'Note not found',
+    });
+  }
+
+  const isOwner = note.authorId === userId;
+  const isPublicAdmin = note.authorRole === 'ADMIN' && note.visibility === 'PUBLIC';
+
+  if (!isOwner && !isPublicAdmin) {
+    return APIResponse.send(HTTP_STATUS.FORBIDDEN).json({
+      success: false,
+      message: 'You do not have permission to access this note',
+    });
+  }
+
+  return note;
+};
+
 // ─── GET /api/notes/[id] ───────────────────────────────────────────────────────
 
 export const GET = APIHandler.authenticated<undefined, { id: string }>(
@@ -47,9 +70,9 @@ export const GET = APIHandler.authenticated<undefined, { id: string }>(
       });
     }
 
-    const result = await getOwnedNote(id, userId);
+    const result = await getAccessibleNote(id, userId);
 
-    // If getOwnedNote returned a NextResponse (error), bubble it up
+    // If getAccessibleNote returned a NextResponse (error), bubble it up
     if (!('authorId' in result)) return result as NextResponse;
 
     return APIResponse.send(HTTP_STATUS.OK).json({
