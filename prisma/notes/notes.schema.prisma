@@ -1,0 +1,67 @@
+generator notesClient {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/@prisma-custom/notes"
+}
+
+datasource notesDb {
+  provider = "mongodb"
+  url      = env("NOTES_DB_URI")
+}
+
+enum NoteAuthorRole {
+  USER
+  ADMIN
+}
+
+enum NoteVisibility {
+  PRIVATE
+  PUBLIC
+}
+
+/// Embedded Q&A pair — stored as an array inside the Note document.
+/// No separate collection; avoids extra round-trips.
+type QuestionAnswer {
+  id       String // client-generated UUID (crypto.randomUUID)
+  question String
+  /// Rich text stored as Quill Delta JSON: { ops: [...] }
+  answer   Json
+  order    Int    @default(0)
+}
+
+model Note {
+  id         String         @id @default(auto()) @map("_id") @notesDb.ObjectId
+
+  /// Maps to User.id (@prisma-custom/users → user-auth collection).
+  /// Same pattern as UserProfile.userId — cross-DB reference, no Prisma relation possible.
+  /// Enforced at application layer: extract userId from JWT, store here on create.
+  authorId   String         @notesDb.ObjectId
+  authorRole NoteAuthorRole @default(USER)
+
+  /// Min 30 characters — enforced via Zod (CreateNoteSchema)
+  title       String
+  /// Min 100 characters — enforced via Zod (CreateNoteSchema)
+  description String
+
+  /// Tech slugs or IDs from the technologies DB.
+  /// Cross-DB reference — stored as plain strings.
+  technologies String[]
+
+  /// All Q&A pairs embedded in the note document.
+  questions QuestionAnswer[]
+
+  /// USER notes are always PRIVATE.
+  /// ADMIN notes can be PUBLIC (visible to all) or PRIVATE (admin-only).
+  visibility NoteVisibility @default(PRIVATE)
+
+  /// Soft delete — set true instead of hard-deleting.
+  isArchived Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([authorId])
+  @@index([authorId, isArchived])
+  @@index([authorRole, visibility])
+  @@index([authorId, authorRole, isArchived])
+  @@map("notes")
+}
