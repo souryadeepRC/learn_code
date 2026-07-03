@@ -1,4 +1,5 @@
 'use server';
+import { TOKEN_CONFIG } from '@/config/tokenConfig';
 import { prismaUsers } from '@/lib';
 import {
   generateTokens,
@@ -11,6 +12,7 @@ import { APIHandler, APIResponse } from '@/utils/api';
 import {
   clearRefreshTokenCookie,
   isRefreshTokenRevoked,
+  setAccessTokenCookie,
   setRefreshTokenCookie,
 } from '@/utils/authCookies';
 
@@ -31,6 +33,7 @@ const postRefreshToken = async ({ request }: APICallbackParams) => {
   if (!decoded || !decoded.id) {
     return APIResponse.send(403).json({
       message: 'Invalid or expired refresh token',
+      decoded,
     });
   }
 
@@ -41,19 +44,24 @@ const postRefreshToken = async ({ request }: APICallbackParams) => {
     return APIResponse.send(404).json({ message: 'User not found' });
   }
 
-  const accessToken = generateTokens({
+  const { accessToken } = generateTokens({
     id: user.id,
     email: user.email ?? '',
     role: user.role,
   });
   const refreshTokenNew = signRefreshToken(user.id);
 
+  await setAccessTokenCookie(
+    accessToken,
+    TOKEN_CONFIG.ACCESS_TOKEN_EXPIRY_SECONDS
+  );
   await setRefreshTokenCookie(refreshTokenNew);
 
   return APIResponse.send(HTTP_STATUS.OK).json({
     accessToken: accessToken,
+    expiresIn: TOKEN_CONFIG.ACCESS_TOKEN_EXPIRY_SECONDS,
     email: user.email,
   });
 };
 
-export const POST = APIHandler.authenticated(postRefreshToken);
+export const POST = APIHandler.authOperations(postRefreshToken);

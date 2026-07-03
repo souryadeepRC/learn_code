@@ -17,6 +17,7 @@ export const loginUser = async ({
   return APIResponse.send(HTTP_STATUS.OK).json({
     message: 'Login successful',
     accessToken: authResult.accessToken,
+    expiresIn: authResult.expiresIn,
     email: authResult.email,
     accountStatus: authResult.accountStatus,
   });

@@ -1,31 +1,32 @@
-import axios from 'axios';
+import axios, { InternalAxiosRequestConfig } from 'axios';
+import { refreshAccessToken, shouldRefreshToken } from './tokenManager';
 
 /**
  * Axios instance scoped to the internal Next.js API.
  *
- * - Base URL resolves to the same origin at runtime so it works in both
- *   development (localhost:3000) and production without extra config.
- * - A request interceptor injects the stored `accessToken` as a Bearer header.
- * - A response interceptor handles global 401 (token expired / missing) by
- *   clearing credentials from sessionStorage so the next navigation lands on
- *   the login page.
+ * - Base URL resolves to the same origin at runtime.
+ * - withCredentials: true ensures both httpOnly cookies (accessToken and refreshToken)
+ *   are automatically included in all requests.
  */
 const apiClient = axios.create({
   baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // include HttpOnly refresh-token cookie automatically
+  withCredentials: true,
 });
+
+// Extend internal config to track our custom retry flag
+interface CustomInternalAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
 
 // ── Request interceptor ────────────────────────────────────────────────────
 apiClient.interceptors.request.use(
-  (config) => {
-    if (typeof window !== 'undefined') {
-      const token = sessionStorage.getItem('accessToken');
-      if (token) {
-        config.headers['Authorization'] = `Bearer ${token}`;
-      }
+  async (config: CustomInternalAxiosRequestConfig) => {
+    // Proactive refresh if token expiring soon (and it's not the refresh request itself)
+    if (config.url !== '/auth/refresh' && shouldRefreshToken()) {
+      await refreshAccessToken();
     }
     return config;
   },
@@ -35,12 +36,42 @@ apiClient.interceptors.request.use(
 // ── Response interceptor ───────────────────────────────────────────────────
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: unknown) => {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      if (typeof window !== 'undefined') {
-        sessionStorage.removeItem('accessToken');
+  async (error: unknown) => {
+    if (!axios.isAxiosError(error)) {
+      return Promise.reject(error);
+    }
+
+    const originalRequest = error.config as CustomInternalAxiosRequestConfig;
+
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry
+    ) {
+      // If the refresh token request itself fails with 401, we shouldn't retry it.
+      if (originalRequest.url === '/auth/refresh') {
+        if (typeof window !== 'undefined') {
+          window.location.href = '/join';
+        }
+        return Promise.reject(error);
+      }
+
+      originalRequest._retry = true;
+      console.log('Token expired, attempting refresh...');
+
+      const refreshed = await refreshAccessToken();
+
+      if (refreshed) {
+        console.log('Token refreshed, retrying request...');
+        return apiClient(originalRequest);
+      } else {
+        console.log('Token refresh failed, redirecting to login');
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
       }
     }
+
     return Promise.reject(error);
   }
 );

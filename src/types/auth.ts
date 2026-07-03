@@ -14,6 +14,7 @@ export type LoginServiceResult =
       success: true;
       status: 200;
       accessToken: string;
+      expiresIn?: number;
       email: string;
       accountStatus: string;
     }

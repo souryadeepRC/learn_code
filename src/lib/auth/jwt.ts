@@ -1,3 +1,4 @@
+import { TOKEN_CONFIG } from '@/config/tokenConfig';
 import jwt from 'jsonwebtoken';
 
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET;
@@ -10,14 +11,16 @@ if (!ACCESS_SECRET || !REFRESH_SECRET) {
 type TokenSignId = { id: string; email: string; role: string };
 
 export const signAccessTokens = (userDetails: TokenSignId) => {
-  // Access Token expires in 15 minutes
+  // Access Token expiration is handled by config
   return jwt.sign(userDetails, ACCESS_SECRET, {
-    expiresIn: '15m',
+    expiresIn: TOKEN_CONFIG.ACCESS_TOKEN_EXPIRY_SECONDS,
   });
 };
 
 export const signRefreshToken = (userId: string) => {
-  return jwt.sign({ userId }, REFRESH_SECRET, { expiresIn: '7d' });
+  return jwt.sign({ id: userId }, REFRESH_SECRET, {
+    expiresIn: TOKEN_CONFIG.REFRESH_TOKEN_EXPIRY_SECONDS,
+  });
 };
 
 export const verifyAccessToken = (token: string) => {

@@ -2,7 +2,8 @@ import { prismaUsers } from '@/lib';
 import { generateTokens } from '@/lib/auth/jwt';
 import { LoginCredentials, LoginServiceResult } from '@/types/auth';
 import bcrypt from 'bcryptjs';
-import { setRefreshTokenCookie } from './authCookies';
+import { TOKEN_CONFIG } from '@/config/tokenConfig';
+import { setAccessTokenCookie, setRefreshTokenCookie } from './authCookies';
 
 export const loginWithCredentials = async (
   credentials: LoginCredentials
@@ -47,12 +48,14 @@ export const loginWithCredentials = async (
     role: user.role,
   });
 
+  await setAccessTokenCookie(accessToken, TOKEN_CONFIG.ACCESS_TOKEN_EXPIRY_SECONDS);
   await setRefreshTokenCookie(refreshToken);
 
   return {
     success: true,
     status: 200,
     accessToken,
+    expiresIn: TOKEN_CONFIG.ACCESS_TOKEN_EXPIRY_SECONDS,
     email: user.email,
     accountStatus: user.accountStatus,
   };

@@ -43,6 +43,7 @@ export const useUserNotes = (includeArchived = false) => {
       });
       return response.data.data;
     },
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -54,6 +55,7 @@ export const useNoteById = (id: string) => {
       return response.data.data;
     },
     enabled: !!id,
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -65,6 +67,7 @@ export const usePublicAdminNotes = () => {
         await apiClient.get<ApiResponse<Note[]>>('/notes/public');
       return response.data.data;
     },
+    refetchOnWindowFocus: false,
   });
 };
 

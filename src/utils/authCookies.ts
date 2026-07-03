@@ -1,5 +1,6 @@
 import { createHash } from 'crypto';
 import { cookies } from 'next/headers';
+import { TOKEN_CONFIG } from '@/config/tokenConfig';
 
 const REFRESH_TOKEN_COOKIE_NAME = 'refreshToken';
 const REVOCATION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -25,9 +26,29 @@ const cleanupExpiredRevocations = () => {
 const hashToken = (token: string) =>
   createHash('sha256').update(token).digest('hex');
 
+const ACCESS_TOKEN_COOKIE_NAME = 'accessToken';
+
+const getAccessTokenCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict' as const,
+  path: '/',
+});
+
+export const setAccessTokenCookie = async (
+  value: string,
+  maxAge = TOKEN_CONFIG.ACCESS_TOKEN_EXPIRY_SECONDS
+) => {
+  const cookieStore = await cookies();
+  cookieStore.set(ACCESS_TOKEN_COOKIE_NAME, value, {
+    ...getAccessTokenCookieOptions(),
+    maxAge,
+  });
+};
+
 export const setRefreshTokenCookie = async (
   value: string,
-  maxAge = 7 * 24 * 60 * 60
+  maxAge = TOKEN_CONFIG.REFRESH_TOKEN_EXPIRY_SECONDS
 ) => {
   const cookieStore = await cookies();
   cookieStore.set(REFRESH_TOKEN_COOKIE_NAME, value, {
