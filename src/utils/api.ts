@@ -85,7 +85,10 @@ const createBaseHandler = <T, P = unknown>(
   };
 };
 
-const decodeTokenDetails = (request: NextRequest): string | NextResponse => {
+type TokenDetails = { userId: string; role: string };
+const decodeTokenDetails = (
+  request: NextRequest
+): TokenDetails | NextResponse => {
   const authHeader = request.headers?.get?.('Authorization');
   const token =
     authHeader?.split?.(' ')?.[1] ||
@@ -93,9 +96,9 @@ const decodeTokenDetails = (request: NextRequest): string | NextResponse => {
 
   // Allow logout endpoint to always execute so cookies get cleared even if access token is expired or missing
   if (request.nextUrl?.pathname?.endsWith('/logout')) {
-    if (!token) return '';
+    if (!token) return { userId: '', role: '' };
     const decoded = verifyAccessToken(token);
-    return decoded?.userId || '';
+    return { userId: decoded?.id || '', role: '' };
   }
 
   if (!token) {
@@ -105,12 +108,12 @@ const decodeTokenDetails = (request: NextRequest): string | NextResponse => {
   }
   const decoded = verifyAccessToken(token);
 
-  if (!decoded || !decoded.userId) {
+  if (!decoded || !decoded.id || !decoded.role) {
     return APIResponse.send(403).json({
       message: 'Unauthorized: Invalid or Expired Token',
     });
   }
-  return decoded.userId;
+  return { userId: decoded.id, role: decoded.role };
 };
 
 // 2. The Authenticated Wrapper
@@ -120,14 +123,15 @@ const createProtectedHandler = <T, P = unknown>(
 ) => {
   // We wrap the entire thing in handleAPI to keep your global try/catch active
   const protectedCallback = async (params: APICallbackParams<T, P>) => {
-    const userIdOrResponse = decodeTokenDetails(params.request);
+    const userDetailsOrResponse = decodeTokenDetails(params.request);
 
-    if (userIdOrResponse instanceof NextResponse) {
-      return userIdOrResponse;
+    if (userDetailsOrResponse instanceof NextResponse) {
+      return userDetailsOrResponse;
     }
 
     return await callback({
-      userId: userIdOrResponse,
+      userId: userDetailsOrResponse.userId,
+      role: userDetailsOrResponse.role,
       ...params,
     });
   };

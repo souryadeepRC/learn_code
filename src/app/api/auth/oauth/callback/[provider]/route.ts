@@ -1,9 +1,9 @@
-import { generateTokens } from '@/lib/auth/jwt';
-import { prismaUsers } from '@/lib/prismaUsers';
+import { ROUTE_CONFIG } from '@/config/routesConfig';
 import { HTTP_STATUS } from '@/constants/api';
 import { OAuthProviders } from '@/constants/auth';
-import { ROUTE_CONFIG } from '@/config/routesConfig';
+import { generateTokens } from '@/lib/auth/jwt';
 import { generatePseudoEmail, isPseudoEmail } from '@/lib/auth/oauth/utils';
+import { prismaUsers } from '@/lib/prismaUsers';
 import { APICallbackParams, OAuthProvider } from '@/types/auth';
 import { APIHandler, APIResponse } from '@/utils/api';
 import { NextResponse } from 'next/server';
@@ -155,10 +155,11 @@ export const oauthCallback = async ({
     }
 
     // Step 5: Generate JWT tokens
-    const { accessToken, refreshToken } = generateTokens(
-      user.id,
-      user.email ?? ''
-    );
+    const { accessToken, refreshToken } = generateTokens({
+      id: user.id,
+      email: user.email ?? '',
+      role: user.role,
+    });
 
     // Step 6: Store session
     await prismaUsers.session.create({

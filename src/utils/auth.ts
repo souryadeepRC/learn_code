@@ -16,6 +16,7 @@ export const loginWithCredentials = async (
       email: true,
       password: true,
       accountStatus: true,
+      role: true,
     },
   });
 
@@ -40,7 +41,11 @@ export const loginWithCredentials = async (
     };
   }
 
-  const { accessToken, refreshToken } = generateTokens(user.id, user.email);
+  const { accessToken, refreshToken } = generateTokens({
+    id: user.id,
+    email: user.email ?? '',
+    role: user.role,
+  });
 
   await setRefreshTokenCookie(refreshToken);
 

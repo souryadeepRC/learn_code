@@ -28,20 +28,24 @@ const postRefreshToken = async ({ request }: APICallbackParams) => {
 
   const decoded = verifyRefreshToken(refreshToken);
 
-  if (!decoded || !decoded.userId) {
+  if (!decoded || !decoded.id) {
     return APIResponse.send(403).json({
       message: 'Invalid or expired refresh token',
     });
   }
 
   const user = await prismaUsers.user.findUnique({
-    where: { id: decoded.userId },
+    where: { id: decoded.id },
   });
   if (!user) {
     return APIResponse.send(404).json({ message: 'User not found' });
   }
 
-  const accessToken = generateTokens(user.id, user.email ?? '');
+  const accessToken = generateTokens({
+    id: user.id,
+    email: user.email ?? '',
+    role: user.role,
+  });
   const refreshTokenNew = signRefreshToken(user.id);
 
   await setRefreshTokenCookie(refreshTokenNew);

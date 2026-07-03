@@ -5,8 +5,9 @@ import { APIResponse } from './api';
 
 const emojiRegex = /[\p{Extended_Pictographic}\u200d\uFE0F]/u;
 const controlCharRegex = /[\u0000-\u001F\u007F]/;
-const suspiciousQueryRegex =
-  /\b(select|union|drop|delete|insert|update|from|where|script|or\s+1\s*=\s*1)\b/i;
+// Removed generic SQL keywords (insert, update, select, delete) as they block legitimate technical notes 
+// and break Quill Delta JSON (which uses {"insert": "text"}). 
+const suspiciousQueryRegex = /<(script|iframe|object|embed|applet)/i;
 
 type ParsedJsonBodyResult =
   | { success: true; data: unknown }
@@ -42,10 +43,14 @@ export const isSafeText = (value: string): boolean => {
 
 export const validateAuthPayload = (payload: unknown) => {
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
-    return false;
+    return { isValid: false, reason: 'Expected a JSON object.' };
   }
 
-  return !containsForbiddenContent(payload);
+  if (containsForbiddenContent(payload)) {
+    return { isValid: false, reason: 'Payload contains forbidden characters or scripts.' };
+  }
+
+  return { isValid: true };
 };
 
 export const validateRequestBody = async (
@@ -90,11 +95,12 @@ export const validateRequestBody = async (
 
   try {
     const parsedBody = JSON.parse(rawBody);
-    if (!validateAuthPayload(parsedBody)) {
+    const validation = validateAuthPayload(parsedBody);
+    if (!validation.isValid) {
       return {
         success: false,
         status: HTTP_STATUS.BAD_REQUEST,
-        message: 'Invalid request payload. Expected a JSON object.',
+        message: `Invalid request payload. ${validation.reason}`,
       };
     }
     return {

@@ -47,6 +47,7 @@ export type CallbackType<T = unknown, P = unknown> = (
 
 export type AuthAPICallbackParams<T = unknown, P = unknown> = {
   userId: string;
+  role: string;
   request: NextRequest;
   context?: RouteContext<P>;
   payload: T;

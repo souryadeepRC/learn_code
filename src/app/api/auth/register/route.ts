@@ -66,7 +66,11 @@ export const registerUser = async ({
     expiryToken
   );
 
-  const token = generateTokens(createdUser.id, createdUser?.email ?? '');
+  const token = generateTokens({
+    id: createdUser.id,
+    email: createdUser.email ?? '',
+    role: createdUser.role,
+  });
 
   return APIResponse.send(HTTP_STATUS.CREATED).json({
     email: createdUser.email,
