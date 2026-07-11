@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { AppHeader } from '@/root/src/components/common/AppHeader';
 import Link from 'next/link';
 
 /**
@@ -10,9 +9,6 @@ import Link from 'next/link';
 const Home = () => {
   return (
     <main className="relative min-h-screen bg-background text-foreground transition-colors duration-300 overflow-hidden">
-      {/* ── Navigation ──────────────────────────────────────────────── */}
-      <AppHeader />
-
       {/* ── Ambient AI Background Glow & Grid Overlay ────────────────── */}
       <div
         className="absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)/15_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)/15_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none"

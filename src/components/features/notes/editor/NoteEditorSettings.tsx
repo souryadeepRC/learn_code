@@ -1,42 +1,27 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import React, { useState } from 'react';
-import { FiGlobe, FiLock, FiTag, FiX } from 'react-icons/fi';
+import type { TechnologySummary } from '@/types/technology';
+import React from 'react';
+import { FiGlobe, FiLock, FiTag } from 'react-icons/fi';
+import { TechnologyPicker } from './TechnologyPicker';
 
 interface NoteEditorSettingsProps {
   visibility: 'PRIVATE' | 'PUBLIC';
   onVisibilityChange: (val: 'PRIVATE' | 'PUBLIC') => void;
-  technologies: string[];
-  onAddTechnology: (tech: string) => void;
-  onRemoveTechnology: (tech: string) => void;
-  technologiesError?: string;
+  technology: TechnologySummary | null;
+  onTechnologyChange: (technology: TechnologySummary) => void;
+  technologyError?: string;
 }
 
 export const NoteEditorSettings: React.FC<NoteEditorSettingsProps> = ({
   visibility,
   onVisibilityChange,
-  technologies,
-  onAddTechnology,
-  onRemoveTechnology,
-  technologiesError,
+  technology,
+  onTechnologyChange,
+  technologyError,
 }) => {
-  const [techInput, setTechInput] = useState('');
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      const val = techInput.trim().replace(/^,+|,+$/g, '');
-      if (val && !technologies.includes(val)) {
-        onAddTechnology(val);
-      }
-      setTechInput('');
-    }
-  };
-
   return (
     <div className="lg:sticky lg:top-24 space-y-4">
       <div className="p-4 sm:p-5 border rounded-xl bg-card/60 backdrop-blur-sm shadow-2xs space-y-4 transition-all hover:shadow-xs">
@@ -79,57 +64,14 @@ export const NoteEditorSettings: React.FC<NoteEditorSettingsProps> = ({
           </div>
         </div>
 
-        {/* Technologies Setting */}
+        {/* Technology Setting */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="tech-input" className="font-semibold text-xs">
-              Technologies
-            </Label>
-            <span className="text-[10px] text-muted-foreground">
-              {technologies.length} added
-            </span>
-          </div>
-
-          <div className="space-y-1">
-            <Input
-              id="tech-input"
-              placeholder="Type (e.g. Next.js) & press Enter..."
-              value={techInput}
-              onChange={(e) => setTechInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="bg-background/80 h-8 text-xs rounded-lg border-muted-foreground/20 focus:border-primary transition-all"
-            />
-            <p className="text-[10px] text-muted-foreground">
-              Press <kbd className="px-1 py-0.5 bg-muted rounded border text-[9px]">Enter</kbd> or <kbd className="px-1 py-0.5 bg-muted rounded border text-[9px]">,</kbd> to add.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-1.5 pt-1 min-h-[24px]">
-            {technologies.length === 0 ? (
-              <p className="text-[11px] text-muted-foreground/60 italic py-0.5">
-                No technologies tagged yet.
-              </p>
-            ) : (
-              technologies.map((tech) => (
-                <Badge
-                  key={tech}
-                  variant="secondary"
-                  className="pl-2 pr-1 py-0.5 text-[11px] font-medium rounded-md gap-1 bg-secondary hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 border border-transparent transition-all cursor-pointer group shadow-2xs"
-                  onClick={() => onRemoveTechnology(tech)}
-                  title="Click to remove tag"
-                >
-                  <span>{tech}</span>
-                  <FiX className="w-3 h-3 text-muted-foreground group-hover:text-destructive transition-colors" />
-                </Badge>
-              ))
-            )}
-          </div>
-
-          {technologiesError && (
-            <p className="text-xs font-medium text-destructive mt-1 animate-in fade-in">
-              {technologiesError}
-            </p>
-          )}
+          <Label className="font-semibold text-xs">Technology</Label>
+          <TechnologyPicker
+            value={technology}
+            onChange={onTechnologyChange}
+            error={technologyError}
+          />
         </div>
       </div>
 

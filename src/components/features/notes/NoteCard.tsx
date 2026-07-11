@@ -1,6 +1,7 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -8,11 +9,25 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Note } from '@/hooks/useNotes';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import type { Note } from '@/types/note';
 import { formatNumber } from '@/root/src/utils/common';
 import Link from 'next/link';
 import React from 'react';
-import { FiEye } from 'react-icons/fi';
+import {
+  FiArchive,
+  FiEye,
+  FiEyeOff,
+  FiMoreVertical,
+  FiRotateCcw,
+  FiTag,
+  FiTrash2,
+} from 'react-icons/fi';
 import { MdQuestionAnswer } from 'react-icons/md';
 
 interface NoteCardProps {
@@ -34,62 +49,109 @@ export const NoteCard: React.FC<NoteCardProps> = ({
     year: 'numeric',
   });
 
-  return (
-    <Card
-      className="group relative overflow-hidden px-3 py-6 flex flex-col h-full bg-card/40 backdrop-blur-sm 
-    border-border/50 hover:bg-card hover:border-primary/30 transition-all duration-300 hover:shadow-md"
-    >
-      <CardHeader className="pb-3">
-        <div className="flex gap-2 flex-col-reverse md:flex-row items-start md:items-center justify-between ">
-          <div className="flex flex-wrap items-center gap-1.5">
-            {note.technologies?.slice(0, 2).map((tech) => (
-              <Badge key={tech} variant="secondary" className="text-xs">
-                {tech}
-              </Badge>
-            ))}
-            {note.technologies?.length > 2 && (
-              <span className="text-xs text-secondary font-medium ml-1">
-                +{note.technologies.length - 2} more
-              </span>
-            )}
-          </div>
-          <Badge variant="secondary">
-            <MdQuestionAnswer />
-            {formatNumber(note.questions?.length || 0)} Q&A
-          </Badge>
-        </div>
+  const showActions = !isReadOnly && (onDelete || onArchive);
 
-        <div className="flex justify-between items-start gap-4">
-          <Link
-            href={`/notes/${note.id}`}
-            className="hover:underline decoration-primary underline-offset-4 line-clamp-2"
-          >
-            <CardTitle className="text-xl text-primary font-bold">
-              {note.title}
-            </CardTitle>
-          </Link>
-        </div>
-        <CardDescription className="flex items-center gap-2 mt-1.5 text-xs">
-          <span>{formattedDate}</span>
-          <span>•</span>
-          <span className="flex items-center gap-1">
-            <FiEye className="w-3 h-3" /> {note.visibility}
-          </span>
-          {note.isArchived && (
-            <>
-              <span>•</span>
+  return (
+    <Card className="group relative flex h-full flex-col overflow-hidden px-3 py-5 border-border/50 bg-card/40 backdrop-blur-sm transition-all duration-300 hover:border-primary/40 hover:bg-card hover:shadow-lg hover:shadow-primary/5">
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {note.technology ? (
+              <Badge className="gap-1 rounded-full border-primary/20 bg-primary/10 text-xs font-semibold text-primary hover:bg-primary/15">
+                <FiTag className="h-3 w-3" aria-hidden="true" />
+                {note.technology.name}
+              </Badge>
+            ) : (
               <Badge
-                variant="secondary"
-                className="text-[10px] px-1.5 py-0 h-4"
+                variant="outline"
+                className="rounded-full text-xs text-muted-foreground"
               >
+                Untagged
+              </Badge>
+            )}
+            {note.isArchived && (
+              <Badge variant="secondary" className="rounded-full text-[10px]">
                 Archived
               </Badge>
-            </>
-          )}
+            )}
+          </div>
+
+          <div className="flex shrink-0 items-center gap-1.5">
+            <Badge variant="secondary" className="gap-1">
+              <MdQuestionAnswer />
+              {formatNumber(note.questions?.length || 0)}
+            </Badge>
+
+            {showActions && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                    aria-label="Note actions"
+                  >
+                    <FiMoreVertical className="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {onArchive && (
+                    <DropdownMenuItem
+                      onClick={() => onArchive(note.id, !note.isArchived)}
+                    >
+                      {note.isArchived ? (
+                        <>
+                          <FiRotateCcw className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
+                          Unarchive
+                        </>
+                      ) : (
+                        <>
+                          <FiArchive className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
+                          Archive
+                        </>
+                      )}
+                    </DropdownMenuItem>
+                  )}
+                  {onDelete && (
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive"
+                      onClick={() => onDelete(note.id)}
+                    >
+                      <FiTrash2 className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
+                      Delete
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+        </div>
+
+        <Link
+          href={`/notes/${note.id}`}
+          className="line-clamp-2 hover:underline decoration-primary underline-offset-4"
+        >
+          <CardTitle className="text-lg font-bold text-foreground">
+            {note.title}
+          </CardTitle>
+        </Link>
+
+        <CardDescription className="flex items-center gap-2 text-xs">
+          <span className="flex items-center gap-1">
+            {note.visibility === 'PUBLIC' ? (
+              <FiEye className="h-3 w-3" />
+            ) : (
+              <FiEyeOff className="h-3 w-3" />
+            )}
+            {note.visibility === 'PUBLIC' ? 'Public' : 'Private'}
+          </span>
+          <span aria-hidden="true">•</span>
+          <span>{formattedDate}</span>
         </CardDescription>
       </CardHeader>
+
       <CardContent className="flex-1">
-        <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed">
+        <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
           {note.description}
         </p>
       </CardContent>

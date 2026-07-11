@@ -40,11 +40,18 @@ export type Category = {
   order: number;
 };
 
+/** Minimal technology projection used wherever only a name/icon reference is needed. */
+export type TechnologySummary = {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string | null;
+};
+
 export type TechnologiesMeta = {
-  total: number;
-  page: number;
-  limit: number;
+  nextCursor: string | null;
   hasNextPage: boolean;
+  limit: number;
 };
 
 export type TechnologiesApiResponse = {

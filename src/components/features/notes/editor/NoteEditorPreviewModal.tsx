@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { CreateNoteInput } from '@/schema/notes';
+import type { TechnologySummary } from '@/types/technology';
 import { QuillDeltaToHtmlConverter } from 'quill-delta-to-html';
 import React from 'react';
 import { FiBookOpen, FiGlobe, FiLock, FiTag } from 'react-icons/fi';
@@ -16,12 +17,14 @@ interface NoteEditorPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   formData: CreateNoteInput;
+  technology: TechnologySummary | null;
 }
 
 export const NoteEditorPreviewModal: React.FC<NoteEditorPreviewModalProps> = ({
   isOpen,
   onClose,
   formData,
+  technology,
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={(val) => !val && onClose()}>
@@ -39,16 +42,15 @@ export const NoteEditorPreviewModal: React.FC<NoteEditorPreviewModalProps> = ({
               {formData.visibility === 'PUBLIC' ? <FiGlobe className="w-3 h-3 text-primary" /> : <FiLock className="w-3 h-3 text-muted-foreground" />}
               <span>{formData.visibility}</span>
             </Badge>
-            {formData.technologies?.map((tech) => (
+            {technology && (
               <Badge
-                key={tech}
                 variant="secondary"
                 className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-lg bg-secondary text-secondary-foreground"
               >
                 <FiTag className="w-3 h-3 text-primary" />
-                <span>{tech}</span>
+                <span>{technology.name}</span>
               </Badge>
-            ))}
+            )}
           </div>
         </DialogHeader>
 

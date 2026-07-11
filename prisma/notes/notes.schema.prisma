@@ -42,9 +42,10 @@ model Note {
   /// Min 100 characters — enforced via Zod (CreateNoteSchema)
   description String
 
-  /// Tech slugs or IDs from the technologies DB.
-  /// Cross-DB reference — stored as plain strings.
-  technologies String[]
+  /// Maps to Technology.id (@prisma-custom/technologies).
+  /// Cross-DB reference, no Prisma relation possible — same pattern as authorId.
+  /// Enforced at application layer: validated against the technologies DB on create/update.
+  technologyId String @notesDb.ObjectId
 
   /// All Q&A pairs embedded in the note document.
   questions QuestionAnswer[]
@@ -63,5 +64,10 @@ model Note {
   @@index([authorId, isArchived])
   @@index([authorRole, visibility])
   @@index([authorId, authorRole, isArchived])
+  @@index([technologyId])
+  /// Supports cursor pagination for getUserNotes (sorted updatedAt desc, id tiebreak).
+  @@index([authorId, isArchived, updatedAt])
+  /// Supports cursor pagination for getPublicAdminNotes.
+  @@index([authorRole, visibility, updatedAt])
   @@map("notes")
 }

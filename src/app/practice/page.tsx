@@ -1,6 +1,5 @@
 'use client';
 
-import { AppHeader } from '@/components/common/AppHeader';
 import { AuthGuard } from '@/components/common/AuthGuard';
 import { Content } from '@/components/common/Content';
 import { Heading } from '@/components/common/Heading';
@@ -49,8 +48,6 @@ const PracticePage = () => {
   return (
     <AuthGuard requiredAccess="premium">
       <main className="min-h-screen bg-background text-foreground transition-colors duration-300">
-        <AppHeader />
-
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
           <div className="mb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border pb-6">
             <div>

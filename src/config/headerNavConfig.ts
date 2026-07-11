@@ -1,4 +1,4 @@
-/** Supported icon identifiers mapped in AppHeaderNavLink. */
+/** Supported icon identifiers mapped in AppSidebar. */
 export type NavIconType =
   | 'github'
   | 'technologies'
@@ -28,7 +28,7 @@ export type NavItem = {
 
 /**
  * Default application nav items.
- * Import and spread in any layout that uses <AppHeader />.
+ * Consumed by AppShell/AppSidebar to render navigation.
  *
  * To add a new link:
  *   { id: 'dashboard', label: 'Dashboard', href: '/dashboard', requiredAccess: 'auth', icon: 'dashboard' }

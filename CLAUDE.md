@@ -59,6 +59,21 @@ Layering: `route.ts` (thin, HTTP concerns) → `src/services/*` (Prisma queries,
 - **Edge route guarding**: `src/proxy.ts` (Next.js middleware) redirects based on cookie presence before any UI renders. Which routes are guest-only vs. protected is configured centrally in `src/config/routesConfig.ts` — edit that config, not `proxy.ts`, to change access rules.
 - Authorization/role rules and protection-level tags (`[GU]`, `[AU]`, `[AU-L]`, `[AU-I]`) are documented in `.claude/rules/authentication.md`.
 
+## UI Architecture
+
+- **AppShell** (`src/components/common/AppShell.tsx`): Persistent header + sidebar chrome mounted at the root layout. Individual routes never render their own header/nav.
+  - **Header**: Sticky, contains hamburger (mobile only) + logo on left; theme toggle + user actions on right.
+  - **Sidebar**: Fixed rail on lg+ (icon + label), icon-only on md–lg, full-width Sheet drawer on mobile (triggered by hamburger).
+- **Component organization**: Domain widgets in `src/components/features/*`, shared chrome (AppShell, AppSidebar, SearchBox) in `src/components/common/*`.
+- **Loading states**: Use skeleton loaders (e.g. `NoteCardSkeleton`) during TanStack Query fetches for perceived performance.
+
+## Pagination & Infinite Scroll
+
+- **Cursor-based**: Replaces offset pagination. Response meta includes `nextCursor` (string | null) and `hasNextPage` (boolean), not `total`/`offset`.
+- **TanStack Query `useInfiniteQuery`**: Implemented via hooks like `useInfiniteNotes`, `useTechnologiesInfinite` in `src/hooks/use*.ts`. Grids call `fetchNextPage()` on demand.
+- **IntersectionObserver sentinel**: Bottom-of-page trigger pattern — a ref at the end of the grid observes intersection and calls `fetchNextPage()`. See `NotesGrid`, `TechnologiesGrid`.
+- **Pagination utilities**: `src/utils/pagination.ts` exports helpers for cursor handling.
+
 ## Conventions
 
 - **Path aliases** (`tsconfig.json`): `@/*` → `src/*`; `@/root/*` → repo root. shadcn aliases in `components.json` (`@/components`, `@/components/ui`, `@/utils`, `@/lib`, `@/hooks`).
@@ -69,4 +84,4 @@ Layering: `route.ts` (thin, HTTP concerns) → `src/services/*` (Prisma queries,
 
 ## Project rule files
 
-`.claude/rules/` holds enforced conventions loaded into context — consult before editing the relevant area: `api-routes.md`, `authentication.md`, `database.md`, `typescript.md`. `.claude/settings.json` also references `rules/frontend-rules.md` and `rules/backend-rules.md`.
+`.claude/rules/` holds enforced conventions loaded into context — consult before editing the relevant area: `api-routes.md`, `authentication.md`, `database.md`, `frontend-rules.md`, `typescript.md`.

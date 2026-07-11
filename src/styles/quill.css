@@ -1,0 +1,89 @@
+/* Quill Editor Customization */
+
+.ql-editor-custom.ql-editor {
+  min-height: 200px;
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 12px;
+}
+
+.ql-snow .ql-toolbar {
+  border: none;
+  border-bottom: 1px solid hsl(var(--muted) / 0.3);
+  padding: 8px 12px;
+  gap: 4px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.ql-snow .ql-toolbar button {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid hsl(var(--muted) / 0.2);
+  background: hsl(var(--card) / 0.5);
+  transition: all 0.2s;
+}
+
+.ql-snow .ql-toolbar button:hover {
+  background: hsl(var(--card));
+  border-color: hsl(var(--primary));
+}
+
+.ql-snow .ql-toolbar button.ql-active {
+  background: hsl(var(--primary) / 0.1);
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+}
+
+.ql-snow .ql-toolbar button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ql-toolbar.ql-snow::after {
+  display: none;
+}
+
+/* Quill Formats */
+.ql-editor.ql-editor {
+  background-color: hsl(var(--card) / 0.3);
+  border-radius: 6px;
+}
+
+.ql-editor code {
+  background-color: hsl(var(--muted) / 0.2);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.ql-editor pre {
+  background-color: hsl(var(--muted) / 0.1);
+  border-radius: 6px;
+  padding: 12px;
+  border: 1px solid hsl(var(--muted) / 0.2);
+}
+
+.ql-editor blockquote {
+  border-left: 3px solid hsl(var(--primary) / 0.5);
+  padding-left: 12px;
+  color: hsl(var(--muted-foreground));
+  margin: 8px 0;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .ql-snow .ql-stroke {
+    stroke: hsl(var(--muted-foreground));
+  }
+
+  .ql-snow .ql-fill {
+    fill: hsl(var(--muted-foreground));
+  }
+
+  .ql-editor.ql-editor {
+    color: hsl(var(--foreground));
+  }
+}

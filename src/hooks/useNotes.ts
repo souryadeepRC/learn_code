@@ -4,34 +4,34 @@ import {
   CreateNoteInput,
   UpdateNoteInput,
 } from '@/schema/notes';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { Note, NotesApiResponse } from '@/types/note';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+import axios from 'axios';
 
-// Types (You might want to extract these to a shared types file later)
-export type NoteQuestion = {
-  id: string;
-  question: string;
-  answer: Record<string, unknown>;
-  order: number;
-};
-export interface Note {
-  id: string;
-  title: string;
-  description: string;
-  technologies: string[];
-  visibility: 'PRIVATE' | 'PUBLIC';
-  questions: NoteQuestion[];
-  isArchived: boolean;
-  authorId: string;
-  authorRole: string;
-  createdAt: string;
-  updatedAt: string;
-}
+export type { Note, NoteQuestion } from '@/types/note';
 
 interface ApiResponse<T> {
   success: boolean;
   data: T;
   message: string;
 }
+
+const NOTES_LIMIT = 12;
+
+const toErrorMessage = (err: unknown, fallback: string) => {
+  if (axios.isAxiosError(err)) {
+    return (
+      (err.response?.data as { message?: string } | undefined)?.message ??
+      fallback
+    );
+  }
+  return 'Network error. Check your connection.';
+};
 
 // ─── Queries ───────────────────────────────────────────────────────────────────
 
@@ -45,6 +45,41 @@ export const useUserNotes = (includeArchived = false) => {
       return response.data.data;
     },
     refetchOnWindowFocus: false,
+  });
+};
+
+/**
+ * Infinite-scroll (cursor-paginated) query hook for the authenticated user's notes.
+ * Mirrors useInfiniteTechnologies — same page shape, same fetch-next-page contract.
+ */
+export const useInfiniteNotes = ({
+  includeArchived = false,
+  search = '',
+}: {
+  includeArchived?: boolean;
+  search?: string;
+} = {}) => {
+  return useInfiniteQuery<NotesApiResponse, Error>({
+    queryKey: ['notes', 'infinite', { includeArchived, search }],
+    queryFn: async ({ pageParam }) => {
+      try {
+        const { data } = await apiClient.get<NotesApiResponse>('/notes', {
+          params: {
+            archived: includeArchived,
+            search: search || undefined,
+            cursor: (pageParam as string | null) ?? undefined,
+            limit: NOTES_LIMIT,
+          },
+        });
+        return data;
+      } catch (err) {
+        throw new Error(toErrorMessage(err, 'Failed to fetch notes.'));
+      }
+    },
+    initialPageParam: null,
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.hasNextPage ? lastPage.meta.nextCursor : undefined,
+    staleTime: 1000 * 30,
   });
 };
 

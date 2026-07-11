@@ -1,22 +1,29 @@
 import { HTTP_STATUS } from '@/constants/api';
-import { createNote, getUserNotes } from '@/root/src/services/notesService';
+import { createNote, listUserNotes } from '@/root/src/services/notesService';
 import { CreateNoteSchema } from '@/schema/notes';
 import { APIHandler, APIResponse } from '@/utils/api';
 import { NoteAuthorRole } from '@prisma-custom/notes';
 
 // ─── GET /api/notes ────────────────────────────────────────────────────────────
-// Returns the authenticated user's notes.
-// Query param: ?archived=true to include archived notes.
+// Returns the authenticated user's notes, cursor-paginated.
+// Query params: ?archived=true&cursor=<opaque>&limit=12&search=react
 
 export const GET = APIHandler.authenticated(async ({ userId, request }) => {
   const { searchParams } = new URL(request.url);
   const includeArchived = searchParams.get('archived') === 'true';
 
-  const notes = await getUserNotes(userId, includeArchived);
+  const { data, nextCursor, hasNextPage, limit } = await listUserNotes({
+    authorId: userId,
+    includeArchived,
+    search: searchParams.get('search'),
+    cursor: searchParams.get('cursor'),
+    limit: searchParams.get('limit'),
+  });
 
   return APIResponse.send(HTTP_STATUS.OK).json({
     success: true,
-    data: notes,
+    data,
+    meta: { nextCursor, hasNextPage, limit },
     message: 'Notes fetched successfully',
   });
 });

@@ -9,7 +9,7 @@ export const QuestionAnswerSchema = z.object({
     .min(1, 'Question is required')
     .max(200, 'Title must be under 200 characters'),
   // Quill Delta JSON — { ops: [...] } — opaque at validation layer; editor owns shape
-  answer: z.record(z.string(), z.unknown()),
+  answer: z.record(z.string(), z.unknown()).optional().default({}),
   order: z.number().int().min(0).default(0),
 });
 
@@ -24,7 +24,7 @@ export const CreateNoteSchema = z.object({
   description: z
     .string()
     .max(200, 'Description must be at under 200 characters'),
-  technologies: z.array(z.string()).default([]),
+  technologyId: z.string().min(1, 'Technology is required'),
   questions: z.array(QuestionAnswerSchema).default([]),
   // USER role always sends PRIVATE; ADMIN can send PUBLIC or PRIVATE
   visibility: z.enum(['PRIVATE', 'PUBLIC']).default('PRIVATE'),

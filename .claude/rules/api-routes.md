@@ -26,6 +26,30 @@ All responses must use `apiResponse<T>()` format:
 }
 ```
 
+### Cursor-Based Pagination
+
+List endpoints that support pagination use cursor-based pagination (not offset):
+
+```typescript
+{
+  "success": boolean,
+  "data": T[],
+  "meta": {
+    "nextCursor": "encoded_cursor_string" | null,
+    "hasNextPage": boolean,
+    "limit": number,
+    "timestamp": "ISO string",
+    "path": "request path"
+  }
+}
+```
+
+- **nextCursor**: Opaque cursor for the next page; `null` if no more pages.
+- **hasNextPage**: Boolean indicating whether to fetch again.
+- **limit**: Number of items in this batch.
+- Client passes `?cursor=<nextCursor>` for subsequent pages.
+- See `src/utils/pagination.ts` for cursor helpers.
+
 ## Status Codes
 
 - 200: Success

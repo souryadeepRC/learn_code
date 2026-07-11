@@ -1,6 +1,5 @@
 import { Content } from '@/components/common/Content';
 import { Heading } from '@/components/common/Heading';
-import { AppHeader } from '@/root/src/components/common/AppHeader';
 import { TechnologiesGrid } from '@/root/src/components/features/technologies/TechnologiesGrid';
 import type { Metadata } from 'next';
 
@@ -17,8 +16,6 @@ export const metadata: Metadata = {
 const TechnologiesPage = () => {
   return (
     <main id="main-content" className="min-h-screen bg-background">
-      <AppHeader />
-
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <header className="mb-10 flex flex-col gap-3">
           {/* Headline */}

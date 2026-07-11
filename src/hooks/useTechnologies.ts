@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
 import apiClient from '@/lib/axios';
@@ -7,13 +7,13 @@ import type { TechnologiesApiResponse } from '@/types/technology';
 const TECHNOLOGIES_LIMIT = 12;
 
 const fetchTechnologies = async (
-  page: number
+  cursor: string | null
 ): Promise<TechnologiesApiResponse> => {
   try {
     const { data } = await apiClient.get<TechnologiesApiResponse>(
       '/technologies',
       {
-        params: { page, limit: TECHNOLOGIES_LIMIT },
+        params: { cursor: cursor ?? undefined, limit: TECHNOLOGIES_LIMIT },
       }
     );
     return data;
@@ -29,7 +29,7 @@ const fetchTechnologies = async (
 };
 
 /**
- * Infinite-scroll query hook for the /api/technologies endpoint.
+ * Infinite-scroll (cursor-paginated) query hook for the /api/technologies endpoint.
  * Works for both authenticated and guest users (public route).
  *
  * Usage:
@@ -39,10 +39,28 @@ const fetchTechnologies = async (
 export const useInfiniteTechnologies = () => {
   return useInfiniteQuery<TechnologiesApiResponse, Error>({
     queryKey: ['technologies', 'infinite'],
-    queryFn: ({ pageParam }) => fetchTechnologies((pageParam as number) ?? 1),
-    initialPageParam: 1,
+    queryFn: ({ pageParam }) => fetchTechnologies(pageParam as string | null),
+    initialPageParam: null,
     getNextPageParam: (lastPage) =>
-      lastPage.meta.hasNextPage ? lastPage.meta.page + 1 : undefined,
+      lastPage.meta.hasNextPage ? lastPage.meta.nextCursor : undefined,
     staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+};
+
+/**
+ * Live-search lookup used by the note technology picker — first page only,
+ * no infinite scroll needed for a short suggestion list.
+ */
+export const useTechnologySearch = (search: string) => {
+  return useQuery<TechnologiesApiResponse, Error>({
+    queryKey: ['technologies', 'search', search],
+    queryFn: async () => {
+      const { data } = await apiClient.get<TechnologiesApiResponse>(
+        '/technologies',
+        { params: { search: search || undefined, limit: 8 } }
+      );
+      return data;
+    },
+    staleTime: 1000 * 60,
   });
 };

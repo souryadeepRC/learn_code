@@ -1,6 +1,5 @@
 'use client';
 
-import { AppHeader } from '@/components/common/AppHeader';
 import { AuthGuard } from '@/components/common/AuthGuard';
 import { Content } from '@/components/common/Content';
 import { ProfileHeader } from '@/components/features/profile/ProfileHeader';
@@ -17,7 +16,6 @@ const ProfilePageContent = () => {
 const ProfilePage = () => {
   return (
     <main className="min-h-screen bg-gradient-to-b from-background via-background/95 to-muted/20 flex flex-col">
-      <AppHeader />
       <AuthGuard requiredAccess="auth">
         <ProfilePageContent />
       </AuthGuard>

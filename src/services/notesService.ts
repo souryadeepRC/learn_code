@@ -1,9 +1,12 @@
+import { PAGINATION } from '@/constants/api';
 import { prismaNotes } from '@/lib/prismaNotes';
 import {
   ArchiveNoteInput,
   CreateNoteInput,
   UpdateNoteInput,
 } from '@/schema/notes';
+import { getTechnologiesByIds, technologyExists } from '@/services/technologiesService';
+import { clampLimit, decodeCursor, encodeCursor } from '@/utils/pagination';
 import { NoteAuthorRole, Prisma, PrismaClient } from '@prisma-custom/notes';
 
 // Suppress unused import — PrismaClient referenced for type narrowing only
@@ -18,7 +21,7 @@ const NOTE_SELECT = {
   authorRole: true,
   title: true,
   description: true,
-  technologies: true,
+  technologyId: true,
   questions: true,
   visibility: true,
   isArchived: true,
@@ -26,35 +29,151 @@ const NOTE_SELECT = {
   updatedAt: true,
 } as const;
 
-// ─── List ──────────────────────────────────────────────────────────────────────
+// `updatedAt` isn't unique, so the cursor carries an `id` tiebreaker too.
+type NoteCursor = { updatedAt: string; id: string };
 
-export const getUserNotes = async (
-  authorId: string,
-  includeArchived: boolean = false
-) => {
-  return prismaNotes.note.findMany({
-    where: {
-      OR: [
-        { authorId },
-        {
-          authorRole: NoteAuthorRole.ADMIN,
-          visibility: 'PUBLIC',
-        },
-      ],
-      isArchived: includeArchived,
-    },
+// ─── Cross-domain enrichment ───────────────────────────────────────────────────
+// technologyId is a plain cross-DB reference (see notes.schema.prisma) — resolved
+// here at the application layer, never via a Prisma relation.
+
+const attachTechnologies = async <T extends { technologyId: string }>(
+  notes: T[]
+): Promise<(T & { technology: Awaited<ReturnType<typeof getTechnologiesByIds>>[number] | null })[]> => {
+  const ids = [...new Set(notes.map((note) => note.technologyId))];
+  const technologies = await getTechnologiesByIds(ids);
+  const byId = new Map(technologies.map((technology) => [technology.id, technology]));
+
+  return notes.map((note) => ({
+    ...note,
+    technology: byId.get(note.technologyId) ?? null,
+  }));
+};
+
+const attachTechnology = async <T extends { technologyId: string }>(note: T) => {
+  const [enriched] = await attachTechnologies([note]);
+  return enriched;
+};
+
+// ─── List (cursor-paginated) ────────────────────────────────────────────────────
+
+export const listUserNotes = async (params: {
+  authorId: string;
+  includeArchived?: boolean;
+  search?: string | null;
+  cursor?: string | null;
+  limit?: string | null;
+}) => {
+  const limit = clampLimit(
+    params.limit,
+    PAGINATION.DEFAULT_LIMIT,
+    PAGINATION.MAX_LIMIT
+  );
+  const cursor = decodeCursor<NoteCursor>(params.cursor);
+  const search = params.search?.trim();
+
+  const where: Prisma.NoteWhereInput = {
+    AND: [
+      {
+        OR: [
+          { authorId: params.authorId },
+          { authorRole: NoteAuthorRole.ADMIN, visibility: 'PUBLIC' },
+        ],
+      },
+      ...(params.includeArchived ? [] : [{ isArchived: false }]),
+      ...buildSearchFilter(search),
+      ...buildCursorFilter(cursor),
+    ],
+  };
+
+  const rows = await prismaNotes.note.findMany({
+    where,
     select: NOTE_SELECT,
-    orderBy: { updatedAt: 'desc' },
+    orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+    take: limit + 1,
   });
+
+  return finalizePage(rows, limit);
+};
+
+export const listPublicAdminNotes = async (params: {
+  search?: string | null;
+  cursor?: string | null;
+  limit?: string | null;
+}) => {
+  const limit = clampLimit(
+    params.limit,
+    PAGINATION.DEFAULT_LIMIT,
+    PAGINATION.MAX_LIMIT
+  );
+  const cursor = decodeCursor<NoteCursor>(params.cursor);
+  const search = params.search?.trim();
+
+  const where: Prisma.NoteWhereInput = {
+    AND: [
+      { authorRole: NoteAuthorRole.ADMIN, visibility: 'PUBLIC', isArchived: false },
+      ...buildSearchFilter(search),
+      ...buildCursorFilter(cursor),
+    ],
+  };
+
+  const rows = await prismaNotes.note.findMany({
+    where,
+    select: NOTE_SELECT,
+    orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+    take: limit + 1,
+  });
+
+  return finalizePage(rows, limit);
+};
+
+const buildSearchFilter = (search: string | undefined): Prisma.NoteWhereInput[] =>
+  search
+    ? [
+        {
+          OR: [
+            { title: { contains: search, mode: 'insensitive' } },
+            { description: { contains: search, mode: 'insensitive' } },
+          ],
+        },
+      ]
+    : [];
+
+const buildCursorFilter = (cursor: NoteCursor | null): Prisma.NoteWhereInput[] =>
+  cursor
+    ? [
+        {
+          OR: [
+            { updatedAt: { lt: new Date(cursor.updatedAt) } },
+            { updatedAt: new Date(cursor.updatedAt), id: { lt: cursor.id } },
+          ],
+        },
+      ]
+    : [];
+
+const finalizePage = async <T extends { technologyId: string; updatedAt: Date; id: string }>(
+  rows: T[],
+  limit: number
+) => {
+  const hasNextPage = rows.length > limit;
+  const page = hasNextPage ? rows.slice(0, limit) : rows;
+  const nextCursor = hasNextPage
+    ? encodeCursor({
+        updatedAt: page[page.length - 1].updatedAt.toISOString(),
+        id: page[page.length - 1].id,
+      })
+    : null;
+
+  return { data: await attachTechnologies(page), nextCursor, hasNextPage, limit };
 };
 
 // ─── Single ────────────────────────────────────────────────────────────────────
 
 export const getNoteById = async (id: string) => {
-  return prismaNotes.note.findUnique({
+  const note = await prismaNotes.note.findUnique({
     where: { id },
     select: NOTE_SELECT,
   });
+  return note ? attachTechnology(note) : null;
 };
 
 // ─── Create ────────────────────────────────────────────────────────────────────
@@ -64,17 +183,21 @@ export const createNote = async (
   authorRole: NoteAuthorRole,
   data: CreateNoteInput
 ) => {
+  if (!(await technologyExists(data.technologyId))) {
+    throw new Error('Selected technology does not exist');
+  }
+
   // USER notes are always PRIVATE regardless of what client sends
   const visibility =
     authorRole === NoteAuthorRole.ADMIN ? data.visibility : 'PRIVATE';
 
-  return prismaNotes.note.create({
+  const note = await prismaNotes.note.create({
     data: {
       authorId,
       authorRole,
       title: data.title,
       description: data.description,
-      technologies: data.technologies ?? [],
+      technologyId: data.technologyId,
       // Cast each answer to Prisma.InputJsonValue — Prisma's Json field type
       questions: (data.questions ?? []).map((q) => ({
         id: q.id,
@@ -86,6 +209,8 @@ export const createNote = async (
     },
     select: NOTE_SELECT,
   });
+
+  return attachTechnology(note);
 };
 
 // ─── Update ────────────────────────────────────────────────────────────────────
@@ -95,6 +220,10 @@ export const updateNote = async (
   authorRole: NoteAuthorRole,
   data: UpdateNoteInput
 ) => {
+  if (data.technologyId !== undefined && !(await technologyExists(data.technologyId))) {
+    throw new Error('Selected technology does not exist');
+  }
+
   // Recalculate visibility — USER can never set PUBLIC
   const visibility =
     data.visibility !== undefined
@@ -103,14 +232,12 @@ export const updateNote = async (
         : 'PRIVATE'
       : undefined;
 
-  return prismaNotes.note.update({
+  const note = await prismaNotes.note.update({
     where: { id },
     data: {
       ...(data.title !== undefined && { title: data.title }),
       ...(data.description !== undefined && { description: data.description }),
-      ...(data.technologies !== undefined && {
-        technologies: data.technologies,
-      }),
+      ...(data.technologyId !== undefined && { technologyId: data.technologyId }),
       // Use { set } envelope — required by Prisma for embedded type array updates
       ...(data.questions !== undefined && {
         questions: {
@@ -126,6 +253,8 @@ export const updateNote = async (
     },
     select: NOTE_SELECT,
   });
+
+  return attachTechnology(note);
 };
 
 // ─── Delete (Hard) ─────────────────────────────────────────────────────────────
@@ -137,23 +266,11 @@ export const deleteNote = async (id: string) => {
 // ─── Archive Toggle ────────────────────────────────────────────────────────────
 
 export const toggleArchiveNote = async (id: string, data: ArchiveNoteInput) => {
-  return prismaNotes.note.update({
+  const note = await prismaNotes.note.update({
     where: { id },
     data: { isArchived: data.isArchived },
     select: NOTE_SELECT,
   });
-};
 
-// ─── Public Admin Notes ────────────────────────────────────────────────────────
-
-export const getPublicAdminNotes = async () => {
-  return prismaNotes.note.findMany({
-    where: {
-      authorRole: NoteAuthorRole.ADMIN,
-      visibility: 'PUBLIC',
-      isArchived: false,
-    },
-    select: NOTE_SELECT,
-    orderBy: { updatedAt: 'desc' },
-  });
+  return attachTechnology(note);
 };
