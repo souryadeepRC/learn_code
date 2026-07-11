@@ -1,6 +1,7 @@
 'use client';
 
 import { Content } from '@/components/common/Content';
+import PageHeader from '@/components/common/PageHeader';
 import { SearchBox } from '@/components/common/SearchBox';
 import { NotesGrid } from '@/components/features/notes/NotesGrid';
 import { Button } from '@/components/ui/button';
@@ -9,8 +10,6 @@ import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import Link from 'next/link';
 import { useState } from 'react';
 import { FiArchive, FiPlus } from 'react-icons/fi';
-import { GrNotes } from 'react-icons/gr';
-import { ProfileCardHeader } from '../../components/features/profile/ProfileCardHeader';
 
 export default function NotesDashboard() {
   const [activeTab, setActiveTab] = useState('active');
@@ -18,9 +17,8 @@ export default function NotesDashboard() {
   const debouncedSearch = useDebouncedValue(search, 350);
 
   return (
-    <Content className="py-4 md:py-12 px-4 md:px-10 max-w-6xl mx-auto space-y-6 w-full min-w-0 max-w-full">
-      <ProfileCardHeader
-        icon={<GrNotes />}
+    <Content>
+      <PageHeader
         title="Technical Notes"
         description="Organize, search, and review your Q&A documentations"
       />

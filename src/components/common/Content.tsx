@@ -23,7 +23,7 @@ const contentVariants = cva(
 export type ContentProps = React.HTMLAttributes<HTMLParagraphElement> &
   VariantProps<typeof contentVariants> & {
     /** Overrides the rendered HTML tag (defaults to <p>). */
-    as?: 'p' | 'div' | 'span' | 'article' | 'section';
+    as?: 'p' | 'div' | 'span' | 'article' | 'section' | 'main';
     children?: React.ReactNode;
   };
 
@@ -34,7 +34,7 @@ export type ContentProps = React.HTMLAttributes<HTMLParagraphElement> &
 export const Content = ({
   className,
   size = 'default',
-  as: Tag = 'div',
+  as: Tag = 'main',
   children,
   ...props
 }: ContentProps) => {

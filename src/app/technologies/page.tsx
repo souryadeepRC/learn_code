@@ -1,7 +1,7 @@
-import { Content } from '@/components/common/Content';
-import { Heading } from '@/components/common/Heading';
-import { TechnologiesGrid } from '@/root/src/components/features/technologies/TechnologiesGrid';
+import PageHeader from '@/components/common/PageHeader';
+import { TechnologiesGrid } from '@/components/features/technologies/TechnologiesGrid';
 import type { Metadata } from 'next';
+import { Content } from '../../components/common/Content';
 
 export const metadata: Metadata = {
   title: 'Technologies | Skill Track AI',
@@ -15,23 +15,16 @@ export const metadata: Metadata = {
  */
 const TechnologiesPage = () => {
   return (
-    <main id="main-content" className="min-h-screen bg-background">
+    <Content>
+      <PageHeader
+        title="Technologies"
+        description="Discover our full library of technologies — each packed with MCQ
+            challenges and coding problems to level up your skills."
+      />
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <header className="mb-10 flex flex-col gap-3">
-          {/* Headline */}
-          <Heading variant="h1">Technologies</Heading>
-
-          {/* Subtitle */}
-          <Content size="default" className="max-w-2xl">
-            Discover our full library of technologies — each packed with MCQ
-            challenges and coding problems to level up your skills.
-          </Content>
-        </header>
-
-        {/* ── Infinite scroll grid ── */}
         <TechnologiesGrid />
       </div>
-    </main>
+    </Content>
   );
 };
 

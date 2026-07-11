@@ -5,7 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { CreateNoteInput } from '@/schema/notes';
 import React from 'react';
-import { Control, Controller, FieldErrors, UseFormRegister } from 'react-hook-form';
+import {
+  Control,
+  Controller,
+  FieldErrors,
+  UseFormRegister,
+} from 'react-hook-form';
 import { FiHelpCircle, FiMove, FiTrash2 } from 'react-icons/fi';
 import { QuillEditor } from '../QuillEditor';
 
@@ -25,11 +30,9 @@ export const NoteEditorQuestionCard: React.FC<NoteEditorQuestionCardProps> = ({
   onRemove,
 }) => {
   const questionError = errors.questions?.[index]?.question?.message as
-    | string
-    | undefined;
+    string | undefined;
   const answerError = errors.questions?.[index]?.answer?.message as
-    | string
-    | undefined;
+    string | undefined;
 
   return (
     <div className="p-4 sm:p-5 border rounded-xl bg-card/70 backdrop-blur-sm shadow-2xs hover:shadow-sm transition-all duration-300 relative group border-muted-foreground/15 space-y-4">
@@ -45,7 +48,10 @@ export const NoteEditorQuestionCard: React.FC<NoteEditorQuestionCardProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5">
-          <div className="p-1 text-muted-foreground/40 hidden sm:block cursor-grab active:cursor-grabbing hover:text-muted-foreground transition-colors" title="Drag to reorder">
+          <div
+            className="p-1 text-muted-foreground/40 hidden sm:block cursor-grab active:cursor-grabbing hover:text-muted-foreground transition-colors"
+            title="Drag to reorder"
+          >
             <FiMove className="h-3.5 w-3.5" />
           </div>
           <Button
@@ -85,14 +91,14 @@ export const NoteEditorQuestionCard: React.FC<NoteEditorQuestionCardProps> = ({
               Rich formatting enabled
             </span>
           </div>
-          
+
           <div className="rounded-lg overflow-hidden border border-muted-foreground/20 bg-background/50 focus-within:border-primary transition-all">
             <Controller
               control={control}
               name={`questions.${index}.answer` as const}
               render={({ field: { onChange, value } }) => (
                 <QuillEditor
-                  value={value}
+                  value={value as string | Record<string, unknown> | null}
                   onChange={onChange}
                   placeholder="Provide a comprehensive explanation with code snippets, bullet points, or highlights..."
                   error={answerError}

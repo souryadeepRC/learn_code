@@ -23,11 +23,11 @@ export const AppHeaderLogo = ({ className }: Props) => {
     >
       {/* Icon mark */}
       <Image
-        src="/appLogo.png"
+        src="/skill-track-ai-logo.svg"
         alt="Skill Track AI Logo"
-        width={60}
-        height={60}
-        className="h-20 w-20 object-contain shrink-0"
+        width={10}
+        height={10}
+        className="h-10 w-10 object-contain shrink-0"
         //priority
       />
 

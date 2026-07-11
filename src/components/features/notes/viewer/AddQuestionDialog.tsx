@@ -30,7 +30,7 @@ export const AddQuestionDialog: React.FC<AddQuestionDialogProps> = ({
   existingQuestions,
 }) => {
   const [question, setQuestion] = useState('');
-  const [answer, setAnswer] = useState<Record<string, unknown>>({});
+  const [answer, setAnswer] = useState<Record<string, unknown> | string>({});
   const [error, setError] = useState<string | null>(null);
 
   const { mutate: updateNote, isPending } = useUpdateNote();
@@ -44,9 +44,13 @@ export const AddQuestionDialog: React.FC<AddQuestionDialogProps> = ({
     setError(null);
 
     const normalizedAnswer =
-      Object.keys(answer).length > 0
-        ? answer
-        : { ops: [{ insert: '\n' }] };
+      typeof answer === 'string'
+        ? answer.trim()
+          ? answer
+          : { ops: [{ insert: '\n' }] }
+        : Object.keys(answer).length > 0
+          ? answer
+          : { ops: [{ insert: '\n' }] };
 
     const newQuestion: NoteQuestion = {
       id: crypto.randomUUID(),
