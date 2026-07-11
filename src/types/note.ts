@@ -8,7 +8,7 @@ export type NoteAuthorRole = 'USER' | 'ADMIN';
 export type NoteQuestion = {
   id: string;
   question: string;
-  answer: Record<string, unknown>;
+  answer: string;
   order: number;
 };
 

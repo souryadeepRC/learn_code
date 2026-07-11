@@ -1,6 +1,6 @@
 import { HTTP_STATUS } from '@/constants/api';
-import { createNote, listNotes } from '@/root/src/services/notesService';
 import { CreateNoteSchema } from '@/schema/notes';
+import { createNote, listNotes } from '@/services/notesService';
 import { APIHandler, APIResponse } from '@/utils/api';
 import { NoteAuthorRole } from '@prisma-custom/notes';
 

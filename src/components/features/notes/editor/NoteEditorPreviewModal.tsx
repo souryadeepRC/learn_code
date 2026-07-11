@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/dialog';
 import { CreateNoteInput } from '@/schema/notes';
 import type { TechnologySummary } from '@/types/technology';
-import { QuillDeltaToHtmlConverter } from 'quill-delta-to-html';
 import React from 'react';
 import { FiBookOpen, FiGlobe, FiLock, FiTag } from 'react-icons/fi';
 
@@ -38,8 +37,15 @@ export const NoteEditorPreviewModal: React.FC<NoteEditorPreviewModalProps> = ({
             {formData.title || 'Untitled Note'}
           </DialogTitle>
           <div className="flex items-center gap-2 mt-3 flex-wrap">
-            <Badge variant="outline" className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-lg">
-              {formData.visibility === 'PUBLIC' ? <FiGlobe className="w-3 h-3 text-primary" /> : <FiLock className="w-3 h-3 text-muted-foreground" />}
+            <Badge
+              variant="outline"
+              className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-lg"
+            >
+              {formData.visibility === 'PUBLIC' ? (
+                <FiGlobe className="w-3 h-3 text-primary" />
+              ) : (
+                <FiLock className="w-3 h-3 text-muted-foreground" />
+              )}
               <span>{formData.visibility}</span>
             </Badge>
             {technology && (
@@ -73,27 +79,13 @@ export const NoteEditorPreviewModal: React.FC<NoteEditorPreviewModalProps> = ({
               </h3>
             </div>
 
-            {(!formData.questions || formData.questions.length === 0) ? (
+            {!formData.questions || formData.questions.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground text-sm italic">
                 No Q&amp;A blocks added yet.
               </div>
             ) : (
               <div className="space-y-6">
                 {formData.questions.map((q, idx) => {
-                  let answerHtml = '';
-                  try {
-                    const answerObj = q.answer as Record<string, unknown>;
-                    if (answerObj && Array.isArray(answerObj.ops)) {
-                      const converter = new QuillDeltaToHtmlConverter(
-                        answerObj.ops,
-                        {}
-                      );
-                      answerHtml = converter.convert();
-                    }
-                  } catch (e) {
-                    console.error('Delta conversion error:', e);
-                  }
-
                   return (
                     <div
                       key={q.id || idx}
@@ -109,11 +101,10 @@ export const NoteEditorPreviewModal: React.FC<NoteEditorPreviewModalProps> = ({
                       </div>
 
                       <div className="pl-0 sm:pl-11 pt-2 border-t sm:border-t-0 border-border/40">
-                        {answerHtml ? (
-                          <div
-                            className="prose prose-sm sm:prose-base dark:prose-invert max-w-none text-muted-foreground leading-relaxed"
-                            dangerouslySetInnerHTML={{ __html: answerHtml }}
-                          />
+                        {q.answer ? (
+                          <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none text-muted-foreground leading-relaxed">
+                            {q.answer}
+                          </div>
                         ) : (
                           <p className="text-sm text-muted-foreground/70 italic">
                             No detailed answer provided.

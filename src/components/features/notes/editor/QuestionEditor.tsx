@@ -1,11 +1,8 @@
 'use client';
 
-import '@/styles/quill.css';
-import 'react-quill-new/dist/quill.snow.css';
-
 import { Label } from '@/components/ui/label';
 import { CreateNoteInput } from '@/schema/notes';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Control,
   Controller,
@@ -13,7 +10,7 @@ import {
   UseFormRegister,
 } from 'react-hook-form';
 import { FormInput } from '../../../common/FormInput';
-import { QuillEditor } from '../QuillEditor';
+import TipTapEditor from '../../../text-editor/TipTapEditor.tsx/TipTapEditor';
 
 interface QuestionEditorProps {
   index: number;
@@ -28,6 +25,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
   register,
   errors,
 }) => {
+  const [html, setHtml] = useState('');
   const questionError = errors.questions?.[index]?.question?.message;
   const answerError = errors.questions?.[index]?.answer?.message;
 
@@ -56,15 +54,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
           control={control}
           render={({ field: { value, onChange } }) => (
             <div className="rounded-lg border border-muted/50 overflow-hidden focus-within:border-primary transition-all">
-              <QuillEditor
-                value={value as string | Record<string, unknown> | null}
-                onChange={onChange}
-                placeholder="Type your answer here... You can format with bold, italic, links, code blocks, etc."
-                className="ql-editor-custom"
-                error={
-                  typeof answerError === 'string' ? answerError : undefined
-                }
-              />
+              <TipTapEditor content={value} onChange={onChange} />
             </div>
           )}
         />

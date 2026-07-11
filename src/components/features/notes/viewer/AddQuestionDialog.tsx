@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { NoteQuestion, useUpdateNote } from '@/hooks/useNotes';
 import React, { useState } from 'react';
 import { FiPlus } from 'react-icons/fi';
-import { QuillEditor } from '../QuillEditor';
+import TipTapEditor from '../../../text-editor/TipTapEditor.tsx/TipTapEditor';
 
 interface AddQuestionDialogProps {
   isOpen: boolean;
@@ -30,7 +30,7 @@ export const AddQuestionDialog: React.FC<AddQuestionDialogProps> = ({
   existingQuestions,
 }) => {
   const [question, setQuestion] = useState('');
-  const [answer, setAnswer] = useState<Record<string, unknown> | string>({});
+  const [answer, setAnswer] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
   const { mutate: updateNote, isPending } = useUpdateNote();
@@ -43,19 +43,10 @@ export const AddQuestionDialog: React.FC<AddQuestionDialogProps> = ({
     }
     setError(null);
 
-    const normalizedAnswer =
-      typeof answer === 'string'
-        ? answer.trim()
-          ? answer
-          : { ops: [{ insert: '\n' }] }
-        : Object.keys(answer).length > 0
-          ? answer
-          : { ops: [{ insert: '\n' }] };
-
     const newQuestion: NoteQuestion = {
       id: crypto.randomUUID(),
       question: question.trim(),
-      answer: normalizedAnswer as Record<string, unknown>,
+      answer: JSON.stringify({ content: answer }),
       order: existingQuestions.length,
     };
 
@@ -69,7 +60,7 @@ export const AddQuestionDialog: React.FC<AddQuestionDialogProps> = ({
       {
         onSuccess: () => {
           setQuestion('');
-          setAnswer({});
+          setAnswer('');
           onClose();
         },
         onError: (err: unknown) => {
@@ -131,8 +122,8 @@ export const AddQuestionDialog: React.FC<AddQuestionDialogProps> = ({
               </span>
             </Label>
             <div className="rounded-lg overflow-hidden border border-muted-foreground/20 bg-background/50 focus-within:border-primary transition-all">
-              <QuillEditor
-                value={answer}
+              <TipTapEditor
+                content={answer}
                 onChange={setAnswer}
                 placeholder="Provide a comprehensive explanation with code snippets, bullet points, or highlights..."
                 className="[&_.ql-editor]:min-h-[420px] [&_.ql-container]:min-h-[420px] [&_.ql-editor]:text-sm"

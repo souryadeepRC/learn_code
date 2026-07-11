@@ -6,7 +6,7 @@ import { APIResponse } from './api';
 const emojiRegex = /[\p{Extended_Pictographic}\u200d\uFE0F]/u;
 const controlCharRegex = /[\u0000-\u001F\u007F]/;
 // Removed generic SQL keywords (insert, update, select, delete) as they block legitimate technical notes
-// and break Quill Delta JSON (which uses {"insert": "text"}).
+// and break Delta JSON (which uses {"insert": "text"}).
 const suspiciousQueryRegex = /<(script|iframe|object|embed|applet)/i;
 
 type ParsedJsonBodyResult =

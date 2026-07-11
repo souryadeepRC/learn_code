@@ -5,9 +5,17 @@ import {
   CreateNoteInput,
   UpdateNoteInput,
 } from '@/schema/notes';
-import { getTechnologiesByIds, technologyExists } from '@/services/technologiesService';
+import {
+  getTechnologiesByIds,
+  technologyExists,
+} from '@/services/technologiesService';
 import { clampLimit, decodeCursor, encodeCursor } from '@/utils/pagination';
-import { NoteAuthorRole, Prisma, PrismaClient, SubscriptionTier } from '@prisma-custom/notes';
+import {
+  NoteAuthorRole,
+  Prisma,
+  PrismaClient,
+  SubscriptionTier,
+} from '@prisma-custom/notes';
 
 // Suppress unused import — PrismaClient referenced for type narrowing only
 void PrismaClient;
@@ -39,10 +47,16 @@ type NoteCursor = { updatedAt: string; id: string };
 
 const attachTechnologies = async <T extends { technologyId: string }>(
   notes: T[]
-): Promise<(T & { technology: Awaited<ReturnType<typeof getTechnologiesByIds>>[number] | null })[]> => {
+): Promise<
+  (T & {
+    technology: Awaited<ReturnType<typeof getTechnologiesByIds>>[number] | null;
+  })[]
+> => {
   const ids = [...new Set(notes.map((note) => note.technologyId))];
   const technologies = await getTechnologiesByIds(ids);
-  const byId = new Map(technologies.map((technology) => [technology.id, technology]));
+  const byId = new Map(
+    technologies.map((technology) => [technology.id, technology])
+  );
 
   return notes.map((note) => ({
     ...note,
@@ -50,7 +64,9 @@ const attachTechnologies = async <T extends { technologyId: string }>(
   }));
 };
 
-const attachTechnology = async <T extends { technologyId: string }>(note: T) => {
+const attachTechnology = async <T extends { technologyId: string }>(
+  note: T
+) => {
   const [enriched] = await attachTechnologies([note]);
   return enriched;
 };
@@ -92,20 +108,20 @@ export const listNotes = async (params: {
   const cursor = decodeCursor<NoteCursor>(params.cursor);
   const search = params.search?.trim();
   const tierFilter = reachableTiers(params.viewerTier);
-
   const where: Prisma.NoteWhereInput = {
     AND: [
       {
         OR: [
           ...(params.viewerId ? [{ authorId: params.viewerId }] : []),
           {
-            authorRole: NoteAuthorRole.ADMIN,
             visibility: 'PUBLIC',
             requiredTier: { in: tierFilter },
           },
         ],
       },
-      ...(params.viewerId && params.includeArchived ? [] : [{ isArchived: false }]),
+      ...(params.viewerId && params.includeArchived
+        ? []
+        : [{ isArchived: false }]),
       ...buildSearchFilter(search),
       ...buildCursorFilter(cursor),
     ],
@@ -153,7 +169,9 @@ export const listPublicAdminNotes = async (params: {
   });
 };
 
-const buildSearchFilter = (search: string | undefined): Prisma.NoteWhereInput[] =>
+const buildSearchFilter = (
+  search: string | undefined
+): Prisma.NoteWhereInput[] =>
   search
     ? [
         {
@@ -165,7 +183,9 @@ const buildSearchFilter = (search: string | undefined): Prisma.NoteWhereInput[] 
       ]
     : [];
 
-const buildCursorFilter = (cursor: NoteCursor | null): Prisma.NoteWhereInput[] =>
+const buildCursorFilter = (
+  cursor: NoteCursor | null
+): Prisma.NoteWhereInput[] =>
   cursor
     ? [
         {
@@ -177,7 +197,9 @@ const buildCursorFilter = (cursor: NoteCursor | null): Prisma.NoteWhereInput[] =
       ]
     : [];
 
-const finalizePage = async <T extends { technologyId: string; updatedAt: Date; id: string }>(
+const finalizePage = async <
+  T extends { technologyId: string; updatedAt: Date; id: string },
+>(
   rows: T[],
   limit: number
 ) => {
@@ -190,7 +212,12 @@ const finalizePage = async <T extends { technologyId: string; updatedAt: Date; i
       })
     : null;
 
-  return { data: await attachTechnologies(page), nextCursor, hasNextPage, limit };
+  return {
+    data: await attachTechnologies(page),
+    nextCursor,
+    hasNextPage,
+    limit,
+  };
 };
 
 // ─── Single ────────────────────────────────────────────────────────────────────
@@ -218,7 +245,9 @@ export const createNote = async (
   const visibility =
     authorRole === NoteAuthorRole.ADMIN ? data.visibility : 'PRIVATE';
   const requiredTier =
-    authorRole === NoteAuthorRole.ADMIN ? (data.requiredTier ?? 'FREE') : 'FREE';
+    authorRole === NoteAuthorRole.ADMIN
+      ? (data.requiredTier ?? 'FREE')
+      : 'FREE';
 
   const note = await prismaNotes.note.create({
     data: {
@@ -250,7 +279,10 @@ export const updateNote = async (
   authorRole: NoteAuthorRole,
   data: UpdateNoteInput
 ) => {
-  if (data.technologyId !== undefined && !(await technologyExists(data.technologyId))) {
+  if (
+    data.technologyId !== undefined &&
+    !(await technologyExists(data.technologyId))
+  ) {
     throw new Error('Selected technology does not exist');
   }
 
@@ -275,7 +307,9 @@ export const updateNote = async (
     data: {
       ...(data.title !== undefined && { title: data.title }),
       ...(data.description !== undefined && { description: data.description }),
-      ...(data.technologyId !== undefined && { technologyId: data.technologyId }),
+      ...(data.technologyId !== undefined && {
+        technologyId: data.technologyId,
+      }),
       // Use { set } envelope — required by Prisma for embedded type array updates
       ...(data.questions !== undefined && {
         questions: {

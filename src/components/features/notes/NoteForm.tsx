@@ -60,7 +60,7 @@ export const NoteForm: React.FC<NoteFormProps> = ({
       questions: (initialData?.questions?.map((q, idx) => ({
         id: q.id || crypto.randomUUID(),
         question: q.question || '',
-        answer: q.answer || {},
+        answer: q.answer || '',
         order: q.order ?? idx,
       })) || []) as any,
     },
@@ -85,7 +85,7 @@ export const NoteForm: React.FC<NoteFormProps> = ({
     append({
       id: crypto.randomUUID(),
       question: '',
-      answer: {},
+      answer: '',
       order: nextIndex,
     });
     setActiveQuestionIdx(nextIndex);
@@ -119,7 +119,7 @@ export const NoteForm: React.FC<NoteFormProps> = ({
       .map((question, index) => ({
         ...question,
         question: question.question?.trim() ?? '',
-        answer: question.answer ?? {},
+        answer: JSON.stringify({ content: question.answer ?? '' }),
         order: index,
       }));
 

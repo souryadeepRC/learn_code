@@ -12,7 +12,7 @@ import {
   UseFormRegister,
 } from 'react-hook-form';
 import { FiHelpCircle, FiMove, FiTrash2 } from 'react-icons/fi';
-import { QuillEditor } from '../QuillEditor';
+import TipTapEditor from '../../../text-editor/TipTapEditor.tsx/TipTapEditor';
 
 interface NoteEditorQuestionCardProps {
   index: number;
@@ -97,11 +97,10 @@ export const NoteEditorQuestionCard: React.FC<NoteEditorQuestionCardProps> = ({
               control={control}
               name={`questions.${index}.answer` as const}
               render={({ field: { onChange, value } }) => (
-                <QuillEditor
-                  value={value as string | Record<string, unknown> | null}
+                <TipTapEditor
+                  content={value as string}
                   onChange={onChange}
                   placeholder="Provide a comprehensive explanation with code snippets, bullet points, or highlights..."
-                  error={answerError}
                 />
               )}
             />

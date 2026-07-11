@@ -30,7 +30,7 @@ enum SubscriptionTier {
 type QuestionAnswer {
   id       String // client-generated UUID (crypto.randomUUID)
   question String
-  /// Rich text stored as Quill Delta JSON: { ops: [...] }
+  /// Rich text stored as string 
   answer   Json
   order    Int    @default(0)
 }

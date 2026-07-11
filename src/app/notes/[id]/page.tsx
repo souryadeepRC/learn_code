@@ -41,7 +41,7 @@ export default function NoteDetailPage({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Allow default Cmd+A / Ctrl+A text selection if typing inside inputs, textareas, or QuillEditor
+      // Allow default Cmd+A / Ctrl+A text selection if typing inside inputs, textareas, or TipTapEditor
       const target = e.target as HTMLElement;
       if (
         target &&

@@ -2,19 +2,13 @@ import { z } from 'zod';
 
 // ─── Q&A Pair ─────────────────────────────────────────────────────────────────
 
-const QuillAnswerSchema = z.union([
-  z.string(),
-  z.record(z.string(), z.unknown()),
-]);
-
 export const QuestionAnswerSchema = z.object({
   id: z.string().min(1, 'Question ID required'), // crypto.randomUUID() on client
   question: z
     .string()
     .max(200, 'Title must be under 200 characters')
     .default(''),
-  // Quill Delta JSON — { ops: [...] } — opaque at validation layer; editor owns shape
-  answer: QuillAnswerSchema.optional().default({}),
+  answer: z.string().optional().default(''),
   order: z.number().int().min(0).default(0),
 });
 
