@@ -1,26 +1,22 @@
 'use client';
+import { FaAngleDoubleLeft } from 'react-icons/fa';
 
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import Button from '@/components/common/Button';
+import EmptyBox from '@/components/common/EmptyBox';
+import { QuestionEditor } from '@/components/features/notes/editor/QuestionEditor';
+import { TechnologyPicker } from '@/components/features/notes/editor/TechnologyPicker';
+import QuestionPagination from '@/components/features/notes/QuestionPagination';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import { CreateNoteInput, CreateNoteSchema } from '@/schema/notes';
 import type { TechnologySummary } from '@/types/technology';
-import { cn } from '@/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Link from 'next/link';
 import React, { useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
-import {
-  FiChevronUp,
-  FiGlobe,
-  FiLock,
-  FiPlus,
-  FiSave,
-  FiTrash2,
-} from 'react-icons/fi';
-import { Input } from '@/components/ui/input';
-import { TechnologyPicker } from './editor/TechnologyPicker';
-import { QuestionEditor } from './editor/QuestionEditor';
+import { FaRegStickyNote } from 'react-icons/fa';
+import { FiGlobe, FiLock, FiPlus, FiSettings, FiTrash2 } from 'react-icons/fi';
 
 interface NoteFormProps {
   initialData?: Partial<CreateNoteInput>;
@@ -38,6 +34,10 @@ export const NoteForm: React.FC<NoteFormProps> = ({
   const [technology, setTechnology] = useState<TechnologySummary | null>(
     initialTechnology
   );
+  const [showSettings, setShowSettings] = useState(true);
+  const toggleSettings = () => {
+    setShowSettings((showSettings) => !showSettings);
+  };
   const [activeQuestionIdx, setActiveQuestionIdx] = useState(0);
 
   const {
@@ -48,12 +48,15 @@ export const NoteForm: React.FC<NoteFormProps> = ({
     watch,
     setValue,
   } = useForm<CreateNoteInput>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(CreateNoteSchema) as unknown as any,
     defaultValues: {
       title: initialData?.title || '',
       description: initialData?.description || '',
       technologyId: initialData?.technologyId || '',
-      visibility: (initialData?.visibility || 'PRIVATE') as 'PRIVATE' | 'PUBLIC',
+      visibility: (initialData?.visibility || 'PRIVATE') as
+        'PRIVATE' | 'PUBLIC',
+
       questions: (initialData?.questions?.map((q, idx) => ({
         id: q.id || crypto.randomUUID(),
         question: q.question || '',
@@ -61,7 +64,7 @@ export const NoteForm: React.FC<NoteFormProps> = ({
         order: q.order ?? idx,
       })) || []) as any,
     },
-    mode: 'onTouched',
+    mode: 'onSubmit',
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -70,8 +73,6 @@ export const NoteForm: React.FC<NoteFormProps> = ({
   });
 
   const visibility = watch('visibility');
-  const title = watch('title');
-  const description = watch('description');
 
   const handleTechnologyChange = (next: TechnologySummary) => {
     setTechnology(next);
@@ -79,277 +80,225 @@ export const NoteForm: React.FC<NoteFormProps> = ({
   };
 
   const handleAddQuestion = () => {
+    const nextIndex = fields.length;
+
     append({
       id: crypto.randomUUID(),
       question: '',
       answer: {},
-      order: fields.length,
+      order: nextIndex,
     });
-    setActiveQuestionIdx(fields.length);
+    setActiveQuestionIdx(nextIndex);
+  };
+
+  const handleRemoveQuestion = () => {
+    const nextIndex = Math.max(0, activeQuestionIdx - 1);
+
+    remove(activeQuestionIdx);
+    setActiveQuestionIdx(nextIndex);
+  };
+
+  const handleFormSubmit = (data: CreateNoteInput) => {
+    const sanitizedQuestions = (data.questions ?? [])
+      .filter((question) => {
+        const text = question?.question?.trim() ?? '';
+        const answer = question?.answer;
+
+        if (text) return true;
+
+        if (typeof answer === 'string') {
+          return answer.trim().length > 0;
+        }
+
+        if (answer && typeof answer === 'object') {
+          return Object.keys(answer).length > 0;
+        }
+
+        return false;
+      })
+      .map((question, index) => ({
+        ...question,
+        question: question.question?.trim() ?? '',
+        answer: question.answer ?? {},
+        order: index,
+      }));
+
+    onSubmit({
+      ...data,
+      description: data.description?.trim() ?? '',
+      questions: sanitizedQuestions,
+    });
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-0">
-      {/* ─── Header with Save Button ─── */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b px-4 sm:px-6 py-3 flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-bold tracking-tight">
-            {initialData ? 'Edit Note' : 'Create Note'}
-          </h1>
-          <p className="text-xs text-muted-foreground">
-            {title || 'Add a title to get started'}
-          </p>
-        </div>
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="gap-2 rounded-lg"
-        >
-          <FiSave className="w-4 h-4" />
-          <span>{isSubmitting ? 'Saving...' : 'Save Note'}</span>
-        </Button>
-      </div>
-
-      {/* ─── Main Content Grid ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 min-h-screen">
-        {/* ─── Left: Main Editor (2/3 width) ─── */}
-        <div className="lg:col-span-2 border-r space-y-6 p-4 sm:p-6 overflow-y-auto">
-          {/* Title Input */}
-          <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Note Title
-            </Label>
+    <form
+      onSubmit={handleSubmit(handleFormSubmit)}
+      className="flex flex-col min-h-screen bg-background"
+    >
+      {/* ─── Header ─── */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 px-4 py-3 border-b bg-background/95 backdrop-blur-sm">
+        <div className="w-full md:w-[70%] flex flex-col md:flex-row items-start md:items-center  gap-1  px-4 py-0 md:py-3">
+          <Link
+            href="/notes"
+            className="flex items-center text-primary hover:underline   pb-4 md:pb-0 "
+          >
+            <FaAngleDoubleLeft />
+            <span className=" md:hidden pl-3">All Notes</span>
+          </Link>
+          <div className="flex-col">
+            <input type="hidden" {...register('description')} />
             <Input
-              placeholder="e.g. Next.js 16 Caching Strategies"
-              className="h-12 text-lg font-semibold rounded-lg border-muted/50 focus:border-primary transition-all placeholder:text-muted-foreground/40"
+              id="title"
+              placeholder="Add a title for your note..."
+              required
+              aria-invalid={!!errors.title}
+              aria-describedby={errors.title ? 'title-error' : undefined}
               {...register('title')}
+              className="text-md md:text-lgfont-semibold"
+              variant="underline"
             />
             {errors.title && (
-              <p className="text-xs text-destructive">{errors.title.message}</p>
-            )}
-          </div>
-
-          {/* Description Input */}
-          <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Description
-            </Label>
-            <Textarea
-              placeholder="Brief summary of what this note covers..."
-              className={cn(
-                'min-h-[100px] rounded-lg border-muted/50 focus:border-primary transition-all p-3 resize-none text-sm',
-                errors.description && 'border-destructive'
-              )}
-              {...register('description')}
-            />
-            {errors.description && (
-              <p className="text-xs text-destructive">
-                {errors.description.message}
+              <p id="title-error" className="text-sm text-destructive mt-1">
+                {errors.title.message}
               </p>
             )}
           </div>
-
-          {/* ─── Questions Section ─── */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b">
-              <div>
-                <h3 className="text-sm font-bold">Questions & Answers</h3>
-                <p className="text-xs text-muted-foreground">
-                  {fields.length} {fields.length === 1 ? 'question' : 'questions'}
-                </p>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleAddQuestion}
-                className="gap-1.5 rounded-lg"
-              >
-                <FiPlus className="w-4 h-4" />
-                <span className="hidden sm:inline">Add Question</span>
-              </Button>
-            </div>
-
-            {fields.length === 0 ? (
-              <div className="py-12 text-center space-y-3">
-                <div className="text-4xl text-muted-foreground/30">📝</div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  No questions yet
-                </p>
-                <p className="text-xs text-muted-foreground/70">
-                  Add your first question to structure your knowledge
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleAddQuestion}
-                  className="gap-1.5 rounded-lg mx-auto mt-3"
-                >
-                  <FiPlus className="w-4 h-4" />
-                  Add First Question
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {/* Questions List - Vertical tabs */}
-                <div className="flex flex-col gap-2 max-h-96 overflow-y-auto">
-                  {fields.map((field, idx) => (
-                    <button
-                      key={field.id}
-                      type="button"
-                      onClick={() => setActiveQuestionIdx(idx)}
-                      className={cn(
-                        'group flex items-center gap-3 p-3 rounded-lg border transition-all text-left',
-                        activeQuestionIdx === idx
-                          ? 'bg-primary/10 border-primary text-primary'
-                          : 'bg-card/50 border-border hover:bg-card hover:border-primary/30'
-                      )}
-                    >
-                      <span className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center bg-background/50 text-xs font-semibold">
-                        {idx + 1}
-                      </span>
-                      <span className="flex-1 truncate text-xs font-medium">
-                        {watch(`questions.${idx}.question`) ||
-                          'Untitled question'}
-                      </span>
-                      <FiChevronUp className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </button>
-                  ))}
-                </div>
-
-                {/* Active Question Editor */}
-                {fields[activeQuestionIdx] && (
-                  <div className="mt-6 pt-6 border-t space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-bold">
-                        Question {activeQuestionIdx + 1} of {fields.length}
-                      </h4>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          remove(activeQuestionIdx);
-                          setActiveQuestionIdx(
-                            Math.max(0, activeQuestionIdx - 1)
-                          );
-                        }}
-                        className="gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10 h-8 px-2"
-                      >
-                        <FiTrash2 className="w-4 h-4" />
-                        <span className="text-xs">Delete</span>
-                      </Button>
-                    </div>
-
-                    <QuestionEditor
-                      index={activeQuestionIdx}
-                      control={control}
-                      register={register}
-                      errors={errors}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
         </div>
 
-        {/* ─── Right: Settings Sidebar (1/3 width) ─── */}
-        <div className="lg:col-span-1 bg-card/50 border-t lg:border-t-0 p-4 sm:p-6 space-y-6 overflow-y-auto">
-          {/* Visibility Setting */}
-          <div className="space-y-3">
-            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Visibility
-            </Label>
-            <div
-              className="p-4 rounded-lg border-2 border-border cursor-pointer transition-all"
-              onClick={() =>
-                setValue(
-                  'visibility',
-                  visibility === 'PRIVATE' ? 'PUBLIC' : 'PRIVATE',
-                  { shouldValidate: true }
-                )
-              }
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={cn(
-                      'p-2 rounded-lg',
-                      visibility === 'PUBLIC'
-                        ? 'bg-primary/10 text-primary'
-                        : 'bg-muted text-muted-foreground'
-                    )}
-                  >
-                    {visibility === 'PUBLIC' ? (
-                      <FiGlobe className="w-5 h-5" />
-                    ) : (
-                      <FiLock className="w-5 h-5" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">
-                      {visibility === 'PUBLIC' ? 'Public' : 'Private'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {visibility === 'PUBLIC'
-                        ? 'Visible to everyone'
-                        : 'Only you can see'}
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  checked={visibility === 'PUBLIC'}
-                  onCheckedChange={(checked) =>
-                    setValue(
-                      'visibility',
-                      checked ? 'PUBLIC' : 'PRIVATE',
-                      { shouldValidate: true }
-                    )
-                  }
-                  className="h-6"
-                />
-              </div>
-            </div>
-          </div>
+        <div className="w-full md:w-auto flex flex-row gap-2 justify-end py-2 px-4">
+          <Button size="lg" type="submit" className="w-[50%]">
+            Preview
+          </Button>
+          <Button
+            size="lg"
+            type="submit"
+            className="w-[50%]"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Saving...' : 'Save'} Note
+          </Button>
+        </div>
+      </div>
 
-          {/* Technology Selection */}
-          <div className="space-y-3">
-            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Technology
-            </Label>
+      <div className="flex flex-col items-start gap-2 px-4 sm:px-6 py-3 bg-primary/10 border-b ">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={toggleSettings}
+          leftIcon={<FiSettings className="w-4 h-4" />}
+          title={showSettings ? 'Hide Settings' : 'Show Settings'}
+        />
+        {showSettings && (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center gap-2  border-1 rounded-md">
+              <Switch
+                id="visibility"
+                checked={visibility === 'PUBLIC'}
+                onCheckedChange={(checked) =>
+                  setValue('visibility', checked ? 'PUBLIC' : 'PRIVATE', {
+                    shouldValidate: true,
+                  })
+                }
+              />
+              <label
+                htmlFor="visibility"
+                className="flex items-center gap-2 cursor-pointer text-sm font-medium"
+              >
+                {visibility === 'PUBLIC' ? (
+                  <>
+                    <FiGlobe className="w-4 h-4" />
+                    Public
+                  </>
+                ) : (
+                  <>
+                    <FiLock className="w-4 h-4" />
+                    Private
+                  </>
+                )}
+              </label>
+            </div>
             <TechnologyPicker
               value={technology}
               onChange={handleTechnologyChange}
               error={errors.technologyId?.message}
             />
           </div>
+        )}
+      </div>
+      <div className="space-y-0">
+        <div className="bg-primary/5 px-4 sm:px-6 py-4">
+          <div className="flex gap-1 md:gap-3 items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Badge>{fields.length}&nbsp;Q&A</Badge>
+            </div>
 
-          {/* Info Card */}
-          <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 space-y-2">
-            <p className="text-xs font-semibold text-foreground">✨ Pro Tip</p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Keep questions concise and focused. One concept per question helps
-              with learning and retention.
-            </p>
-          </div>
+            <div className="flex flex-col gap-3   items-center  justify-end">
+              {fields.length > 0 && (
+                <QuestionPagination
+                  activeQuestionIdx={activeQuestionIdx}
+                  setActiveQuestionIdx={setActiveQuestionIdx}
+                  fields={fields}
+                />
+              )}
+            </div>
 
-          {/* Stats */}
-          <div className="pt-4 border-t space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Title</span>
-              <span className="font-semibold">{title.length}/100</span>
-            </div>
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Description</span>
-              <span className="font-semibold">{description.length}/500</span>
-            </div>
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Questions</span>
-              <span className="font-semibold">{fields.length}</span>
-            </div>
+            <Button
+              type="button"
+              onClick={handleAddQuestion}
+              className="gap-2 whitespace-nowrap"
+              size="lg"
+            >
+              <FiPlus className="w-4 h-4" />
+              Add
+              <span className="hidden sm:inline"> Question</span>
+            </Button>
           </div>
+        </div>
+
+        <div className="p-4 sm:p-6">
+          {fields.length === 0 ? (
+            <EmptyBox
+              Icon={FaRegStickyNote}
+              title="No questions yet"
+              description="Structure your learning notes"
+              action={{
+                onClick: handleAddQuestion,
+                leftIcon: <FiPlus className="w-4 h-4" />,
+                title: 'Add First Question',
+              }}
+            />
+          ) : (
+            <div className="space-y-6">
+              {fields[activeQuestionIdx] && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-bold text-muted-foreground">
+                      Question {activeQuestionIdx + 1} of {fields.length}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleRemoveQuestion}
+                      className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <FiTrash2 className="w-4 h-4" />
+                      Delete
+                      <span className="hidden sm:inline"> Question</span>
+                    </Button>
+                  </div>
+
+                  <QuestionEditor
+                    key={`${activeQuestionIdx}-${fields[activeQuestionIdx]?.id ?? 'new'}`}
+                    index={activeQuestionIdx}
+                    control={control}
+                    register={register}
+                    errors={errors}
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </form>

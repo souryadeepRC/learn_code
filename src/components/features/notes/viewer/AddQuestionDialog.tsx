@@ -43,11 +43,15 @@ export const AddQuestionDialog: React.FC<AddQuestionDialogProps> = ({
     }
     setError(null);
 
+    const normalizedAnswer =
+      Object.keys(answer).length > 0
+        ? answer
+        : { ops: [{ insert: '\n' }] };
+
     const newQuestion: NoteQuestion = {
       id: crypto.randomUUID(),
       question: question.trim(),
-      answer:
-        Object.keys(answer).length > 0 ? answer : { ops: [{ insert: '\n' }] },
+      answer: normalizedAnswer as Record<string, unknown>,
       order: existingQuestions.length,
     };
 

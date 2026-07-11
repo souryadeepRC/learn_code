@@ -1,12 +1,11 @@
 'use client';
 
-import 'react-quill-new/dist/quill.snow.css';
 import '@/styles/quill.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { CreateNoteInput } from '@/schema/notes';
-import { cn } from '@/utils';
+import dynamic from 'next/dynamic';
 import React, { useMemo } from 'react';
 import {
   Control,
@@ -14,7 +13,7 @@ import {
   FieldErrors,
   UseFormRegister,
 } from 'react-hook-form';
-import dynamic from 'next/dynamic';
+import { FormInput } from '../../../common/FormInput';
 
 const ReactQuill = dynamic(
   () => import('react-quill-new').then((mod) => mod.default),
@@ -65,40 +64,33 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Question Input */}
-      <div className="space-y-2">
-        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Question
-        </Label>
-        <Textarea
-          placeholder="What is the main concept you want to ask about?"
-          className={cn(
-            'min-h-[80px] rounded-lg border-muted/50 focus:border-primary transition-all p-3 resize-none text-sm',
-            questionError && 'border-destructive'
-          )}
-          {...register(`questions.${index}.question`)}
-        />
-        {questionError && typeof questionError === 'string' && (
-          <p className="text-xs text-destructive">{questionError}</p>
-        )}
-      </div>
+      <FormInput
+        id={`questions.${index}.question`}
+        type="text"
+        label="Question"
+        placeholder="What is the main concept you want to ask about?"
+
+        {...register(`questions.${index}.question`)}
+        error={questionError}
+      />
 
       {/* Answer Input with Rich Text */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Label className="text-xs font-semibold tracking-wider text-muted-foreground">
             Answer
           </Label>
-          <span className="text-[10px] text-muted-foreground">
-            Rich text editor
-          </span>
         </div>
 
         <Controller
           name={`questions.${index}.answer`}
           control={control}
           render={({ field: { value, onChange } }) => {
-            const quillValue = typeof value === 'string' ? value : '';
+            const quillValue =
+              typeof value === 'string' || (value && typeof value === 'object')
+                ? value
+                : '';
+
             return (
               <div className="rounded-lg border border-muted/50 overflow-hidden focus-within:border-primary transition-all">
                 <ReactQuill
@@ -117,10 +109,6 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
         {answerError && typeof answerError === 'string' && (
           <p className="text-xs text-destructive">{answerError}</p>
         )}
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          💡 Use formatting to make your answer clear and scannable. Break down
-          complex ideas into bullet points or code blocks.
-        </p>
       </div>
     </div>
   );

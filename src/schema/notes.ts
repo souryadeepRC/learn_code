@@ -2,14 +2,19 @@ import { z } from 'zod';
 
 // ─── Q&A Pair ─────────────────────────────────────────────────────────────────
 
+const QuillAnswerSchema = z.union([
+  z.string(),
+  z.record(z.string(), z.unknown()),
+]);
+
 export const QuestionAnswerSchema = z.object({
   id: z.string().min(1, 'Question ID required'), // crypto.randomUUID() on client
   question: z
     .string()
-    .min(1, 'Question is required')
-    .max(200, 'Title must be under 200 characters'),
+    .max(200, 'Title must be under 200 characters')
+    .default(''),
   // Quill Delta JSON — { ops: [...] } — opaque at validation layer; editor owns shape
-  answer: z.record(z.string(), z.unknown()).optional().default({}),
+  answer: QuillAnswerSchema.optional().default({}),
   order: z.number().int().min(0).default(0),
 });
 
@@ -23,7 +28,8 @@ export const CreateNoteSchema = z.object({
     .max(100, 'Title must be under 100 characters'),
   description: z
     .string()
-    .max(200, 'Description must be at under 200 characters'),
+    .max(200, 'Description must be at under 200 characters')
+    .default(''),
   technologyId: z.string().min(1, 'Technology is required'),
   questions: z.array(QuestionAnswerSchema).default([]),
   // USER role always sends PRIVATE; ADMIN can send PUBLIC or PRIVATE

@@ -2,6 +2,8 @@
 
 .ql-editor-custom.ql-editor {
   min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
   font-size: 14px;
   line-height: 1.6;
   padding: 12px;

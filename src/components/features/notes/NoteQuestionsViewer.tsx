@@ -25,19 +25,38 @@ export const NoteQuestionsViewer: React.FC<NoteQuestionsViewerProps> = ({
 
   const activeQuestion = questions[activeIndex];
   const answerHtml = useMemo(() => {
-    let html = '';
+    if (!activeQuestion) return '';
+
     try {
-      const answerObj = activeQuestion.answer as Record<string, unknown>;
-      if (answerObj && Array.isArray(answerObj.ops)) {
-        html = new QuillDeltaToHtmlConverter(answerObj.ops, {
-          multiLineParagraph: false,
-        }).convert();
+      const answerValue = activeQuestion.answer as unknown;
+
+      if (typeof answerValue === 'string' && answerValue.trim()) {
+        return answerValue;
+      }
+
+      if (answerValue && typeof answerValue === 'object') {
+        const answerObj = answerValue as Record<string, unknown>;
+
+        if (Array.isArray(answerObj.ops)) {
+          return new QuillDeltaToHtmlConverter(answerObj.ops, {
+            multiLineParagraph: false,
+          }).convert();
+        }
+
+        if (typeof answerObj.html === 'string' && answerObj.html.trim()) {
+          return answerObj.html;
+        }
+
+        if (typeof answerObj.text === 'string' && answerObj.text.trim()) {
+          return answerObj.text;
+        }
       }
     } catch (e) {
       console.error(e);
     }
-    return html;
-  }, [activeQuestion.id]);
+
+    return '';
+  }, [activeQuestion]);
   return (
     <div>
       <div className="pb-2  flex gap-2 items-center">

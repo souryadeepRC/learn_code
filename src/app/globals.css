@@ -85,7 +85,7 @@
   --popover-foreground: #091710;
 
   /* Brand primary (Deep Accessible Mint-Emerald) */
-  --primary: #0b6e4f; /* Darkened version of your mint token, offering rich >4.5:1 contrast */
+  --primary: #0b4231; /* Darkened version of your mint token, offering rich >4.5:1 contrast */
   --primary-foreground: #ffffff; /* Crisp white text sits perfectly on top */
 
   /* Brand secondary (Deep Ocean Blue) */
@@ -94,7 +94,7 @@
 
   /* Muted / subtle elements */
   --muted: #e8f2ed; /* Light gray-mint for code block backgrounds and table rows */
-  --muted-foreground: #4a6658; /* Balanced slate-sage for text descriptions and code comments */
+  --muted-foreground: #102e1f; /* Balanced slate-sage for text descriptions and code comments */
 
   /* Accent (The Light Mode home for your Neon Mint) */
   --accent: #d8f8e5; /* A beautiful, highly transparent wash of your neon mint */
@@ -140,7 +140,7 @@
   --popover-foreground: #e6f7ee;
 
   /* Brand primary (Your Neon Mint) */
-  --primary: #5ef59a;
+  --primary: #0bf1ca;
   --primary-foreground: #021a0d; /* Ultra-dark green ensures a crisp > 7:1 contrast ratio */
 
   /* Brand secondary (Electric Tech Cyan) */
@@ -149,7 +149,7 @@
 
   /* Muted / subtle elements */
   --muted: #0d1a12; /* Slightly lighter surface for code block backgrounds */
-  --muted-foreground: #7ea18f; /* Desaturated sage-gray for comments/subtitles */
+  --muted-foreground: #0ea880; /* Desaturated sage-gray for comments/subtitles */
 
   /* Accent (Hover states and highlights) */
   --accent: #0c2b1a; /* Rich dark translucent emerald for button hovers */
