@@ -81,7 +81,7 @@ export const oauthCallback = async ({
             : []),
         ],
       },
-      include: { accounts: true },
+      include: { accounts: true, userProfile: { select: { cachedSubscriptionTier: true } } },
     });
 
     // Step 6: Create user if doesn't exist
@@ -93,7 +93,8 @@ export const oauthCallback = async ({
           phoneNumber: userInfo.phoneNumber || null,
         },
         include: {
-          accounts: true, // ✅ NOW accounts is included!
+          accounts: true,
+          userProfile: { select: { cachedSubscriptionTier: true } },
         },
       });
     } else {
@@ -108,7 +109,7 @@ export const oauthCallback = async ({
         user = await prismaUsers.user.update({
           where: { id: user.id },
           data: updateData,
-          include: { accounts: true },
+          include: { accounts: true, userProfile: { select: { cachedSubscriptionTier: true } } },
         });
       }
     }
@@ -159,6 +160,7 @@ export const oauthCallback = async ({
       id: user.id,
       email: user.email ?? '',
       role: user.role,
+      tier: user.userProfile?.cachedSubscriptionTier ?? 'FREE',
     });
 
     // Step 6: Store session

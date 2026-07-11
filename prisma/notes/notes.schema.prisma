@@ -18,6 +18,13 @@ enum NoteVisibility {
   PUBLIC
 }
 
+enum SubscriptionTier {
+  FREE
+  S1
+  S2
+  S3
+}
+
 /// Embedded Q&A pair — stored as an array inside the Note document.
 /// No separate collection; avoids extra round-trips.
 type QuestionAnswer {
@@ -54,6 +61,10 @@ model Note {
   /// ADMIN notes can be PUBLIC (visible to all) or PRIVATE (admin-only).
   visibility NoteVisibility @default(PRIVATE)
 
+  /// Minimum subscription tier required to view this note when visibility is PUBLIC.
+  /// Only meaningful when visibility = PUBLIC. USER notes always have FREE (the default).
+  requiredTier SubscriptionTier @default(FREE)
+
   /// Soft delete — set true instead of hard-deleting.
   isArchived Boolean @default(false)
 
@@ -67,7 +78,7 @@ model Note {
   @@index([technologyId])
   /// Supports cursor pagination for getUserNotes (sorted updatedAt desc, id tiebreak).
   @@index([authorId, isArchived, updatedAt])
-  /// Supports cursor pagination for getPublicAdminNotes.
-  @@index([authorRole, visibility, updatedAt])
+  /// Supports cursor pagination for getPublicAdminNotes and tiered listing.
+  @@index([authorRole, visibility, requiredTier, updatedAt])
   @@map("notes")
 }

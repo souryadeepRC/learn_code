@@ -1,19 +1,22 @@
 import { HTTP_STATUS } from '@/constants/api';
-import { createNote, listUserNotes } from '@/root/src/services/notesService';
+import { createNote, listNotes } from '@/root/src/services/notesService';
 import { CreateNoteSchema } from '@/schema/notes';
 import { APIHandler, APIResponse } from '@/utils/api';
 import { NoteAuthorRole } from '@prisma-custom/notes';
 
 // ─── GET /api/notes ────────────────────────────────────────────────────────────
-// Returns the authenticated user's notes, cursor-paginated.
+// Returns notes based on caller identity: guest sees PUBLIC FREE notes,
+// authenticated users see their own + PUBLIC notes up to their tier,
+// cursor-paginated.
 // Query params: ?archived=true&cursor=<opaque>&limit=12&search=react
 
-export const GET = APIHandler.authenticated(async ({ userId, request }) => {
+export const GET = APIHandler.optional(async ({ userId, tier, request }) => {
   const { searchParams } = new URL(request.url);
   const includeArchived = searchParams.get('archived') === 'true';
 
-  const { data, nextCursor, hasNextPage, limit } = await listUserNotes({
-    authorId: userId,
+  const { data, nextCursor, hasNextPage, limit } = await listNotes({
+    viewerId: userId,
+    viewerTier: tier,
     includeArchived,
     search: searchParams.get('search'),
     cursor: searchParams.get('cursor'),

@@ -39,6 +39,16 @@ const postRefreshToken = async ({ request }: APICallbackParams) => {
 
   const user = await prismaUsers.user.findUnique({
     where: { id: decoded.id },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      userProfile: {
+        select: {
+          cachedSubscriptionTier: true,
+        },
+      },
+    },
   });
   if (!user) {
     return APIResponse.send(404).json({ message: 'User not found' });
@@ -48,6 +58,7 @@ const postRefreshToken = async ({ request }: APICallbackParams) => {
     id: user.id,
     email: user.email ?? '',
     role: user.role,
+    tier: user.userProfile?.cachedSubscriptionTier ?? 'FREE',
   });
   const refreshTokenNew = signRefreshToken(user.id);
 

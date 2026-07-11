@@ -8,6 +8,7 @@ import {
   APIConfig,
   AuthCallbackType,
   CallbackType,
+  OptionalAuthCallbackType,
   RouteContext,
 } from '@/types/auth';
 import z from 'zod';
@@ -85,7 +86,7 @@ const createBaseHandler = <T, P = unknown>(
   };
 };
 
-type TokenDetails = { userId: string; role: string };
+type TokenDetails = { userId: string; role: string; tier?: string };
 const decodeTokenDetails = (
   request: NextRequest
 ): TokenDetails | NextResponse => {
@@ -96,9 +97,9 @@ const decodeTokenDetails = (
 
   // Allow logout endpoint to always execute so cookies get cleared even if access token is expired or missing
   if (request.nextUrl?.pathname?.endsWith('/logout')) {
-    if (!token) return { userId: '', role: '' };
+    if (!token) return { userId: '', role: '', tier: undefined };
     const decoded = verifyAccessToken(token);
-    return { userId: decoded?.id || '', role: '' };
+    return { userId: decoded?.id || '', role: '', tier: decoded?.tier };
   }
 
   if (!token) {
@@ -113,7 +114,25 @@ const decodeTokenDetails = (
       message: 'Unauthorized: Invalid or Expired Token',
     });
   }
-  return { userId: decoded.id, role: decoded.role };
+  return { userId: decoded.id, role: decoded.role, tier: decoded.tier };
+};
+
+type OptionalTokenDetails = { userId: string | null; role: string | null; tier: string | null };
+const decodeTokenDetailsOptional = (request: NextRequest): OptionalTokenDetails => {
+  const authHeader = request.headers?.get?.('Authorization');
+  const token = authHeader?.split?.(' ')?.[1];
+
+  if (!token) {
+    return { userId: null, role: null, tier: null };
+  }
+
+  const decoded = verifyAccessToken(token);
+  if (!decoded || !decoded.id) {
+    // Invalid/expired token — return null (guest), not error
+    return { userId: null, role: null, tier: null };
+  }
+
+  return { userId: decoded.id, role: decoded.role || null, tier: decoded.tier || null };
 };
 
 // 2. The Authenticated Wrapper
@@ -132,10 +151,29 @@ const createProtectedHandler = <T, P = unknown>(
     return await callback({
       userId: userDetailsOrResponse.userId,
       role: userDetailsOrResponse.role,
+      tier: userDetailsOrResponse.tier,
       ...params,
     });
   };
   return createBaseHandler<T, P>(protectedCallback, config);
+};
+
+// 3. The Optional Auth Wrapper (best-effort decode, guest on invalid/absent token)
+const createOptionalAuthHandler = <T, P = unknown>(
+  callback: OptionalAuthCallbackType<T, P>,
+  config: APIConfig<T>
+) => {
+  const optionalAuthCallback = async (params: APICallbackParams<T, P>) => {
+    const userDetails = decodeTokenDetailsOptional(params.request);
+
+    return await callback({
+      userId: userDetails.userId,
+      role: userDetails.role,
+      tier: userDetails.tier,
+      ...params,
+    });
+  };
+  return createBaseHandler<T, P>(optionalAuthCallback, config);
 };
 
 export class APIHandler {
@@ -175,6 +213,21 @@ export class APIHandler {
     schema?: z.ZodType<T>
   ) {
     return createBaseHandler<T>(callback, {
+      schema,
+      maxPayloadSize: 8 * 1024,
+      rateLimitConfig: {
+        maxRequests: 100,
+        windowSeconds: 60, // 10 requests per minute (in seconds)
+      },
+    });
+  }
+
+  // 4. For Optional auth endpoints (guest or authenticated, best-effort decode)
+  static optional<T = undefined, P = unknown>(
+    callback: OptionalAuthCallbackType<T, P>,
+    schema?: z.ZodType<T>
+  ) {
+    return createOptionalAuthHandler<T, P>(callback, {
       schema,
       maxPayloadSize: 8 * 1024,
       rateLimitConfig: {

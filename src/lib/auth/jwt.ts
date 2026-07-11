@@ -8,7 +8,7 @@ if (!ACCESS_SECRET || !REFRESH_SECRET) {
   throw new Error('ACCESS_TOKEN_SECRET and REFRESH_TOKEN_SECRET must be set');
 }
 
-type TokenSignId = { id: string; email: string; role: string };
+type TokenSignId = { id: string; email: string; role: string; tier?: string };
 
 export const signAccessTokens = (userDetails: TokenSignId) => {
   // Access Token expiration is handled by config

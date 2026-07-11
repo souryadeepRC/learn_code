@@ -7,7 +7,7 @@ import {
 } from '@/schema/notes';
 import { getTechnologiesByIds, technologyExists } from '@/services/technologiesService';
 import { clampLimit, decodeCursor, encodeCursor } from '@/utils/pagination';
-import { NoteAuthorRole, Prisma, PrismaClient } from '@prisma-custom/notes';
+import { NoteAuthorRole, Prisma, PrismaClient, SubscriptionTier } from '@prisma-custom/notes';
 
 // Suppress unused import — PrismaClient referenced for type narrowing only
 void PrismaClient;
@@ -24,6 +24,7 @@ const NOTE_SELECT = {
   technologyId: true,
   questions: true,
   visibility: true,
+  requiredTier: true,
   isArchived: true,
   createdAt: true,
   updatedAt: true,
@@ -54,10 +55,30 @@ const attachTechnology = async <T extends { technologyId: string }>(note: T) => 
   return enriched;
 };
 
+// ─── Tier helpers ──────────────────────────────────────────────────────────────
+
+const tierOrder: Record<string, number> = {
+  FREE: 0,
+  S1: 1,
+  S2: 2,
+  S3: 3,
+};
+
+const reachableTiers = (viewerTier: string | null): SubscriptionTier[] => {
+  if (!viewerTier || viewerTier === 'FREE') {
+    return ['FREE'];
+  }
+  const tierRank = tierOrder[viewerTier];
+  return Object.entries(tierOrder)
+    .filter(([, rank]) => rank <= tierRank)
+    .map(([tier]) => tier as SubscriptionTier);
+};
+
 // ─── List (cursor-paginated) ────────────────────────────────────────────────────
 
-export const listUserNotes = async (params: {
-  authorId: string;
+export const listNotes = async (params: {
+  viewerId: string | null;
+  viewerTier: string | null;
   includeArchived?: boolean;
   search?: string | null;
   cursor?: string | null;
@@ -70,16 +91,21 @@ export const listUserNotes = async (params: {
   );
   const cursor = decodeCursor<NoteCursor>(params.cursor);
   const search = params.search?.trim();
+  const tierFilter = reachableTiers(params.viewerTier);
 
   const where: Prisma.NoteWhereInput = {
     AND: [
       {
         OR: [
-          { authorId: params.authorId },
-          { authorRole: NoteAuthorRole.ADMIN, visibility: 'PUBLIC' },
+          ...(params.viewerId ? [{ authorId: params.viewerId }] : []),
+          {
+            authorRole: NoteAuthorRole.ADMIN,
+            visibility: 'PUBLIC',
+            requiredTier: { in: tierFilter },
+          },
         ],
       },
-      ...(params.includeArchived ? [] : [{ isArchived: false }]),
+      ...(params.viewerId && params.includeArchived ? [] : [{ isArchived: false }]),
       ...buildSearchFilter(search),
       ...buildCursorFilter(cursor),
     ],
@@ -95,35 +121,36 @@ export const listUserNotes = async (params: {
   return finalizePage(rows, limit);
 };
 
+export const listUserNotes = async (params: {
+  authorId: string;
+  includeArchived?: boolean;
+  search?: string | null;
+  cursor?: string | null;
+  limit?: string | null;
+}) => {
+  return listNotes({
+    viewerId: params.authorId,
+    viewerTier: null,
+    includeArchived: params.includeArchived,
+    search: params.search,
+    cursor: params.cursor,
+    limit: params.limit,
+  });
+};
+
 export const listPublicAdminNotes = async (params: {
   search?: string | null;
   cursor?: string | null;
   limit?: string | null;
 }) => {
-  const limit = clampLimit(
-    params.limit,
-    PAGINATION.DEFAULT_LIMIT,
-    PAGINATION.MAX_LIMIT
-  );
-  const cursor = decodeCursor<NoteCursor>(params.cursor);
-  const search = params.search?.trim();
-
-  const where: Prisma.NoteWhereInput = {
-    AND: [
-      { authorRole: NoteAuthorRole.ADMIN, visibility: 'PUBLIC', isArchived: false },
-      ...buildSearchFilter(search),
-      ...buildCursorFilter(cursor),
-    ],
-  };
-
-  const rows = await prismaNotes.note.findMany({
-    where,
-    select: NOTE_SELECT,
-    orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
-    take: limit + 1,
+  return listNotes({
+    viewerId: null,
+    viewerTier: null,
+    includeArchived: false,
+    search: params.search,
+    cursor: params.cursor,
+    limit: params.limit,
   });
-
-  return finalizePage(rows, limit);
 };
 
 const buildSearchFilter = (search: string | undefined): Prisma.NoteWhereInput[] =>
@@ -187,9 +214,11 @@ export const createNote = async (
     throw new Error('Selected technology does not exist');
   }
 
-  // USER notes are always PRIVATE regardless of what client sends
+  // USER notes are always PRIVATE and FREE tier regardless of what client sends
   const visibility =
     authorRole === NoteAuthorRole.ADMIN ? data.visibility : 'PRIVATE';
+  const requiredTier =
+    authorRole === NoteAuthorRole.ADMIN ? (data.requiredTier ?? 'FREE') : 'FREE';
 
   const note = await prismaNotes.note.create({
     data: {
@@ -206,6 +235,7 @@ export const createNote = async (
         order: q.order,
       })),
       visibility,
+      requiredTier,
     },
     select: NOTE_SELECT,
   });
@@ -232,6 +262,14 @@ export const updateNote = async (
         : 'PRIVATE'
       : undefined;
 
+  // Recalculate requiredTier — USER can never set above FREE
+  const requiredTier =
+    data.requiredTier !== undefined
+      ? authorRole === NoteAuthorRole.ADMIN
+        ? data.requiredTier
+        : 'FREE'
+      : undefined;
+
   const note = await prismaNotes.note.update({
     where: { id },
     data: {
@@ -250,6 +288,7 @@ export const updateNote = async (
         },
       }),
       ...(visibility !== undefined && { visibility }),
+      ...(requiredTier !== undefined && { requiredTier }),
     },
     select: NOTE_SELECT,
   });

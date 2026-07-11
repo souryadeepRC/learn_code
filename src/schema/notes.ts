@@ -34,6 +34,8 @@ export const CreateNoteSchema = z.object({
   questions: z.array(QuestionAnswerSchema).default([]),
   // USER role always sends PRIVATE; ADMIN can send PUBLIC or PRIVATE
   visibility: z.enum(['PRIVATE', 'PUBLIC']).default('PRIVATE'),
+  // USER role always gets FREE; ADMIN can specify tier but defaults to FREE
+  requiredTier: z.enum(['FREE', 'S1', 'S2', 'S3']).default('FREE'),
 });
 
 export const UpdateNoteSchema = CreateNoteSchema.partial();

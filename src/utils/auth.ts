@@ -18,6 +18,11 @@ export const loginWithCredentials = async (
       password: true,
       accountStatus: true,
       role: true,
+      userProfile: {
+        select: {
+          cachedSubscriptionTier: true,
+        },
+      },
     },
   });
 
@@ -46,6 +51,7 @@ export const loginWithCredentials = async (
     id: user.id,
     email: user.email ?? '',
     role: user.role,
+    tier: user.userProfile?.cachedSubscriptionTier ?? 'FREE',
   });
 
   await setAccessTokenCookie(accessToken, TOKEN_CONFIG.ACCESS_TOKEN_EXPIRY_SECONDS);
