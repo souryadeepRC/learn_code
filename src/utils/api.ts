@@ -109,7 +109,7 @@ const decodeTokenDetails = (
   const decoded = verifyAccessToken(token);
 
   if (!decoded || !decoded.id || !decoded.role) {
-    return APIResponse.send(403).json({
+    return APIResponse.send(401).json({
       message: 'Unauthorized: Invalid or Expired Token',
     });
   }

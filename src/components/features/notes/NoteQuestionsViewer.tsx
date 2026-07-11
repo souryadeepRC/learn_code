@@ -1,80 +1,100 @@
 'use client';
 
 import { Note } from '@/hooks/useNotes';
-import React, { useState } from 'react';
-import { NoteActionBar } from './viewer/NoteActionBar';
-import { NoteOverview } from './viewer/NoteOverview';
-import { NoteQuestionDetail } from './viewer/NoteQuestionDetail';
-import { NoteQuestionsSidebar } from './viewer/NoteQuestionsSidebar';
+import { QuillDeltaToHtmlConverter } from 'quill-delta-to-html';
+import React, { useMemo, useState } from 'react';
+
+import { Button } from '@/components/ui/button';
+import {
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/root/src/components/ui/card';
+import { cn } from '@/root/src/utils';
+import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { Separator } from '../../ui/separator';
 
 interface NoteQuestionsViewerProps {
-  note: Note;
-  onToggleArchive: () => void;
-  onDelete: () => void;
+  questions: Note['questions'];
 }
 
 export const NoteQuestionsViewer: React.FC<NoteQuestionsViewerProps> = ({
-  note,
-  onToggleArchive,
-  onDelete,
+  questions,
 }) => {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
 
-  const formattedDate = new Date(note.updatedAt).toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
-
-  const questions = note.questions || [];
-
+  const activeQuestion = questions[activeIndex];
+  const answerHtml = useMemo(() => {
+    let html = '';
+    try {
+      const answerObj = activeQuestion.answer as Record<string, unknown>;
+      if (answerObj && Array.isArray(answerObj.ops)) {
+        html = new QuillDeltaToHtmlConverter(answerObj.ops, {
+          multiLineParagraph: false,
+        }).convert();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return html;
+  }, [activeQuestion.id]);
   return (
-    <div className="flex flex-col-reverse md:flex-row h-full min-h-0 md:overflow-hidden overflow-y-auto w-full pr-1 md:pr-0">
-      <NoteQuestionsSidebar
-        questions={questions}
-        activeIndex={activeIndex}
-        setActiveIndex={setActiveIndex}
-        isSidebarOpen={isSidebarOpen}
-      />
-
-      {/* Right Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 md:overflow-hidden overflow-visible">
-        <NoteActionBar
-          noteId={note.id}
-          isArchived={note.isArchived}
-          isSidebarOpen={isSidebarOpen}
-          setIsSidebarOpen={setIsSidebarOpen}
-          onToggleArchive={onToggleArchive}
-          onDelete={onDelete}
-          activeIndex={activeIndex}
-        />
-
-        {/* Content Area */}
-        <div className="flex-1 md:overflow-y-auto md:pr-2 md:scrollbar-thin animate-in fade-in slide-in-from-bottom-2 duration-300">
-          {activeIndex === null ? (
-            <NoteOverview
-              title={note.title}
-              description={note.description}
-              visibility={note.visibility}
-              isArchived={note.isArchived}
-              technologies={note.technologies}
-              formattedDate={formattedDate}
+    <div>
+      <div className="pb-2  flex gap-2 items-center">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setActiveIndex((activeIndex) => activeIndex - 1)}
+          disabled={activeIndex === 0}
+        >
+          <FiChevronLeft />
+          Prev
+        </Button>
+        <p className="text-xs">
+          Question {activeIndex + 1} of {questions.length}
+        </p>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setActiveIndex((activeIndex) => activeIndex + 1)}
+          disabled={activeIndex === questions.length - 1}
+        >
+          Next <FiChevronRight />
+        </Button>
+      </div>
+      <Separator />
+      <div>
+        <CardHeader>
+          <CardTitle className="pt-2 text-sm font-bold">
+            Q{activeIndex + 1}. {activeQuestion.question}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {answerHtml ? (
+            <div
+              className={cn(
+                'text-xs pt-2',
+                'prose prose-lg dark:prose-invert max-w-none',
+                'prose-p:leading-relaxed prose-p:text-muted-foreground',
+                'prose-headings:text-foreground prose-strong:text-foreground',
+                'prose-a:text-primary prose-a:no-underline hover:prose-a:underline',
+                'prose-ul:list-disc prose-ul:pl-6 prose-ul:text-muted-foreground prose-ul:marker:text-primary',
+                'prose-ol:list-decimal prose-ol:pl-6 prose-ol:text-muted-foreground prose-ol:marker:text-primary',
+                'prose-li:my-1',
+                'prose-pre:bg-zinc-950 dark:prose-pre:bg-zinc-900 prose-pre:text-zinc-50 prose-pre:p-5 prose-pre:rounded-xl prose-pre:border prose-pre:border-zinc-800 prose-pre:shadow-md',
+                'prose-code:text-primary prose-code:bg-primary/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:font-medium',
+                'prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-muted-foreground/80'
+              )}
+              dangerouslySetInnerHTML={{
+                __html: answerHtml,
+              }}
             />
           ) : (
-            <NoteQuestionDetail
-              question={questions[activeIndex]}
-              currentIndex={activeIndex}
-              totalQuestions={questions.length}
-              onPrev={() => activeIndex > 0 && setActiveIndex(activeIndex - 1)}
-              onNext={() =>
-                activeIndex < questions.length - 1 &&
-                setActiveIndex(activeIndex + 1)
-              }
-              onBack={() => setActiveIndex(null)}
-            />
+            <p className="text-muted-foreground italic bg-muted/30 p-6 rounded-xl border border-dashed text-center">
+              No answer provided for this question.
+            </p>
           )}
-        </div>
+        </CardContent>
       </div>
     </div>
   );

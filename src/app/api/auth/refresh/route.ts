@@ -31,7 +31,7 @@ const postRefreshToken = async ({ request }: APICallbackParams) => {
   const decoded = verifyRefreshToken(refreshToken);
 
   if (!decoded || !decoded.id) {
-    return APIResponse.send(403).json({
+    return APIResponse.send(401).json({
       message: 'Invalid or expired refresh token',
       decoded,
     });

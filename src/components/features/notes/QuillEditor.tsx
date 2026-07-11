@@ -65,6 +65,7 @@ export const QuillEditor = React.forwardRef<ReactQuillType, QuillEditorProps>(
           }}
           className={cn(
             'bg-background rounded-md border border-input shadow-sm focus-within:ring-1 focus-within:ring-primary',
+            !readOnly && '[&_.ql-editor]:min-h-[200px] [&_.ql-container]:min-h-[200px]',
             error && 'border-destructive focus-within:ring-destructive',
             readOnly &&
               'border-none shadow-none focus-within:ring-0 bg-transparent'

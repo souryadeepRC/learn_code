@@ -11,6 +11,7 @@ export type NoteQuestion = {
   id: string;
   question: string;
   answer: Record<string, unknown>;
+  order: number;
 };
 export interface Note {
   id: string;

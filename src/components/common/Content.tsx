@@ -3,7 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import React from 'react';
 
 const contentVariants = cva(
-  'text-muted-foreground leading-relaxed transition-colors',
+  'py-4 md:py-12 px-4 md:px-10 max-w-6xl mx-auto space-y-4 w-full min-w-0 max-w-full text-muted-foreground leading-relaxed transition-colors',
   {
     variants: {
       size: {
