@@ -21,12 +21,27 @@ export const GET = APIHandler.public(
     const skip = (page - 1) * limit;
 
     const [data, total] = await Promise.all([
-      prismaTechnologies.technologies.findMany({
+      prismaTechnologies.technology.findMany({
         skip,
         take: limit,
         orderBy: { name: 'asc' },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          description: true,
+          icon: true,
+          categoryId: true,
+          difficulty: true,
+          prerequisiteIds: true,
+          tags: true,
+          isFeatured: true,
+          isPremium: true,
+          status: true,
+          cachedContentCounts: true,
+        },
       }),
-      prismaTechnologies.technologies.count(),
+      prismaTechnologies.technology.count(),
     ]);
 
     const hasNextPage = skip + data.length < total;

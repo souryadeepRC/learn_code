@@ -1,14 +1,14 @@
 import { PrismaClient } from '@prisma-custom/technologies';
 
-if (!process.env.CODING_TECH_DB_URI) {
-  throw new Error('CODING_TECH_DB_URI environment variable is not set');
+if (!process.env.TECHNOLOGIES_DB_URI) {
+  throw new Error('TECHNOLOGIES_DB_URI environment variable is not set');
 }
 
 const prismaClientSingleton = () => {
   return new PrismaClient({
     datasources: {
       techDb: {
-        url: process.env.CODING_TECH_DB_URI,
+        url: process.env.TECHNOLOGIES_DB_URI,
       },
     },
     log:

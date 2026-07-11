@@ -1,0 +1,143 @@
+generator quizzesClient {
+    provider = "prisma-client-js"
+    output   = "../../node_modules/@prisma-custom/quizzes"
+}
+
+datasource quizzesDb {
+    provider = "mongodb"
+    url      = env("QUIZZES_DB_URI")
+}
+
+enum QuizQuestionType {
+  SINGLE_CHOICE
+  MULTI_CHOICE
+  TRUE_FALSE
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum DifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  ABANDONED
+}
+
+/// Embedded — options only ever read/written as part of their parent
+/// question, never queried independently. Bounded (a handful per question).
+type QuestionOption {
+  id   String
+  text String
+  /// isCorrect is stripped by the service layer before sending question
+  /// payloads to unauthenticated/preview clients (SPEC.md: guests can
+  /// preview but not see correct answers). Never trust the client to omit it.
+  isCorrect Boolean @default(false)
+}
+
+/// Embedded in Quiz — same reasoning as Note.questions: bounded count
+/// (tens of questions per quiz, authored once), always read together with
+/// the quiz, never queried/filtered independently of its parent quiz.
+/// If this domain ever moves to Postgres: Quiz -> quiz_questions -> options
+/// becomes two join tables. If it moves to DynamoDB: Quiz and its questions
+/// become one item (questions as a Map/List attribute), consistent with how
+/// it's already modeled here.
+type QuizQuestion {
+  id          String
+  text        String
+  type        QuizQuestionType @default(SINGLE_CHOICE)
+  options     QuestionOption[]
+  explanation String?
+  points      Int              @default(1)
+  order       Int              @default(0)
+}
+
+/// Cached, async-updated aggregate stats — never authoritative (derived from
+/// QuizAttempt). Avoids a COUNT/AVG aggregation on every quiz list/detail read.
+type QuizStats {
+  attemptCount    Int   @default(0)
+  avgScorePercent Float @default(0)
+  completionRate  Float @default(0)
+}
+
+model Quiz {
+  id String @id @default(auto()) @map("_id") @quizzesDb.ObjectId
+
+  /// Maps to Technology.id (@prisma-custom/technologies). Cross-DB reference,
+  /// app-layer enforced — same pattern as Note.technologies.
+  technologyId String @quizzesDb.ObjectId
+
+  /// Maps to User.id (@prisma-custom/users), the admin who authored this quiz.
+  createdByUserId String @quizzesDb.ObjectId
+
+  title       String
+  slug        String  @unique
+  description String?
+  difficulty  DifficultyLevel @default(BEGINNER)
+
+  questions QuizQuestion[]
+
+  timeLimitSeconds    Int?
+  passingScorePercent Int     @default(70)
+  maxAttempts         Int? // null = unlimited
+  isPremium           Boolean @default(false)
+  status              ContentStatus @default(DRAFT)
+
+  cachedStats QuizStats?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  attempts QuizAttempt[]
+
+  @@index([technologyId, status])
+  @@index([status, isPremium, difficulty])
+  @@map("quizzes")
+}
+
+/// Embedded in QuizAttempt — bounded by the parent quiz's question count,
+/// always written/read atomically with the attempt (one submit = one write).
+type AttemptAnswer {
+  questionId        String
+  selectedOptionIds String[]
+  isCorrect         Boolean @default(false)
+  pointsAwarded     Float   @default(0)
+}
+
+model QuizAttempt {
+  id String @id @default(auto()) @map("_id") @quizzesDb.ObjectId
+
+  quizId String @quizzesDb.ObjectId
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  /// Maps to User.id (@prisma-custom/users). Cross-DB reference, app-layer
+  /// enforced — extracted from JWT, never trusted from the request body.
+  userId String @quizzesDb.ObjectId
+
+  answers      AttemptAnswer[]
+  scorePercent Float   @default(0)
+  maxScore     Int     @default(0)
+  passed       Boolean @default(false)
+  status       AttemptStatus @default(IN_PROGRESS)
+
+  startedAt        DateTime  @default(now())
+  submittedAt      DateTime?
+  timeSpentSeconds Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, quizId, createdAt])
+  @@index([quizId, createdAt])
+  @@index([userId, status])
+  @@map("quiz-attempts")
+}

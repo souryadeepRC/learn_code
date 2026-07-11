@@ -78,8 +78,11 @@ model User {
     updatedAt                   DateTime       @updatedAt
     lastLoginAt                 DateTime       @default(now())
 
-    // 1-to-1 Relation (Non-defining side) 
+    // 1-to-1 Relation (Non-defining side)
     userProfile UserProfile?
+
+    // 1-to-many Relation (Non-defining side) — a user's subscription history
+    subscriptions Subscription[]
 
     @@map("user-auth")
 }
@@ -105,11 +108,33 @@ model UserProfile {
     // Store as strings since they're from a different DB
     technologyIds String[] @usersDb.ObjectId
 
+    /// Cached, denormalized, async-updated. Never authoritative — Subscription
+    /// rows are the source of truth. Avoids a cross-collection read on every
+    /// profile fetch.
+    cachedSubscriptionTier SubscriptionTier @default(FREE)
+
+    /// Cached learning stats, replaces ad-hoc aggregation on dashboard load.
+    /// Updated by the progress domain's write path (best-effort async job),
+    /// same pattern as docs/database-design.md's existing denormalization note.
+    cachedStats UserCachedStats?
+
     // Metadata
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     @@map("user-profile")
+}
+
+/// Embedded — always read as part of the profile, never queried standalone.
+type UserCachedStats {
+  quizzesTaken     Int       @default(0)
+  quizzesPassed    Int       @default(0)
+  avgQuizScore     Float     @default(0)
+  notesCreated     Int       @default(0)
+  challengesSolved Int       @default(0)
+  currentStreak    Int       @default(0)
+  longestStreak    Int       @default(0)
+  lastActivityAt   DateTime?
 }
 
 // Address types enum
@@ -143,4 +168,51 @@ model Address {
 
     @@index([userProfileId])
     @@map("user-address")
+}
+
+/// Subscription tier catalog. Feature gating per tier lives in app config
+/// (src/config), not the DB — this model only tracks *entitlement state* for
+/// a user, not plan definitions, so adding/renaming plan features never
+/// requires a migration.
+enum SubscriptionTier {
+  FREE
+  S1
+  S2
+  S3
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  EXPIRED
+  TRIALING
+}
+
+model Subscription {
+  id     String @id @default(auto()) @map("_id") @usersDb.ObjectId
+  userId String @usersDb.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tier   SubscriptionTier   @default(FREE)
+  status SubscriptionStatus @default(ACTIVE)
+
+  /// External billing provider reference (Stripe subscription id, etc.) —
+  /// opaque string so swapping billing providers never touches the schema.
+  providerSubscriptionId String?
+  provider               String? // "stripe", "paddle", etc.
+
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean   @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // One user can have historical subscriptions (upgrades/downgrades/renewals);
+  // "current" tier is resolved as the most recent ACTIVE/TRIALING row by app
+  // logic and cached onto UserProfile.cachedSubscriptionTier for hot-path reads.
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@map("user-subscription")
 }

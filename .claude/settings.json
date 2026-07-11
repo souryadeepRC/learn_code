@@ -1,0 +1,9 @@
+{
+  "rules": ["rules/frontend-rules.md", "rules/backend-rules.md"],
+  "agents": [
+    "agents/frontend-specialist.md",
+    "agents/backend-specialist.md",
+    "agents/code-reviewer.md",
+    "agents/dba-specialist.md"
+  ]
+}

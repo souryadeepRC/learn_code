@@ -10,10 +10,7 @@
     "lint": "eslint src/ --ext .ts,.tsx,.js,.jsx",
     "lint:fix": "eslint src/ --ext .ts,.tsx,.js,.jsx --fix",
     "format:all": "npm run format && npm run lint:fix",
-    "prisma:generate:users": "prisma generate --schema=./prisma/users/users.schema.prisma",
-    "prisma:generate:technologies": "prisma generate --schema=./prisma/technologies/technologies.schema.prisma",
-    "prisma:generate:notes": "prisma generate --schema=./prisma/notes/notes.schema.prisma",
-    "prisma:generate:all": "prisma generate --schema=./prisma/users/users.schema.prisma && prisma generate --schema=./prisma/technologies/technologies.schema.prisma && prisma generate --schema=./prisma/notes/notes.schema.prisma",
+    "prisma:generate:all": "node scripts/prisma-generate-all.mjs",
     "postinstall": "npm run prisma:generate:all"
   },
   "dependencies": {
