@@ -1,7 +1,6 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -9,47 +8,23 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import type { Note } from '@/types/note';
 import { formatNumber } from '@/root/src/utils/common';
+import type { Note } from '@/types/note';
 import Link from 'next/link';
 import React from 'react';
-import {
-  FiArchive,
-  FiEye,
-  FiEyeOff,
-  FiMoreVertical,
-  FiRotateCcw,
-  FiTag,
-  FiTrash2,
-} from 'react-icons/fi';
+import { FiEye, FiEyeOff, FiTag } from 'react-icons/fi';
 import { MdQuestionAnswer } from 'react-icons/md';
 
 interface NoteCardProps {
   note: Note;
-  onDelete?: (id: string) => void;
-  onArchive?: (id: string, isArchived: boolean) => void;
-  isReadOnly?: boolean;
 }
 
-export const NoteCard: React.FC<NoteCardProps> = ({
-  note,
-  onDelete,
-  onArchive,
-  isReadOnly = false,
-}) => {
+export const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
   const formattedDate = new Date(note.updatedAt).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
   });
-
-  const showActions = !isReadOnly && (onDelete || onArchive);
 
   return (
     <Card className="group relative flex h-full flex-col overflow-hidden px-3 py-5 border-border/50 bg-card/40 backdrop-blur-sm transition-all duration-300 hover:border-primary/40 hover:bg-card hover:shadow-lg hover:shadow-primary/5">
@@ -79,51 +54,8 @@ export const NoteCard: React.FC<NoteCardProps> = ({
           <div className="flex shrink-0 items-center gap-1.5">
             <Badge variant="secondary" className="gap-1">
               <MdQuestionAnswer />
-              {formatNumber(note.questions?.length || 0)}
+              {formatNumber(note.questions?.length || 0)} Q&A
             </Badge>
-
-            {showActions && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
-                    aria-label="Note actions"
-                  >
-                    <FiMoreVertical className="h-4 w-4" aria-hidden="true" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {onArchive && (
-                    <DropdownMenuItem
-                      onClick={() => onArchive(note.id, !note.isArchived)}
-                    >
-                      {note.isArchived ? (
-                        <>
-                          <FiRotateCcw className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
-                          Unarchive
-                        </>
-                      ) : (
-                        <>
-                          <FiArchive className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
-                          Archive
-                        </>
-                      )}
-                    </DropdownMenuItem>
-                  )}
-                  {onDelete && (
-                    <DropdownMenuItem
-                      className="text-destructive focus:text-destructive"
-                      onClick={() => onDelete(note.id)}
-                    >
-                      <FiTrash2 className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
-                      Delete
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
           </div>
         </div>
 
@@ -131,7 +63,7 @@ export const NoteCard: React.FC<NoteCardProps> = ({
           href={`/notes/${note.id}`}
           className="line-clamp-2 hover:underline decoration-primary underline-offset-4"
         >
-          <CardTitle className="text-lg font-bold text-foreground">
+          <CardTitle className="text-lg font-bold text-foreground uppercase">
             {note.title}
           </CardTitle>
         </Link>

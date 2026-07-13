@@ -26,9 +26,14 @@ export const SearchBox = ({
   'aria-label': ariaLabel,
 }: Props) => {
   return (
-    <div className={cn('relative w-full', className)}>
+    <div
+      className={cn(
+        'relative w-[60%] md:w-[70%] lg:w-[60%] max-w-[400px]',
+        className
+      )}
+    >
       <FiSearch
-        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+        className="pointer-events-none absolute left-6 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
         aria-hidden="true"
       />
       <Input
@@ -37,7 +42,7 @@ export const SearchBox = ({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-label={ariaLabel ?? placeholder}
-        className="h-10 rounded-xl pl-9 pr-9"
+        className=" rounded-full py-5 pl-12 pr-9"
       />
       {value && (
         <Button

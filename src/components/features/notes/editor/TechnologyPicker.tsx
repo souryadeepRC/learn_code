@@ -51,18 +51,25 @@ export const TechnologyPicker = ({ value, onChange, error }: Props) => {
           aria-haspopup="listbox"
           aria-expanded={open}
           className={cn(
+            'cursor-pointer',
             'flex h-9 w-full items-center justify-between gap-2 rounded-lg border bg-background/80 px-3 text-xs font-medium transition-all',
             'border-muted-foreground/20 hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-ring',
             error && 'border-destructive'
           )}
         >
           <span className="flex min-w-0 items-center gap-1.5">
-            <FiTag className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
+            <FiTag
+              className="h-3.5 w-3.5 shrink-0 text-primary"
+              aria-hidden="true"
+            />
             <span className={cn('truncate', !value && 'text-muted-foreground')}>
-              {value ? value.name : 'Select a technology…'}
+              {value ? value.name : 'Select a technology'}
             </span>
           </span>
-          <FiChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <FiChevronDown
+            className="h-3.5 w-3.5 shrink-0 text-muted-foreground"
+            aria-hidden="true"
+          />
         </button>
 
         {open && (
@@ -76,10 +83,14 @@ export const TechnologyPicker = ({ value, onChange, error }: Props) => {
             />
             <ul role="listbox" className="max-h-56 overflow-y-auto py-1">
               {isFetching && (
-                <li className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</li>
+                <li className="px-3 py-2 text-[11px] text-muted-foreground">
+                  Searching…
+                </li>
               )}
               {!isFetching && results.length === 0 && (
-                <li className="px-3 py-2 text-[11px] text-muted-foreground">No technologies found.</li>
+                <li className="px-3 py-2 text-[11px] text-muted-foreground">
+                  No technologies found.
+                </li>
               )}
               {results.map((technology) => (
                 <li key={technology.id}>
@@ -99,7 +110,10 @@ export const TechnologyPicker = ({ value, onChange, error }: Props) => {
                   >
                     <span className="truncate">{technology.name}</span>
                     {value?.id === technology.id && (
-                      <FiCheck className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
+                      <FiCheck
+                        className="h-3.5 w-3.5 shrink-0 text-primary"
+                        aria-hidden="true"
+                      />
                     )}
                   </button>
                 </li>
@@ -110,7 +124,9 @@ export const TechnologyPicker = ({ value, onChange, error }: Props) => {
       </div>
 
       {error && (
-        <p className="text-xs font-medium text-destructive animate-in fade-in">{error}</p>
+        <p className="text-xs font-medium text-destructive animate-in fade-in">
+          {error}
+        </p>
       )}
     </div>
   );

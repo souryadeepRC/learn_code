@@ -52,10 +52,9 @@ const QuestionPagination: React.FC<Props> = ({
     <div className="flex items-center gap-2  overflow-x-auto">
       {showFirstButton && (
         <Button
-          type="button"
+          variant="ghost"
           size="sm"
           onClick={() => setActiveQuestionIdx(0)}
-          className="p-1.5 hover:bg-accent rounded-md transition-colors"
           aria-label="Go to first question"
         >
           <FiChevronLeft className="w-4 h-4" />
@@ -70,14 +69,10 @@ const QuestionPagination: React.FC<Props> = ({
           return (
             <Button
               key={index}
-              type="button"
+              variant="ghost"
               size="sm"
               onClick={() => setActiveQuestionIdx(index)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
-                isActive
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted hover:bg-muted/80 text-muted-foreground'
-              }`}
+              className={`  ${isActive ? 'font-bold' : ''}`}
             >
               Q{index + 1}
             </Button>
@@ -87,10 +82,9 @@ const QuestionPagination: React.FC<Props> = ({
 
       {showLastButton && (
         <Button
-          type="button"
+          variant="ghost"
           size="sm"
           onClick={() => setActiveQuestionIdx(totalQuestions - 1)}
-          className="p-1.5 hover:bg-accent rounded-md transition-colors"
           aria-label="Go to last question"
         >
           <span className="hidden md:block">Go to </span>Last

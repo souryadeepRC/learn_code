@@ -1,4 +1,5 @@
 import { PAGINATION } from '@/constants/api';
+import { decryptAnswer, encryptAnswer } from '@/lib/auth/crypto';
 import { prismaNotes } from '@/lib/prismaNotes';
 import {
   ArchiveNoteInput,
@@ -19,6 +20,17 @@ import {
 
 // Suppress unused import — PrismaClient referenced for type narrowing only
 void PrismaClient;
+
+// ─── Answer encryption/decryption ────────────────────────────────────────────
+
+const decryptQuestions = (
+  questions: Array<{ answer: string; [key: string]: unknown }>
+) => {
+  return questions.map((q) => ({
+    ...q,
+    answer: decryptAnswer(q.answer),
+  }));
+};
 
 // ─── Select shape returned to clients ─────────────────────────────────────────
 // Never expose internal DB fields we don't need
@@ -134,7 +146,12 @@ export const listNotes = async (params: {
     take: limit + 1,
   });
 
-  return finalizePage(rows, limit);
+  const decryptedRows = rows.map((row) => ({
+    ...row,
+    questions: decryptQuestions(row.questions),
+  }));
+
+  return finalizePage(decryptedRows, limit);
 };
 
 export const listUserNotes = async (params: {
@@ -227,7 +244,12 @@ export const getNoteById = async (id: string) => {
     where: { id },
     select: NOTE_SELECT,
   });
-  return note ? attachTechnology(note) : null;
+  if (!note) return null;
+  const decryptedNote = {
+    ...note,
+    questions: decryptQuestions(note.questions),
+  };
+  return attachTechnology(decryptedNote);
 };
 
 // ─── Create ────────────────────────────────────────────────────────────────────
@@ -256,11 +278,10 @@ export const createNote = async (
       title: data.title,
       description: data.description,
       technologyId: data.technologyId,
-      // Cast each answer to Prisma.InputJsonValue — Prisma's Json field type
       questions: (data.questions ?? []).map((q) => ({
         id: q.id,
         question: q.question,
-        answer: q.answer as Prisma.InputJsonValue,
+        answer: encryptAnswer(q.answer || ''),
         order: q.order,
       })),
       visibility,
@@ -269,7 +290,12 @@ export const createNote = async (
     select: NOTE_SELECT,
   });
 
-  return attachTechnology(note);
+  const decryptedNote = {
+    ...note,
+    questions: decryptQuestions(note.questions),
+  };
+
+  return attachTechnology(decryptedNote);
 };
 
 // ─── Update ────────────────────────────────────────────────────────────────────
@@ -310,13 +336,12 @@ export const updateNote = async (
       ...(data.technologyId !== undefined && {
         technologyId: data.technologyId,
       }),
-      // Use { set } envelope — required by Prisma for embedded type array updates
       ...(data.questions !== undefined && {
         questions: {
           set: data.questions.map((q) => ({
             id: q.id,
             question: q.question,
-            answer: q.answer as Prisma.InputJsonValue,
+            answer: encryptAnswer(q.answer || ''),
             order: q.order,
           })),
         },
@@ -327,7 +352,12 @@ export const updateNote = async (
     select: NOTE_SELECT,
   });
 
-  return attachTechnology(note);
+  const decryptedNote = {
+    ...note,
+    questions: decryptQuestions(note.questions),
+  };
+
+  return attachTechnology(decryptedNote);
 };
 
 // ─── Delete (Hard) ─────────────────────────────────────────────────────────────
@@ -345,5 +375,10 @@ export const toggleArchiveNote = async (id: string, data: ArchiveNoteInput) => {
     select: NOTE_SELECT,
   });
 
-  return attachTechnology(note);
+  const decryptedNote = {
+    ...note,
+    questions: decryptQuestions(note.questions),
+  };
+
+  return attachTechnology(decryptedNote);
 };

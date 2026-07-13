@@ -2,7 +2,7 @@
 
 import { Label } from '@/components/ui/label';
 import { CreateNoteInput } from '@/schema/notes';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Control,
   Controller,
@@ -25,7 +25,6 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
   register,
   errors,
 }) => {
-  const [html, setHtml] = useState('');
   const questionError = errors.questions?.[index]?.question?.message;
   const answerError = errors.questions?.[index]?.answer?.message;
 
@@ -44,7 +43,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
       {/* Answer Input with Rich Text */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label className="text-xs font-semibold tracking-wider text-muted-foreground">
+          <Label className="text-sm font-semibold tracking-wider text-primary">
             Answer
           </Label>
         </div>
@@ -53,7 +52,10 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
           name={`questions.${index}.answer`}
           control={control}
           render={({ field: { value, onChange } }) => (
-            <div className="rounded-lg border border-muted/50 overflow-hidden focus-within:border-primary transition-all">
+            <div
+              className="rounded-lg border border-muted/50 overflow-hidden 
+             border-primary "
+            >
               <TipTapEditor content={value} onChange={onChange} />
             </div>
           )}

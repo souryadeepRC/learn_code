@@ -21,7 +21,7 @@ const EmptyBox: React.FC<Props> = ({
       )}
       <p className="text-sm font-medium text-foreground mt-4 ">{title}</p>
       <p className="text-xs text-muted-foreground">{description}</p>
-      <Button className="gap-2 mx-auto mt-4" {...action} />
+      {action && <Button className="gap-2 mx-auto mt-4" {...action} />}
     </div>
   );
 };

@@ -1,5 +1,4 @@
 'use client';
-import { FaAngleDoubleLeft } from 'react-icons/fa';
 
 import Button from '@/components/common/Button';
 import EmptyBox from '@/components/common/EmptyBox';
@@ -12,11 +11,12 @@ import { Switch } from '@/components/ui/switch';
 import { CreateNoteInput, CreateNoteSchema } from '@/schema/notes';
 import type { TechnologySummary } from '@/types/technology';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Link from 'next/link';
 import React, { useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
-import { FaRegStickyNote } from 'react-icons/fa';
-import { FiGlobe, FiLock, FiPlus, FiSettings, FiTrash2 } from 'react-icons/fi';
+import { FaRegStickyNote, FaSave } from 'react-icons/fa';
+import { FiGlobe, FiLock, FiPlus, FiTrash2 } from 'react-icons/fi';
+import { MdPreview } from 'react-icons/md';
+import { Separator } from '../../ui/separator';
 
 interface NoteFormProps {
   initialData?: Partial<CreateNoteInput>;
@@ -24,7 +24,8 @@ interface NoteFormProps {
   onSubmit: (data: CreateNoteInput) => void;
   isSubmitting?: boolean;
 }
-
+const formSection =
+  'bg-foreground/5 rounded-3xl px-4 md:px-6 py-2 md:py-3 mb-1 md:mb-2';
 export const NoteForm: React.FC<NoteFormProps> = ({
   initialData,
   initialTechnology = null,
@@ -34,10 +35,7 @@ export const NoteForm: React.FC<NoteFormProps> = ({
   const [technology, setTechnology] = useState<TechnologySummary | null>(
     initialTechnology
   );
-  const [showSettings, setShowSettings] = useState(true);
-  const toggleSettings = () => {
-    setShowSettings((showSettings) => !showSettings);
-  };
+
   const [activeQuestionIdx, setActiveQuestionIdx] = useState(0);
 
   const {
@@ -73,6 +71,14 @@ export const NoteForm: React.FC<NoteFormProps> = ({
   });
 
   const visibility = watch('visibility');
+  const title = watch('title');
+  const technologyId = watch('technologyId');
+
+  const isDisabled =
+    isSubmitting ||
+    Object.keys(errors).length > 0 ||
+    !title.trim() ||
+    !technologyId;
 
   const handleTechnologyChange = (next: TechnologySummary) => {
     setTechnology(next);
@@ -99,6 +105,7 @@ export const NoteForm: React.FC<NoteFormProps> = ({
   };
 
   const handleFormSubmit = (data: CreateNoteInput) => {
+    // Only call onSubmit, do NOT submit the form
     const sanitizedQuestions = (data.questions ?? [])
       .filter((question) => {
         const text = question?.question?.trim() ?? '';
@@ -119,7 +126,7 @@ export const NoteForm: React.FC<NoteFormProps> = ({
       .map((question, index) => ({
         ...question,
         question: question.question?.trim() ?? '',
-        answer: JSON.stringify({ content: question.answer ?? '' }),
+        answer: question.answer ?? '',
         order: index,
       }));
 
@@ -132,174 +139,158 @@ export const NoteForm: React.FC<NoteFormProps> = ({
 
   return (
     <form
-      onSubmit={handleSubmit(handleFormSubmit)}
-      className="flex flex-col min-h-screen bg-background"
+      onSubmit={(e) => e.preventDefault()}
+      className="flex flex-col md:p-2 gap-2"
     >
+      <input type="hidden" {...register('description')} />
       {/* ─── Header ─── */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 px-4 py-3 border-b bg-background/95 backdrop-blur-sm">
-        <div className="w-full md:w-[70%] flex flex-col md:flex-row items-start md:items-center  gap-1  px-4 py-0 md:py-3">
-          <Link
-            href="/notes"
-            className="flex items-center text-primary hover:underline   pb-4 md:pb-0 "
-          >
-            <FaAngleDoubleLeft />
-            <span className=" md:hidden pl-3">All Notes</span>
-          </Link>
-          <div className="flex-col">
-            <input type="hidden" {...register('description')} />
-            <Input
-              id="title"
-              placeholder="Add a title for your note..."
-              required
-              aria-invalid={!!errors.title}
-              aria-describedby={errors.title ? 'title-error' : undefined}
-              {...register('title')}
-              className="text-md md:text-lgfont-semibold"
-              variant="underline"
-            />
-            {errors.title && (
-              <p id="title-error" className="text-sm text-destructive mt-1">
-                {errors.title.message}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="w-full md:w-auto flex flex-row gap-2 justify-end py-2 px-4">
-          <Button size="lg" type="submit" className="w-[50%]">
-            Preview
-          </Button>
-          <Button
-            size="lg"
-            type="submit"
-            className="w-[50%]"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Saving...' : 'Save'} Note
-          </Button>
-        </div>
-      </div>
-
-      <div className="flex flex-col items-start gap-2 px-4 sm:px-6 py-3 bg-primary/10 border-b ">
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={toggleSettings}
-          leftIcon={<FiSettings className="w-4 h-4" />}
-          title={showSettings ? 'Hide Settings' : 'Show Settings'}
+      <div
+        className={`${formSection} flex md:flex-row  items-center justify-between 
+      gap-4    
+      `}
+      >
+        <Button variant="rounded" size="md" type="button">
+          <MdPreview />
+          <span className="hidden sm:inline">Preview</span>
+        </Button>
+        <Input
+          id="title"
+          placeholder="Add a title for your note..."
+          required
+          aria-invalid={!!errors.title}
+          aria-describedby={errors.title ? 'title-error' : undefined}
+          {...register('title')}
+          className="font-bold"
+          variant="underline"
         />
-        {showSettings && (
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-2  border-1 rounded-md">
-              <Switch
-                id="visibility"
-                checked={visibility === 'PUBLIC'}
-                onCheckedChange={(checked) =>
-                  setValue('visibility', checked ? 'PUBLIC' : 'PRIVATE', {
-                    shouldValidate: true,
-                  })
-                }
-              />
-              <label
-                htmlFor="visibility"
-                className="flex items-center gap-2 cursor-pointer text-sm font-medium"
-              >
-                {visibility === 'PUBLIC' ? (
-                  <>
-                    <FiGlobe className="w-4 h-4" />
-                    Public
-                  </>
-                ) : (
-                  <>
-                    <FiLock className="w-4 h-4" />
-                    Private
-                  </>
-                )}
-              </label>
-            </div>
-            <TechnologyPicker
-              value={technology}
-              onChange={handleTechnologyChange}
-              error={errors.technologyId?.message}
-            />
-          </div>
-        )}
+
+        <Button
+          size="lg"
+          type="button"
+          className="rounded-xl h-10"
+          disabled={isDisabled}
+          onClick={handleSubmit(handleFormSubmit)}
+        >
+          <FaSave />
+          <span className="hidden sm:inline">
+            {isSubmitting ? 'Saving...' : 'Save'}
+          </span>
+        </Button>
       </div>
-      <div className="space-y-0">
-        <div className="bg-primary/5 px-4 sm:px-6 py-4">
-          <div className="flex gap-1 md:gap-3 items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Badge>{fields.length}&nbsp;Q&A</Badge>
-            </div>
+      {errors.title && (
+        <p id="title-error" className="text-xs text-destructive">
+          {errors.title.message}
+        </p>
+      )}
 
-            <div className="flex flex-col gap-3   items-center  justify-end">
-              {fields.length > 0 && (
-                <QuestionPagination
-                  activeQuestionIdx={activeQuestionIdx}
-                  setActiveQuestionIdx={setActiveQuestionIdx}
-                  fields={fields}
-                />
-              )}
-            </div>
+      <div className={`${formSection} grid grid-cols-2 md:grid-cols-3 gap-4`}>
+        <div className="flex items-center gap-2  ">
+          <Switch
+            id="visibility"
+            checked={visibility === 'PUBLIC'}
+            onCheckedChange={(checked) =>
+              setValue('visibility', checked ? 'PUBLIC' : 'PRIVATE', {
+                shouldValidate: true,
+              })
+            }
+          />
+          <label
+            htmlFor="visibility"
+            className="flex items-center gap-2 cursor-pointer text-sm font-medium"
+          >
+            {visibility === 'PUBLIC' ? (
+              <>
+                <FiGlobe className="w-4 h-4" />
+                Public
+              </>
+            ) : (
+              <>
+                <FiLock className="w-4 h-4" />
+                Private
+              </>
+            )}
+          </label>
+        </div>
+        <TechnologyPicker
+          value={technology}
+          onChange={handleTechnologyChange}
+          error={errors.technologyId?.message}
+        />
+      </div>
 
-            <Button
-              type="button"
-              onClick={handleAddQuestion}
-              className="gap-2 whitespace-nowrap"
-              size="lg"
-            >
-              <FiPlus className="w-4 h-4" />
-              Add
-              <span className="hidden sm:inline"> Question</span>
-            </Button>
-          </div>
+      <div
+        className={`${formSection} flex gap-1 md:gap-3 items-center justify-between`}
+      >
+        <div className="flex items-center gap-2">
+          <Badge>{fields.length}&nbsp;Q&A</Badge>
         </div>
 
-        <div className="p-4 sm:p-6">
-          {fields.length === 0 ? (
-            <EmptyBox
-              Icon={FaRegStickyNote}
-              title="No questions yet"
-              description="Structure your learning notes"
-              action={{
-                onClick: handleAddQuestion,
-                leftIcon: <FiPlus className="w-4 h-4" />,
-                title: 'Add First Question',
-              }}
+        <div className="flex flex-col gap-3   items-center  justify-end">
+          {fields.length > 0 && (
+            <QuestionPagination
+              activeQuestionIdx={activeQuestionIdx}
+              setActiveQuestionIdx={setActiveQuestionIdx}
+              fields={fields}
             />
-          ) : (
-            <div className="space-y-6">
-              {fields[activeQuestionIdx] && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-bold text-muted-foreground">
-                      Question {activeQuestionIdx + 1} of {fields.length}
-                    </p>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      onClick={handleRemoveQuestion}
-                      className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
-                    >
-                      <FiTrash2 className="w-4 h-4" />
-                      Delete
-                      <span className="hidden sm:inline"> Question</span>
-                    </Button>
-                  </div>
-
-                  <QuestionEditor
-                    key={`${activeQuestionIdx}-${fields[activeQuestionIdx]?.id ?? 'new'}`}
-                    index={activeQuestionIdx}
-                    control={control}
-                    register={register}
-                    errors={errors}
-                  />
-                </div>
-              )}
-            </div>
           )}
         </div>
+
+        <Button
+          variant="rounded"
+          onClick={handleAddQuestion}
+          className="gap-2 whitespace-nowrap"
+          size="md"
+        >
+          <FiPlus className="w-4 h-4" />
+          Add
+          <span className="hidden sm:inline"> Question</span>
+        </Button>
+      </div>
+
+      <div className="pt-2 pb-4">
+        {fields.length === 0 ? (
+          <EmptyBox
+            Icon={FaRegStickyNote}
+            title="No questions yet"
+            description="Structure your learning notes"
+            action={{
+              onClick: handleAddQuestion,
+              leftIcon: <FiPlus className="w-4 h-4" />,
+              title: 'Add First Question',
+            }}
+          />
+        ) : (
+          <>
+            {fields[activeQuestionIdx] && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-bold text-foreground/60">
+                    Question {activeQuestionIdx + 1} of {fields.length}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="destructiveOutline"
+                    size="sm"
+                    className="rounded-full px-4"
+                    onClick={handleRemoveQuestion}
+                  >
+                    <FiTrash2 className="w-4 h-4" />
+                    Delete
+                    <span className="hidden sm:inline"> Question</span>
+                  </Button>
+                </div>
+                <Separator />
+                <QuestionEditor
+                  key={`${activeQuestionIdx}-${fields[activeQuestionIdx]?.id ?? 'new'}`}
+                  index={activeQuestionIdx}
+                  control={control}
+                  register={register}
+                  errors={errors}
+                />
+              </div>
+            )}
+          </>
+        )}
       </div>
     </form>
   );

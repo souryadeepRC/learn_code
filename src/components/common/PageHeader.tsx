@@ -17,13 +17,13 @@ const PageHeader: React.FC<Props> = ({
   actionCta,
 }) => {
   return (
-    <div className="px-4 sm:px-6 py-6 flex items-center justify-between">
+    <div className="px-4 pb-3 sm:px-6 flex items-center justify-between">
       <div>
-        <h1 className="flex gap-2 text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-tight sm:leading-tight md:leading-tight lg:leading-tight font-bold text-primary ">
+        <h1 className="flex gap-2 text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight sm:leading-tight md:leading-tight lg:leading-tight font-bold text-primary ">
           {icon} {title}
         </h1>
         {description && (
-          <p className="text-base sm:text-sm md:text-md text-muted-foreground pt-2 max-w-2xl">
+          <p className="text-xs sm:text-sm md:text-md text-muted-foreground   max-w-2xl">
             {description}
           </p>
         )}

@@ -32,7 +32,7 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
     ref
   ) => {
     return (
-      <div className={cn('space-y-1.5 md:space-y-2', containerClassName)}>
+      <div className={cn('space-y-1 md:space-y-1.5', containerClassName)}>
         {label && (
           <Label htmlFor={id} className="text-xs md:text-sm font-semibold">
             {label} {required && <span className="text-destructive">*</span>}
@@ -49,8 +49,8 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
             id={id}
             required={required}
             className={cn(
-              'text-xs md:text-sm p-4 text-foreground font-medium placeholder:text-muted-foreground/50 placeholder:font-normal',
-              'bg-background/80 h-6 border-border/60 focus:border-primary focus-visible:border-primary focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all',
+              //  'text-xs md:text-sm p-4 text-foreground font-medium placeholder:text-muted-foreground/50 placeholder:font-normal',
+              // 'bg-background/80 h-6 border-border/60 focus:border-primary focus-visible:border-primary focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all',
               leftIcon && 'pl-10',
               rightIcon && 'pr-10',
               error &&

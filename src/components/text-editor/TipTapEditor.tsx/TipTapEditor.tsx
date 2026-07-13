@@ -22,6 +22,8 @@ export interface TipTapEditorProps {
   editable?: boolean;
   /** Additional CSS class for the wrapper. */
   className?: string;
+  /** Maximum height of the editor (e.g., '400px', '50vh'). Defaults to 500px. */
+  maxHeight?: string;
 }
 
 const TipTapEditor = ({
@@ -30,22 +32,30 @@ const TipTapEditor = ({
   placeholder = 'Start writing...',
   editable = true,
   className = '',
+  maxHeight = '10vh',
 }: TipTapEditorProps) => {
   // Track whether we're programmatically updating content to avoid infinite loops
   const isUpdatingRef = useRef(false);
 
   const handleUpdate = useCallback(
-    ({ editor }: { editor: ReturnType<typeof useEditor> extends infer E ? NonNullable<E> : never }) => {
+    ({
+      editor,
+    }: {
+      editor: ReturnType<typeof useEditor> extends infer E
+        ? NonNullable<E>
+        : never;
+    }) => {
       if (isUpdatingRef.current) return;
       onChange?.(editor.getHTML());
     },
-    [onChange],
+    [onChange]
   );
 
   const editor = useEditor({
     extensions,
     content,
     editable,
+    immediatelyRender: true,
     onUpdate: handleUpdate,
     editorProps: {
       attributes: {
@@ -76,7 +86,12 @@ const TipTapEditor = ({
   return (
     <div className={`editor-wrapper ${className}`.trim()}>
       {editable && <MenuBar editor={editor} />}
-      <EditorContent editor={editor} className="editor-content" />
+      <div
+        className="editor-content"
+        style={{ '--editor-max-height': maxHeight } as React.CSSProperties}
+      >
+        <EditorContent editor={editor} />
+      </div>
     </div>
   );
 };

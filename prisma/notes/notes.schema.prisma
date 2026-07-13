@@ -30,8 +30,8 @@ enum SubscriptionTier {
 type QuestionAnswer {
   id       String // client-generated UUID (crypto.randomUUID)
   question String
-  /// Rich text stored as string 
-  answer   Json
+  /// Answer text encrypted at rest (AES-256-GCM). Stored as 'iv:authTag:ciphertext' (base64-joined).
+  answer   String
   order    Int    @default(0)
 }
 

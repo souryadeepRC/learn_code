@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -13,7 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { NoteQuestion, useUpdateNote } from '@/hooks/useNotes';
 import React, { useState } from 'react';
-import { FiPlus } from 'react-icons/fi';
 import TipTapEditor from '../../../text-editor/TipTapEditor.tsx/TipTapEditor';
 
 interface AddQuestionDialogProps {
@@ -46,7 +44,7 @@ export const AddQuestionDialog: React.FC<AddQuestionDialogProps> = ({
     const newQuestion: NoteQuestion = {
       id: crypto.randomUUID(),
       question: question.trim(),
-      answer: JSON.stringify({ content: answer }),
+      answer: answer,
       order: existingQuestions.length,
     };
 
@@ -79,17 +77,11 @@ export const AddQuestionDialog: React.FC<AddQuestionDialogProps> = ({
       open={isOpen}
       onOpenChange={(val) => !val && !isPending && onClose()}
     >
-      <DialogContent className="min-w-[80vw] max-h-[85vh] overflow-y-auto p-6 rounded-2xl bg-card/95 backdrop-blur-xl border shadow-xl">
+      <DialogContent className="min-w-[80vw] max-h-[85vh] overflow-y-auto p-6 rounded-2xl bg-card/95 backdrop-blur-xl shadow-xl">
         <DialogHeader className="  ">
-          <DialogTitle className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <span className="p-1.5 rounded-lg bg-primary/10 text-primary">
-              <FiPlus className="w-5 h-5" />
-            </span>
-            <span>Add New Q&amp;A Block</span>
+          <DialogTitle className="text-xl text-primary font-bold tracking-tight   flex items-center gap-2">
+            Add New Q&amp;A Block
           </DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground mt-1">
-            Add a new question and rich-text answer directly to this note.
-          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-1">
@@ -101,7 +93,7 @@ export const AddQuestionDialog: React.FC<AddQuestionDialogProps> = ({
 
           <div className="space-y-1.5">
             <Label htmlFor="question-title" className="text-xs font-semibold">
-              Question Title <span className="text-destructive">*</span>
+              Question<span className="text-destructive">*</span>
             </Label>
             <Input
               id="question-title"
@@ -116,46 +108,34 @@ export const AddQuestionDialog: React.FC<AddQuestionDialogProps> = ({
 
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold flex items-center justify-between">
-              <span>Detailed Answer</span>
-              <span className="text-[10px] font-normal text-muted-foreground">
-                Rich formatting enabled
-              </span>
+              <span>Answer</span>
             </Label>
             <div className="rounded-lg overflow-hidden border border-muted-foreground/20 bg-background/50 focus-within:border-primary transition-all">
               <TipTapEditor
                 content={answer}
                 onChange={setAnswer}
                 placeholder="Provide a comprehensive explanation with code snippets, bullet points, or highlights..."
-                className="[&_.ql-editor]:min-h-[420px] [&_.ql-container]:min-h-[420px] [&_.ql-editor]:text-sm"
               />
             </div>
           </div>
 
-          <DialogFooter className=" pt-4 gap-2 flex flex-col sm:flex-row justify-end items-center">
+          <DialogFooter className="  pt-2 gap-2 flex flex-row  justify-end items-center">
             <Button
-              type="button"
+              size="md"
               variant="outline"
-              size="sm"
               onClick={onClose}
               disabled={isPending}
-              className="w-full sm:w-auto h-9 text-xs"
+              className=" w-[20%] max-w-[100px]"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              size="sm"
+              size="md"
               disabled={isPending || !question.trim()}
-              className="w-full sm:w-auto h-9 text-xs font-semibold gap-1.5 min-w-[120px]"
+              className="   w-[40%] max-w-[200px]"
             >
-              {isPending ? (
-                <span>Adding...</span>
-              ) : (
-                <>
-                  <FiPlus className="w-3.5 h-3.5" />
-                  <span>Submit Question</span>
-                </>
-              )}
+              {isPending ? 'Adding...' : ' Submit Question'}
             </Button>
           </DialogFooter>
         </form>

@@ -1,13 +1,14 @@
 'use client';
 
+import { NoteForm } from '@/components/features/notes/NoteForm';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNoteById, useUpdateNote } from '@/hooks/useNotes';
+import { Content } from '@/root/src/components/common/Content';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { use } from 'react';
-import { FiArrowLeft } from 'react-icons/fi';
-import { NoteForm } from '@/components/features/notes/NoteForm';
+import { FaAngleDoubleLeft } from 'react-icons/fa';
 
 export default function EditNotePage({
   params,
@@ -46,36 +47,34 @@ export default function EditNotePage({
   }
 
   return (
-    <>
-      <div className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-b z-40 px-4 py-3">
-        <Link href={`/notes/${note.id}`}>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <FiArrowLeft className="w-4 h-4" />
-            Back to Note
-          </Button>
+    <Content>
+      <div className="flex items-center justify-between gap-4 ">
+        <Link
+          className="flex text-primary text-xs gap-2 items-center"
+          href="/notes"
+        >
+          <FaAngleDoubleLeft /> Back to All Notes
         </Link>
+
+        <h1 className="text-primary text-lg md:text-xl lg:text-2xl font-bold">
+          Edit your note
+        </h1>
       </div>
-      <div className="pt-16">
-        <NoteForm
-          initialData={note}
-          initialTechnology={note.technology}
-          isSubmitting={isPending}
-          onSubmit={(data) => {
-            updateNote(
-              { id: note.id, data },
-              {
-                onSuccess: () => {
-                  router.push(`/notes/${note.id}`);
-                },
-              }
-            );
-          }}
-        />
-      </div>
-    </>
+      <NoteForm
+        initialData={note}
+        initialTechnology={note.technology}
+        isSubmitting={isPending}
+        onSubmit={(data) => {
+          updateNote(
+            { id: note.id, data },
+            {
+              onSuccess: () => {
+                router.push(`/notes/${note.id}`);
+              },
+            }
+          );
+        }}
+      />
+    </Content>
   );
 }

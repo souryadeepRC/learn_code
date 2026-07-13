@@ -98,7 +98,7 @@ export const NoteEditorQuestionCard: React.FC<NoteEditorQuestionCardProps> = ({
               name={`questions.${index}.answer` as const}
               render={({ field: { onChange, value } }) => (
                 <TipTapEditor
-                  content={value as string}
+                  content={value}
                   onChange={onChange}
                   placeholder="Provide a comprehensive explanation with code snippets, bullet points, or highlights..."
                 />

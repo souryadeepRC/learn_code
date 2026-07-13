@@ -1,11 +1,11 @@
 'use client';
 
-import * as React from 'react';
 import { Dialog as DialogPrimitive } from 'radix-ui';
+import * as React from 'react';
 
-import { cn } from '@/utils';
-import { Button } from '@/components/ui/button';
 import { IconPlaceholder } from '@/app/(create)/components/IconPlaceholder';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/utils';
 
 function Dialog({
   ...props
@@ -112,7 +112,7 @@ function DialogFooter({
     <div
       data-slot="dialog-footer"
       className={cn(
-        '-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t bg-muted/50 p-4 sm:flex-row sm:justify-end',
+        '-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl  p-4 sm:flex-row sm:justify-end',
         className
       )}
       {...props}

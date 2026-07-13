@@ -1,17 +1,18 @@
 'use client';
 
-import { useDeleteNote, useInfiniteNotes, useToggleArchiveNote } from '@/hooks/useNotes';
+import { useInfiniteNotes } from '@/hooks/useNotes';
 import { cn } from '@/root/src/utils';
 import type { Note, NotesApiResponse } from '@/types/note';
 import { useCallback, useEffect, useRef } from 'react';
 import { LiaStickyNoteSolid } from 'react-icons/lia';
+import EmptyBox from '../../common/EmptyBox';
 import { NoteCard } from './NoteCard';
 import { NoteCardSkeleton } from './NoteCardSkeleton';
 
 const SKELETON_COUNT = 8;
 
 type Props = {
-  includeArchived: boolean;
+  includeArchived?: boolean;
   search: string;
   isReadOnly?: boolean;
 };
@@ -20,7 +21,11 @@ type Props = {
  * NotesGrid — responsive grid with IntersectionObserver-based infinite scroll,
  * mirroring TechnologiesGrid's cursor-pagination pattern.
  */
-export const NotesGrid = ({ includeArchived, search, isReadOnly = false }: Props) => {
+export const NotesGrid = ({
+  includeArchived = false,
+  search,
+  isReadOnly = false,
+}: Props) => {
   const {
     data,
     fetchNextPage,
@@ -30,9 +35,6 @@ export const NotesGrid = ({ includeArchived, search, isReadOnly = false }: Props
     isError,
     error,
   } = useInfiniteNotes({ includeArchived, search });
-
-  const { mutate: deleteNote } = useDeleteNote();
-  const { mutate: toggleArchive } = useToggleArchiveNote();
 
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -60,16 +62,6 @@ export const NotesGrid = ({ includeArchived, search, isReadOnly = false }: Props
     return () => observer.disconnect();
   }, [handleObserver]);
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this note?')) {
-      deleteNote(id);
-    }
-  };
-
-  const handleArchive = (id: string, isArchived: boolean) => {
-    toggleArchive({ id, data: { isArchived } });
-  };
-
   // ── Initial loading state ──────────────────────────────────────────────────
   if (isLoading) {
     return (
@@ -96,7 +88,9 @@ export const NotesGrid = ({ includeArchived, search, isReadOnly = false }: Props
         <span className="text-4xl" aria-hidden="true">
           ⚠️
         </span>
-        <p className="text-base font-semibold text-foreground">Failed to load notes</p>
+        <p className="text-base font-semibold text-foreground">
+          Failed to load notes
+        </p>
         <p className="text-sm text-muted-foreground">
           {error?.message ?? 'An unexpected error occurred. Please try again.'}
         </p>
@@ -104,42 +98,50 @@ export const NotesGrid = ({ includeArchived, search, isReadOnly = false }: Props
     );
   }
 
-  const notes = data?.pages.flatMap((page: NotesApiResponse) => page.data) ?? [];
+  const notes =
+    data?.pages.flatMap((page: NotesApiResponse) => page.data) ?? [];
 
   // ── Empty state ────────────────────────────────────────────────────────────
   if (notes.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-border/40 bg-card/10 px-4 py-20 text-center">
-        <LiaStickyNoteSolid className="h-12 w-12 text-muted-foreground" aria-hidden="true" />
-        <h3 className="text-xl font-semibold">No notes found</h3>
-        <p className="max-w-md text-muted-foreground">
-          {search
+      <EmptyBox
+        Icon={LiaStickyNoteSolid}
+        title="No notes found"
+        description={
+          search
             ? `No notes match "${search}".`
             : isReadOnly
               ? 'There are no public notes available at the moment.'
-              : "You haven't created any notes yet. Start documenting your learning journey!"}
-        </p>
-      </div>
+              : 'Start documenting your learning journey!'
+        }
+      />
+      // <div className="flex flex-col items-center justify-center gap-2 text-center px-4 py-20 text-primary">
+      //   <LiaStickyNoteSolid className="h-12 w-12 " aria-hidden="true" />
+      //   <h3 className="text-xl font-semibold">No notes found</h3>
+      //   <p className="max-w-md">
+      //     {search
+      //       ? `No notes match "${search}".`
+      //       : isReadOnly
+      //         ? 'There are no public notes available at the moment.'
+      //         : "You haven't created any notes yet. Start documenting your learning journey!"}
+      //   </p>
+      // </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-8">
       <p aria-live="polite" aria-atomic="true" className="sr-only">
-        {isFetchingNextPage ? 'Loading more notes…' : `Showing ${notes.length} notes`}
+        {isFetchingNextPage
+          ? 'Loading more notes…'
+          : `Showing ${notes.length} notes`}
       </p>
 
       <div
         className={cn('grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3')}
       >
         {notes.map((note: Note) => (
-          <NoteCard
-            key={note.id}
-            note={note}
-            isReadOnly={isReadOnly}
-            onDelete={isReadOnly ? undefined : handleDelete}
-            onArchive={isReadOnly ? undefined : handleArchive}
-          />
+          <NoteCard key={note.id} note={note} />
         ))}
 
         {isFetchingNextPage &&
