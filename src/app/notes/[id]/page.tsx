@@ -83,37 +83,43 @@ export default function NoteDetailPage({
   return (
     <Content>
       <Link
-        className="flex text-primary text-xs gap-2 items-center"
+        className="w-fit flex text-primary text-xs gap-2 items-center"
         href="/notes"
       >
         <FaAngleDoubleLeft /> Back to All Notes
       </Link>
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-col md:flex-row flex-wrap gap-4 pt-4">
         <h1 className="text-primary text-lg md:text-2xl font-bold flex-1">
           {note.title}
         </h1>
-        <Button
-          variant="outline"
-          size="sm"
-          leftIcon={<FaEdit />}
-          title="Edit"
-          onClick={() => router.push(`/notes/${note.id}/edit`)}
-        />
-        <Button
-          variant="destructiveOutline"
-          size="sm"
-          leftIcon={<FaTrash />}
-          title="Delete"
-          onClick={() => {
-            if (window.confirm('Are you sure you want to delete this note?')) {
-              deleteNote(note.id, {
-                onSuccess: () => router.push('/notes'),
-              });
-            }
-          }}
-        />
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="flex-1"
+            size="md"
+            leftIcon={<FaEdit />}
+            title="Edit"
+            onClick={() => router.push(`/notes/${note.id}/edit`)}
+          />
+          <Button
+            variant="destructiveOutline"
+            className="flex-1"
+            size="md"
+            leftIcon={<FaTrash />}
+            title="Delete"
+            onClick={() => {
+              if (
+                window.confirm('Are you sure you want to delete this note?')
+              ) {
+                deleteNote(note.id, {
+                  onSuccess: () => router.push('/notes'),
+                });
+              }
+            }}
+          />
+        </div>
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2 pt-2 md:pt-4">
         <Badge variant="ghost">12-Dec-2026</Badge>
         <Badge variant="outline">
           {formatNumber(note.questions.length)} Questions

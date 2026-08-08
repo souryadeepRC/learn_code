@@ -35,19 +35,6 @@ const toErrorMessage = (err: unknown, fallback: string) => {
 
 // ─── Queries ───────────────────────────────────────────────────────────────────
 
-export const useUserNotes = (includeArchived = false) => {
-  return useQuery({
-    queryKey: ['notes', { includeArchived }],
-    queryFn: async () => {
-      const response = await apiClient.get<ApiResponse<Note[]>>('/notes', {
-        params: { archived: includeArchived },
-      });
-      return response.data.data;
-    },
-    refetchOnWindowFocus: false,
-  });
-};
-
 /**
  * Infinite-scroll (cursor-paginated) query hook for the authenticated user's notes.
  * Mirrors useInfiniteTechnologies — same page shape, same fetch-next-page contract.
@@ -76,6 +63,7 @@ export const useInfiniteNotes = ({
         throw new Error(toErrorMessage(err, 'Failed to fetch notes.'));
       }
     },
+    refetchOnWindowFocus: false,
     initialPageParam: null,
     getNextPageParam: (lastPage) =>
       lastPage.meta.hasNextPage ? lastPage.meta.nextCursor : undefined,
@@ -91,18 +79,6 @@ export const useNoteById = (id: string) => {
       return response.data.data;
     },
     enabled: !!id,
-    refetchOnWindowFocus: false,
-  });
-};
-
-export const usePublicAdminNotes = () => {
-  return useQuery({
-    queryKey: ['notes', 'public'],
-    queryFn: async () => {
-      const response =
-        await apiClient.get<ApiResponse<Note[]>>('/notes/public');
-      return response.data.data;
-    },
     refetchOnWindowFocus: false,
   });
 };

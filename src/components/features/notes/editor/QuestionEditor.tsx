@@ -56,7 +56,11 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
               className="rounded-lg border border-muted/50 overflow-hidden 
              border-primary "
             >
-              <TipTapEditor content={value} onChange={onChange} />
+              <TipTapEditor
+                content={value}
+                onChange={onChange}
+                maxHeight="30vh"
+              />
             </div>
           )}
         />

@@ -130,7 +130,7 @@ export const NotesGrid = ({
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 pt-8 md:pt-16">
       <p aria-live="polite" aria-atomic="true" className="sr-only">
         {isFetchingNextPage
           ? 'Loading more notes…'

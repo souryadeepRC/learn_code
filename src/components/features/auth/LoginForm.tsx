@@ -1,12 +1,5 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { IoIosAlert } from 'react-icons/io';
-import { LuEye, LuEyeOff, LuLoader } from 'react-icons/lu';
-import { RiLoginCircleLine } from 'react-icons/ri';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,6 +7,13 @@ import { useLogin } from '@/hooks/useLogin';
 import { cn } from '@/root/src/utils';
 import { loginSchema } from '@/schema/auth';
 import type { LoginCredentials } from '@/types/auth';
+import { zodResolver } from '@hookform/resolvers/zod';
+import Link from 'next/link';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { IoIosAlert } from 'react-icons/io';
+import { LuEye, LuEyeOff, LuLoader } from 'react-icons/lu';
+import { RiLoginCircleLine } from 'react-icons/ri';
 import SocialAuth from './SocialAuth';
 
 // ── Field error message ────────────────────────────────────────────────────
@@ -127,7 +127,7 @@ export const LoginForm = () => {
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
               aria-label={showPassword ? 'Hide password' : 'Show password'}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background p-1"
             >
               {showPassword ? (
                 <LuEyeOff className="h-4 w-4" aria-hidden="true" />
@@ -164,9 +164,7 @@ export const LoginForm = () => {
 
         {/* ── Forgot password ── */}
         <div className="flex justify-center mt-2">
-          <Button variant="link" type="button" asChild>
-            <a href="/forgot-password">Forgot password?</a>
-          </Button>
+          <Link href="/forgot-password">Forgot password? </Link>
         </div>
       </form>
 

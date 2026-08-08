@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { TOKEN_CONFIG } from '@/config/tokenConfig';
+import { getQueryClient } from './queryClient';
 
 interface TokenState {
   expiresAt: number | null;
@@ -42,6 +43,14 @@ export async function refreshAccessToken(): Promise<boolean> {
 
       if (response.status === 200) {
         setTokenExpiration(response.data.expiresIn);
+
+        // Invalidate all queries after successful token refresh
+        // This ensures cached data is refetched with the new token
+        if (typeof window !== 'undefined') {
+          const queryClient = getQueryClient();
+          queryClient.invalidateQueries();
+        }
+
         return true;
       }
 

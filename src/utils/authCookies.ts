@@ -9,7 +9,7 @@ const revokedRefreshTokenHashes = new Map<string, number>();
 const getRefreshTokenCookieOptions = () => ({
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
+  sameSite: process.env.NODE_ENV === 'production' ? ('strict' as const) : ('lax' as const),
   path: '/',
 });
 
@@ -31,7 +31,7 @@ const ACCESS_TOKEN_COOKIE_NAME = 'accessToken';
 const getAccessTokenCookieOptions = () => ({
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
+  sameSite: process.env.NODE_ENV === 'production' ? ('strict' as const) : ('lax' as const),
   path: '/',
 });
 

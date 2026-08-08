@@ -4,9 +4,6 @@ import Button from '@/components/common/Button';
 import EmptyBox from '@/components/common/EmptyBox';
 import { QuestionEditor } from '@/components/features/notes/editor/QuestionEditor';
 import { TechnologyPicker } from '@/components/features/notes/editor/TechnologyPicker';
-import QuestionPagination from '@/components/features/notes/QuestionPagination';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { CreateNoteInput, CreateNoteSchema } from '@/schema/notes';
 import type { TechnologySummary } from '@/types/technology';
@@ -14,19 +11,29 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { FaRegStickyNote, FaSave } from 'react-icons/fa';
-import { FiGlobe, FiLock, FiPlus, FiTrash2 } from 'react-icons/fi';
+import {
+  FiChevronLeft,
+  FiChevronRight,
+  FiGlobe,
+  FiLock,
+  FiPlus,
+  FiTrash2,
+} from 'react-icons/fi';
 import { MdPreview } from 'react-icons/md';
-import { Separator } from '../../ui/separator';
+import { FormInput } from '../../common/FormInput';
 
 interface NoteFormProps {
+  label: string;
   initialData?: Partial<CreateNoteInput>;
   initialTechnology?: TechnologySummary | null;
   onSubmit: (data: CreateNoteInput) => void;
   isSubmitting?: boolean;
 }
 const formSection =
-  'bg-foreground/5 rounded-3xl px-4 md:px-6 py-2 md:py-3 mb-1 md:mb-2';
+  'border-1 border-input rounded-md px-4 md:px-6 py-4 md:py-4 mb-1 md:mb-2 flex flex-col gap-4';
+
 export const NoteForm: React.FC<NoteFormProps> = ({
+  label,
   initialData,
   initialTechnology = null,
   onSubmit,
@@ -142,99 +149,83 @@ export const NoteForm: React.FC<NoteFormProps> = ({
       onSubmit={(e) => e.preventDefault()}
       className="flex flex-col md:p-2 gap-2"
     >
-      <input type="hidden" {...register('description')} />
-      {/* ─── Header ─── */}
-      <div
-        className={`${formSection} flex md:flex-row  items-center justify-between 
-      gap-4    
-      `}
-      >
-        <Button variant="rounded" size="md" type="button">
-          <MdPreview />
-          <span className="hidden sm:inline">Preview</span>
-        </Button>
-        <Input
+      <div className="flex justify-between items-center gap-4 my-2">
+        <h1 className="pt-2 text-primary text-lg md:text-xl lg:text-2xl font-bold">
+          {label}
+        </h1>
+        <div className="flex     gap-4">
+          <Button variant="rounded" size="md">
+            <MdPreview />
+            <span className="hidden sm:inline">Preview</span>
+          </Button>
+          <Button
+            size="lg"
+            className="rounded-xl h-10"
+            disabled={isDisabled}
+            onClick={handleSubmit(handleFormSubmit)}
+          >
+            <FaSave />
+            <span className="hidden sm:inline">
+              {isSubmitting ? 'Saving...' : 'Save'}
+            </span>
+          </Button>
+        </div>
+      </div>
+
+      <div className={formSection}>
+        <FormInput
+          label="Note Title"
           id="title"
           placeholder="Add a title for your note..."
           required
           aria-invalid={!!errors.title}
           aria-describedby={errors.title ? 'title-error' : undefined}
           {...register('title')}
-          className="font-bold"
-          variant="underline"
         />
+        <input type="hidden" {...register('description')} />
 
-        <Button
-          size="lg"
-          type="button"
-          className="rounded-xl h-10"
-          disabled={isDisabled}
-          onClick={handleSubmit(handleFormSubmit)}
-        >
-          <FaSave />
-          <span className="hidden sm:inline">
-            {isSubmitting ? 'Saving...' : 'Save'}
-          </span>
-        </Button>
-      </div>
-      {errors.title && (
-        <p id="title-error" className="text-xs text-destructive">
-          {errors.title.message}
-        </p>
-      )}
-
-      <div className={`${formSection} grid grid-cols-2 md:grid-cols-3 gap-4`}>
-        <div className="flex items-center gap-2  ">
-          <Switch
-            id="visibility"
-            checked={visibility === 'PUBLIC'}
-            onCheckedChange={(checked) =>
-              setValue('visibility', checked ? 'PUBLIC' : 'PRIVATE', {
-                shouldValidate: true,
-              })
-            }
+        {errors.title && (
+          <p id="title-error" className="text-xs text-destructive">
+            {errors.title.message}
+          </p>
+        )}
+        <div className="flex flex-wrap gap-4">
+          <TechnologyPicker
+            value={technology}
+            onChange={handleTechnologyChange}
+            error={errors.technologyId?.message}
           />
-          <label
-            htmlFor="visibility"
-            className="flex items-center gap-2 cursor-pointer text-sm font-medium"
-          >
-            {visibility === 'PUBLIC' ? (
-              <>
-                <FiGlobe className="w-4 h-4" />
-                Public
-              </>
-            ) : (
-              <>
-                <FiLock className="w-4 h-4" />
-                Private
-              </>
-            )}
-          </label>
+          <div className="flex items-center gap-2  ">
+            <Switch
+              id="visibility"
+              checked={visibility === 'PUBLIC'}
+              onCheckedChange={(checked) =>
+                setValue('visibility', checked ? 'PUBLIC' : 'PRIVATE', {
+                  shouldValidate: true,
+                })
+              }
+            />
+            <label
+              htmlFor="visibility"
+              className="flex items-center gap-2 cursor-pointer text-sm font-medium"
+            >
+              {visibility === 'PUBLIC' ? (
+                <>
+                  <FiGlobe className="w-4 h-4" />
+                  Public
+                </>
+              ) : (
+                <>
+                  <FiLock className="w-4 h-4" />
+                  Private
+                </>
+              )}
+            </label>
+          </div>
         </div>
-        <TechnologyPicker
-          value={technology}
-          onChange={handleTechnologyChange}
-          error={errors.technologyId?.message}
-        />
       </div>
 
-      <div
-        className={`${formSection} flex gap-1 md:gap-3 items-center justify-between`}
-      >
-        <div className="flex items-center gap-2">
-          <Badge>{fields.length}&nbsp;Q&A</Badge>
-        </div>
-
-        <div className="flex flex-col gap-3   items-center  justify-end">
-          {fields.length > 0 && (
-            <QuestionPagination
-              activeQuestionIdx={activeQuestionIdx}
-              setActiveQuestionIdx={setActiveQuestionIdx}
-              fields={fields}
-            />
-          )}
-        </div>
-
+      <div className="flex gap-1 md:gap-3 items-center my-2">
         <Button
           variant="rounded"
           onClick={handleAddQuestion}
@@ -242,12 +233,42 @@ export const NoteForm: React.FC<NoteFormProps> = ({
           size="md"
         >
           <FiPlus className="w-4 h-4" />
-          Add
-          <span className="hidden sm:inline"> Question</span>
+          Add Question
         </Button>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={activeQuestionIdx === 0}
+              onClick={() =>
+                setActiveQuestionIdx((prev) => Math.max(0, prev - 1))
+              }
+            >
+              <FiChevronLeft className="w-4 h-4" />
+              Prev
+            </Button>
+            <p className="text-sm font-bold text-foreground/60">
+              {activeQuestionIdx + 1} of {fields.length}
+            </p>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={activeQuestionIdx === fields.length - 1}
+              onClick={() =>
+                setActiveQuestionIdx((prev) =>
+                  Math.min(fields.length - 1, prev + 1)
+                )
+              }
+            >
+              Next
+              <FiChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <div className="pt-2 pb-4">
+      <div className={formSection}>
         {fields.length === 0 ? (
           <EmptyBox
             Icon={FaRegStickyNote}
@@ -268,7 +289,6 @@ export const NoteForm: React.FC<NoteFormProps> = ({
                     Question {activeQuestionIdx + 1} of {fields.length}
                   </p>
                   <Button
-                    type="button"
                     variant="destructiveOutline"
                     size="sm"
                     className="rounded-full px-4"
@@ -279,7 +299,6 @@ export const NoteForm: React.FC<NoteFormProps> = ({
                     <span className="hidden sm:inline"> Question</span>
                   </Button>
                 </div>
-                <Separator />
                 <QuestionEditor
                   key={`${activeQuestionIdx}-${fields[activeQuestionIdx]?.id ?? 'new'}`}
                   index={activeQuestionIdx}

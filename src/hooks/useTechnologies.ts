@@ -41,6 +41,7 @@ export const useInfiniteTechnologies = () => {
     queryKey: ['technologies', 'infinite'],
     queryFn: ({ pageParam }) => fetchTechnologies(pageParam as string | null),
     initialPageParam: null,
+    refetchOnWindowFocus: false,
     getNextPageParam: (lastPage) =>
       lastPage.meta.hasNextPage ? lastPage.meta.nextCursor : undefined,
     staleTime: 1000 * 60 * 5, // 5 minutes

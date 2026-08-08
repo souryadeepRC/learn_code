@@ -1,9 +1,16 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  // Don't mark Prisma as external - let Next.js bundle it
   serverExternalPackages: [],
-  allowedDevOrigins: ['192.168.1.5'],
+  allowedDevOrigins: ['192.168.1.5', '192.168.1.9'],
+  webpackDevMiddleware: (config) => {
+    config.watchOptions = {
+      ...config.watchOptions,
+      poll: 1000,
+      aggregateTimeout: 300,
+    };
+    return config;
+  },
 };
 
 export default nextConfig;

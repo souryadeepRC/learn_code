@@ -149,7 +149,7 @@
 
   /* Muted / subtle elements */
   --muted: #0d1a12; /* Slightly lighter surface for code block backgrounds */
-  --muted-foreground: #0ea880; /* Desaturated sage-gray for comments/subtitles */
+  --muted-foreground: #aff6e4; /* Desaturated sage-gray for comments/subtitles */
 
   /* Accent (Hover states and highlights) */
   --accent: #0c2b1a; /* Rich dark translucent emerald for button hovers */

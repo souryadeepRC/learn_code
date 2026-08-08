@@ -117,10 +117,15 @@ const decodeTokenDetails = (
   return { userId: decoded.id, role: decoded.role, tier: decoded.tier };
 };
 
-type OptionalTokenDetails = { userId: string | null; role: string | null; tier: string | null };
-const decodeTokenDetailsOptional = (request: NextRequest): OptionalTokenDetails => {
-  const authHeader = request.headers?.get?.('Authorization');
-  const token = authHeader?.split?.(' ')?.[1];
+type OptionalTokenDetails = {
+  userId: string | null;
+  role: string | null;
+  tier: string | null;
+};
+const decodeTokenDetailsOptional = (
+  request: NextRequest
+): OptionalTokenDetails => {
+  const token = request.cookies?.get?.('accessToken')?.value;
 
   if (!token) {
     return { userId: null, role: null, tier: null };
@@ -132,7 +137,11 @@ const decodeTokenDetailsOptional = (request: NextRequest): OptionalTokenDetails 
     return { userId: null, role: null, tier: null };
   }
 
-  return { userId: decoded.id, role: decoded.role || null, tier: decoded.tier || null };
+  return {
+    userId: decoded.id,
+    role: decoded.role || null,
+    tier: decoded.tier || null,
+  };
 };
 
 // 2. The Authenticated Wrapper

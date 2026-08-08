@@ -13,18 +13,14 @@ export default function CreateNotePage() {
 
   return (
     <Content>
-      <div className="flex items-center justify-between gap-4 ">
-        <Link
-          className="flex text-primary text-xs gap-2 items-center"
-          href="/notes"
-        >
-          <FaAngleDoubleLeft /> Back to All Notes
-        </Link>
-        <h1 className="text-primary text-lg md:text-xl lg:text-2xl font-bold">
-          Create Note
-        </h1>
-      </div>
+      <Link
+        className="w-fit flex text-primary text-xs gap-2 items-center"
+        href="/notes"
+      >
+        <FaAngleDoubleLeft /> Back to All Notes
+      </Link>
       <NoteForm
+        label="Create Note"
         isSubmitting={isPending}
         onSubmit={(data) => {
           createNote(data, {

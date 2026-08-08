@@ -63,13 +63,13 @@ export const NoteQuestionsViewer: React.FC<NoteQuestionsViewerProps> = ({
           }}
         />
       ) : (
-        <div className="mt-1">
-          <div className="flex justify-between">
+        <div className="mt-8 ">
+          <div className="flex justify-between flex-col-reverse md:flex-row">
             {hasQuestions && (
               <div className="py-2  flex gap-2 justify-center items-center">
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="lg"
                   onClick={() =>
                     setActiveIndex((activeIndex) => activeIndex - 1)
                   }
@@ -78,12 +78,12 @@ export const NoteQuestionsViewer: React.FC<NoteQuestionsViewerProps> = ({
                   <FiChevronLeft />
                   Prev
                 </Button>
-                <p className="text-xs">
+                <p className="text-sm md:text-lg">
                   Question {activeIndex + 1} of {questions.length}
                 </p>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="lg"
                   onClick={() =>
                     setActiveIndex((activeIndex) => activeIndex + 1)
                   }
@@ -95,7 +95,7 @@ export const NoteQuestionsViewer: React.FC<NoteQuestionsViewerProps> = ({
             )}
             <Button
               variant="rounded"
-              size="md"
+              size="lg"
               className="px-6"
               onClick={() => setIsAddDialogOpen(true)}
             >
@@ -105,16 +105,16 @@ export const NoteQuestionsViewer: React.FC<NoteQuestionsViewerProps> = ({
               </kbd>
             </Button>
           </div>
-          <div className="h-1.5 w-full rounded-full bg-foreground/10 overflow-hidden">
+          <div className="h-1.5 w-full rounded-full bg-foreground/10 overflow-hidden mt-4">
             <div
               className="h-full rounded-full bg-primary transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
           {hasQuestions && (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 pt-8">
               <CardHeader>
-                <CardTitle className="pt-2 text-sm font-bold">
+                <CardTitle className="pt-2 text-lg font-bold">
                   Q{activeIndex + 1}. {activeQuestion.question}
                 </CardTitle>
               </CardHeader>
@@ -122,7 +122,7 @@ export const NoteQuestionsViewer: React.FC<NoteQuestionsViewerProps> = ({
                 className="bg-red-100"
                 content={activeQuestion.answer}
                 editable={false}
-                maxHeight="50vh"
+                // maxHeight="50vh"
               />
             </div>
           )}

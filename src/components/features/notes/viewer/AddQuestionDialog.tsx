@@ -115,6 +115,7 @@ export const AddQuestionDialog: React.FC<AddQuestionDialogProps> = ({
                 content={answer}
                 onChange={setAnswer}
                 placeholder="Provide a comprehensive explanation with code snippets, bullet points, or highlights..."
+                maxHeight="30vh"
               />
             </div>
           </div>

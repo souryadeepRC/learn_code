@@ -62,8 +62,8 @@ const Home = () => {
             asChild
             className="group relative h-12 px-8 rounded-xl font-semibold text-base shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
           >
-            <Link href="/join" className="flex items-center gap-2">
-              <span>Join Us</span>
+            <Link href="/join" className="w-fit flex items-center gap-2">
+              <span>Get Started</span>
               <span className="transition-transform duration-300 group-hover:translate-x-1">
                 →
               </span>

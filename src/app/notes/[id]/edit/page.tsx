@@ -48,19 +48,15 @@ export default function EditNotePage({
 
   return (
     <Content>
-      <div className="flex items-center justify-between gap-4 ">
-        <Link
-          className="flex text-primary text-xs gap-2 items-center"
-          href="/notes"
-        >
-          <FaAngleDoubleLeft /> Back to All Notes
-        </Link>
+      <Link
+        className="w-fit flex text-primary text-xs gap-2 items-center"
+        href="/notes"
+      >
+        <FaAngleDoubleLeft /> Back to All Notes
+      </Link>
 
-        <h1 className="text-primary text-lg md:text-xl lg:text-2xl font-bold">
-          Edit your note
-        </h1>
-      </div>
       <NoteForm
+        label="Edit Note"
         initialData={note}
         initialTechnology={note.technology}
         isSubmitting={isPending}

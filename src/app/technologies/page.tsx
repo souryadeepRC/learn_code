@@ -1,7 +1,7 @@
+import { Content } from '@/components/common/Content';
 import PageHeader from '@/components/common/PageHeader';
 import { TechnologiesGrid } from '@/components/features/technologies/TechnologiesGrid';
 import type { Metadata } from 'next';
-import { Content } from '../../components/common/Content';
 
 export const metadata: Metadata = {
   title: 'Technologies | Skill Track AI',

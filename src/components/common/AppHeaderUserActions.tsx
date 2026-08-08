@@ -1,4 +1,5 @@
 'use client';
+import { PiStudentFill } from 'react-icons/pi';
 
 import {
   Avatar,
@@ -154,11 +155,14 @@ export const AppHeaderUserActions = ({ vertical = false }: Props) => {
           variant="gradient"
           size={vertical ? 'lg' : 'sm'}
           asChild
-          className={cn('gap-1.5', vertical && 'w-full justify-center')}
+          className={cn(
+            'gap-1.5 text-xs px-4 py-5 md:px-6 md:py-5 rounded-full',
+            vertical && 'w-full justify-center '
+          )}
         >
           <Link href="/join">
-            <span aria-hidden="true">✦</span>
-            Join Us
+            <PiStudentFill />
+            Get Started
           </Link>
         </Button>
       )}

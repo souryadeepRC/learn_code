@@ -35,7 +35,7 @@
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .editor-wrapper {
-    --editor-bg: #1a1a1a;
+    --editor-bg: #050b07;
     --editor-surface: #282840;
     --editor-border: rgba(255, 255, 255, 0.08);
     --editor-text: #e8e8e8;
@@ -65,7 +65,7 @@
 /* Tailwind dark mode support */
 :root[data-theme='dark'] .editor-wrapper,
 .dark .editor-wrapper {
-  --editor-bg: #1a1a1a;
+  --editor-bg: #050b07;
   --editor-surface: #282840;
   --editor-border: rgba(255, 255, 255, 0.08);
   --editor-text: #e8e8e8;
@@ -212,8 +212,8 @@
 
 .editor-content .tiptap {
   padding: 24px 32px;
-  min-height: 300px;
-  max-height: var(--editor-max-height, 10vh);
+  min-height: 40vh;
+  max-height: var(--editor-max-height, none);
   overflow-y: auto;
   outline: none;
   color: var(--editor-text);

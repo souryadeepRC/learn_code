@@ -63,7 +63,7 @@ export const TechnologyPicker = ({ value, onChange, error }: Props) => {
               aria-hidden="true"
             />
             <span className={cn('truncate', !value && 'text-muted-foreground')}>
-              {value ? value.name : 'Select a technology'}
+              {value ? value.name : 'Choose technology'}
             </span>
           </span>
           <FiChevronDown
