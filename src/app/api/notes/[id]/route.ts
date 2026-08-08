@@ -44,7 +44,7 @@ const getAccessibleNote = async (id: string, userId: string) => {
   }
 
   const isOwner = note.authorId === userId;
-  const isPublicAdmin = note.authorRole === 'ADMIN' && note.visibility === 'PUBLIC';
+  const isPublicAdmin = note.visibility === 'PUBLIC';
 
   if (!isOwner && !isPublicAdmin) {
     return APIResponse.send(HTTP_STATUS.FORBIDDEN).json({
@@ -58,7 +58,7 @@ const getAccessibleNote = async (id: string, userId: string) => {
 
 // ─── GET /api/notes/[id] ───────────────────────────────────────────────────────
 
-export const GET = APIHandler.authenticated<undefined, { id: string }>(
+export const GET = APIHandler.optional<undefined, { id: string }>(
   async ({ userId, context }) => {
     const paramDetails = await context?.params;
     const id = paramDetails?.id;
@@ -70,7 +70,7 @@ export const GET = APIHandler.authenticated<undefined, { id: string }>(
       });
     }
 
-    const result = await getAccessibleNote(id, userId);
+    const result = await getAccessibleNote(id, userId ?? '');
 
     // If getAccessibleNote returned a NextResponse (error), bubble it up
     if (!('authorId' in result)) return result as NextResponse;

@@ -1,6 +1,6 @@
+import { TOKEN_CONFIG } from '@/config/tokenConfig';
 import { createHash } from 'crypto';
 import { cookies } from 'next/headers';
-import { TOKEN_CONFIG } from '@/config/tokenConfig';
 
 const REFRESH_TOKEN_COOKIE_NAME = 'refreshToken';
 const REVOCATION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -9,7 +9,10 @@ const revokedRefreshTokenHashes = new Map<string, number>();
 const getRefreshTokenCookieOptions = () => ({
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: process.env.NODE_ENV === 'production' ? ('strict' as const) : ('lax' as const),
+  sameSite:
+    process.env.NODE_ENV === 'production'
+      ? ('strict' as const)
+      : ('lax' as const),
   path: '/',
 });
 
@@ -31,7 +34,10 @@ const ACCESS_TOKEN_COOKIE_NAME = 'accessToken';
 const getAccessTokenCookieOptions = () => ({
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: process.env.NODE_ENV === 'production' ? ('strict' as const) : ('lax' as const),
+  sameSite:
+    process.env.NODE_ENV === 'production'
+      ? ('strict' as const)
+      : ('lax' as const),
   path: '/',
 });
 

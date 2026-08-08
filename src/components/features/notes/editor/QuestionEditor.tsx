@@ -52,10 +52,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
           name={`questions.${index}.answer`}
           control={control}
           render={({ field: { value, onChange } }) => (
-            <div
-              className="rounded-lg border border-muted/50 overflow-hidden 
-             border-primary "
-            >
+            <div className="rounded-lg border border-muted/50 overflow-hidden  ">
               <TipTapEditor
                 content={value}
                 onChange={onChange}

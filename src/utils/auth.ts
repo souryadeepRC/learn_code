@@ -1,8 +1,8 @@
+import { TOKEN_CONFIG } from '@/config/tokenConfig';
 import { prismaUsers } from '@/lib';
 import { generateTokens } from '@/lib/auth/jwt';
 import { LoginCredentials, LoginServiceResult } from '@/types/auth';
 import bcrypt from 'bcryptjs';
-import { TOKEN_CONFIG } from '@/config/tokenConfig';
 import { setAccessTokenCookie, setRefreshTokenCookie } from './authCookies';
 
 export const loginWithCredentials = async (
@@ -54,7 +54,10 @@ export const loginWithCredentials = async (
     tier: user.userProfile?.cachedSubscriptionTier ?? 'FREE',
   });
 
-  await setAccessTokenCookie(accessToken, TOKEN_CONFIG.ACCESS_TOKEN_EXPIRY_SECONDS);
+  await setAccessTokenCookie(
+    accessToken,
+    TOKEN_CONFIG.ACCESS_TOKEN_EXPIRY_SECONDS
+  );
   await setRefreshTokenCookie(refreshToken);
 
   return {

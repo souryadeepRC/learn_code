@@ -28,7 +28,7 @@ export const SearchBox = ({
   return (
     <div
       className={cn(
-        'relative w-[60%] md:w-[70%] lg:w-[60%] max-w-[400px]',
+        'relative w-[100%] md:w-[70%] lg:w-[60%] md:max-w-[400px]',
         className
       )}
     >
@@ -42,7 +42,7 @@ export const SearchBox = ({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-label={ariaLabel ?? placeholder}
-        className=" rounded-full py-5 pl-12 pr-9"
+        className="rounded-full py-5 px-12 md:px-12 pr-9"
       />
       {value && (
         <Button

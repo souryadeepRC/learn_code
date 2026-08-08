@@ -11,6 +11,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { NoteQuestion, useUpdateNote } from '@/hooks/useNotes';
+import { generateUUID } from '@/utils/uuid';
 import React, { useState } from 'react';
 import TipTapEditor from '../../../text-editor/TipTapEditor.tsx/TipTapEditor';
 
@@ -42,7 +43,7 @@ export const AddQuestionDialog: React.FC<AddQuestionDialogProps> = ({
     setError(null);
 
     const newQuestion: NoteQuestion = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       question: question.trim(),
       answer: answer,
       order: existingQuestions.length,

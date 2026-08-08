@@ -9,6 +9,7 @@ import {
   useNoteById,
   useToggleArchiveNote,
 } from '@/hooks/useNotes';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { Badge } from '@/root/src/components/ui/badge';
 import { formatNumber } from '@/root/src/utils/common';
 import Link from 'next/link';
@@ -52,6 +53,7 @@ export default function NoteDetailPage({
   const { data: note, isLoading } = useNoteById(resolvedParams.id);
   const { mutate: deleteNote } = useDeleteNote();
   const { mutate: toggleArchive } = useToggleArchiveNote();
+  const { data: currentUser } = useCurrentUser();
 
   if (isLoading) {
     return (
@@ -92,32 +94,34 @@ export default function NoteDetailPage({
         <h1 className="text-primary text-lg md:text-2xl font-bold flex-1">
           {note.title}
         </h1>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            className="flex-1"
-            size="md"
-            leftIcon={<FaEdit />}
-            title="Edit"
-            onClick={() => router.push(`/notes/${note.id}/edit`)}
-          />
-          <Button
-            variant="destructiveOutline"
-            className="flex-1"
-            size="md"
-            leftIcon={<FaTrash />}
-            title="Delete"
-            onClick={() => {
-              if (
-                window.confirm('Are you sure you want to delete this note?')
-              ) {
-                deleteNote(note.id, {
-                  onSuccess: () => router.push('/notes'),
-                });
-              }
-            }}
-          />
-        </div>
+        {currentUser && (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className="flex-1"
+              size="md"
+              leftIcon={<FaEdit />}
+              title="Edit"
+              onClick={() => router.push(`/notes/${note.id}/edit`)}
+            />
+            <Button
+              variant="destructiveOutline"
+              className="flex-1"
+              size="md"
+              leftIcon={<FaTrash />}
+              title="Delete"
+              onClick={() => {
+                if (
+                  window.confirm('Are you sure you want to delete this note?')
+                ) {
+                  deleteNote(note.id, {
+                    onSuccess: () => router.push('/notes'),
+                  });
+                }
+              }}
+            />
+          </div>
+        )}
       </div>
       <div className="flex flex-wrap gap-2 pt-2 md:pt-4">
         <Badge variant="ghost">12-Dec-2026</Badge>
@@ -130,7 +134,7 @@ export default function NoteDetailPage({
           {note.visibility.toLowerCase()}
         </Badge>
       </div>
-      <NoteQuestionsViewer noteId={note.id} questions={note.questions} />
+      <NoteQuestionsViewer noteId={note.id} questions={note.questions} isAuthenticated={!!currentUser} />
     </Content>
   );
 }

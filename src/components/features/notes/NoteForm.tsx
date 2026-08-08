@@ -7,6 +7,7 @@ import { TechnologyPicker } from '@/components/features/notes/editor/TechnologyP
 import { Switch } from '@/components/ui/switch';
 import { CreateNoteInput, CreateNoteSchema } from '@/schema/notes';
 import type { TechnologySummary } from '@/types/technology';
+import { generateUUID } from '@/utils/uuid';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
@@ -19,7 +20,6 @@ import {
   FiPlus,
   FiTrash2,
 } from 'react-icons/fi';
-import { MdPreview } from 'react-icons/md';
 import { FormInput } from '../../common/FormInput';
 
 interface NoteFormProps {
@@ -63,7 +63,7 @@ export const NoteForm: React.FC<NoteFormProps> = ({
         'PRIVATE' | 'PUBLIC',
 
       questions: (initialData?.questions?.map((q, idx) => ({
-        id: q.id || crypto.randomUUID(),
+        id: q.id || generateUUID(),
         question: q.question || '',
         answer: q.answer || '',
         order: q.order ?? idx,
@@ -96,7 +96,7 @@ export const NoteForm: React.FC<NoteFormProps> = ({
     const nextIndex = fields.length;
 
     append({
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       question: '',
       answer: '',
       order: nextIndex,
@@ -154,20 +154,13 @@ export const NoteForm: React.FC<NoteFormProps> = ({
           {label}
         </h1>
         <div className="flex     gap-4">
-          <Button variant="rounded" size="md">
-            <MdPreview />
-            <span className="hidden sm:inline">Preview</span>
-          </Button>
           <Button
-            size="lg"
-            className="rounded-xl h-10"
+            size="md"
             disabled={isDisabled}
             onClick={handleSubmit(handleFormSubmit)}
           >
             <FaSave />
-            <span className="hidden sm:inline">
-              {isSubmitting ? 'Saving...' : 'Save'}
-            </span>
+            {isSubmitting ? 'Saving...' : 'Save'}
           </Button>
         </div>
       </div>
@@ -225,18 +218,13 @@ export const NoteForm: React.FC<NoteFormProps> = ({
         </div>
       </div>
 
-      <div className="flex gap-1 md:gap-3 items-center my-2">
-        <Button
-          variant="rounded"
-          onClick={handleAddQuestion}
-          className="gap-2 whitespace-nowrap"
-          size="md"
-        >
+      <div className="flex  gap-1 md:gap-3  items-center my-2">
+        <Button variant="rounded" onClick={handleAddQuestion} size="md">
           <FiPlus className="w-4 h-4" />
           Add Question
         </Button>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 md:gap-2">
             <Button
               size="sm"
               variant="ghost"
@@ -248,7 +236,7 @@ export const NoteForm: React.FC<NoteFormProps> = ({
               <FiChevronLeft className="w-4 h-4" />
               Prev
             </Button>
-            <p className="text-sm font-bold text-foreground/60">
+            <p className="text-xs md:text-sm font-bold text-foreground/60">
               {activeQuestionIdx + 1} of {fields.length}
             </p>
             <Button

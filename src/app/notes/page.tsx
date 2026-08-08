@@ -4,6 +4,7 @@ import { Content } from '@/components/common/Content';
 import PageHeader from '@/components/common/PageHeader';
 import { SearchBox } from '@/components/common/SearchBox';
 import { NotesGrid } from '@/components/features/notes/NotesGrid';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -13,20 +14,23 @@ export default function NotesDashboard() {
   const router = useRouter();
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 350);
+  const { data: currentUser } = useCurrentUser();
 
   return (
     <Content>
       <PageHeader
         title="Technical Notes"
         description="Organize and review your Q&A documentations"
-        actionCta={{
-          title: 'Create Note',
-          leftIcon: <FiPlus />,
-          size: 'md',
-          variant: 'rounded',
-          onClick: () => router.push('/notes/create'),
-          className: 'h-10 md:h-12 md:px-10',
-        }}
+        {...(currentUser && {
+          actionCta: {
+            title: 'Create Note',
+            leftIcon: <FiPlus />,
+            size: 'md',
+            variant: 'rounded',
+            onClick: () => router.push('/notes/create'),
+            className: 'h-10 md:h-12 md:px-10',
+          },
+        })}
       />
 
       <SearchBox
