@@ -1,0 +1,80 @@
+generator learningPathsClient {
+    provider = "prisma-client-js"
+    output   = "../../node_modules/@prisma-custom/learning-paths"
+}
+
+datasource learningPathsDb {
+    provider = "mongodb"
+    url      = env("LEARNING_PATHS_DB_URI")
+}
+
+enum DifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum LearningPathContentType {
+  TECHNOLOGY
+  QUIZ
+  CHALLENGE
+  NOTE
+}
+
+/// Embedded in LearningPath — ordered curriculum steps are bounded (tens per
+/// path), authored as a unit by an admin/curriculum builder, and always read
+/// together with the path (a learner fetches the whole path to render it).
+/// contentId is a polymorphic cross-domain reference — resolved by the
+/// service layer per contentType (fan-out fetch to technologies/quizzes/
+/// challenges/notes). Never queried independently of its parent path.
+type LearningPathStep {
+  id               String
+  order            Int
+  contentType      LearningPathContentType
+  contentId        String // cross-DB, polymorphic — see contentType
+  title            String
+  isOptional       Boolean @default(false)
+  estimatedMinutes Int     @default(0)
+}
+
+type LearningPathStats {
+  enrollmentCount   Int   @default(0)
+  completionCount   Int   @default(0)
+  avgCompletionDays Float @default(0)
+}
+
+model LearningPath {
+  id String @id @default(auto()) @map("_id") @learningPathsDb.ObjectId
+
+  title       String
+  slug        String  @unique
+  description String?
+  difficulty  DifficultyLevel @default(BEGINNER)
+
+  /// Maps to User.id (@prisma-custom/users), authoring admin.
+  createdByUserId String @learningPathsDb.ObjectId
+
+  /// Self-referential, same reasoning as Technology.prerequisiteIds — not a
+  /// Prisma relation, app-resolved.
+  prerequisitePathIds String[] @learningPathsDb.ObjectId
+
+  steps LearningPathStep[]
+
+  isPremium Boolean       @default(false)
+  status    ContentStatus @default(DRAFT)
+
+  cachedStats LearningPathStats?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, isPremium, difficulty])
+  @@map("learning-paths")
+}

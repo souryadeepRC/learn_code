@@ -1,43 +1,30 @@
 'use server';
 import { HTTP_STATUS } from '@/constants/api';
-import { prismaTechnologies } from '@/lib/prismaTechnologies';
+import { listTechnologies } from '@/services/technologiesService';
 import { APIHandler, APIResponse } from '@/utils/api';
 import { NextRequest } from 'next/server';
 
 // ==========================================
-// GET: Fetch paginated list of technologies
-// Query params: ?page=1&limit=12
+// GET: Cursor-paginated list of technologies
+// Query params: ?cursor=<opaque>&limit=12&search=react
 // Accessible by: Authenticated OR Guest users (public)
 // ==========================================
 export const GET = APIHandler.public(
   async ({ request }: { request: NextRequest }) => {
     const { searchParams } = new URL(request.url);
 
-    const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10));
-    const limit = Math.min(
-      50,
-      Math.max(1, parseInt(searchParams.get('limit') ?? '12', 10))
-    );
-    const skip = (page - 1) * limit;
-
-    const [data, total] = await Promise.all([
-      prismaTechnologies.technologies.findMany({
-        skip,
-        take: limit,
-        orderBy: { name: 'asc' },
-      }),
-      prismaTechnologies.technologies.count(),
-    ]);
-
-    const hasNextPage = skip + data.length < total;
+    const { data, nextCursor, hasNextPage, limit } = await listTechnologies({
+      cursor: searchParams.get('cursor'),
+      limit: searchParams.get('limit'),
+      search: searchParams.get('search'),
+    });
 
     return APIResponse.send(HTTP_STATUS.OK).json({
       data,
       meta: {
-        total,
-        page,
-        limit,
+        nextCursor,
         hasNextPage,
+        limit,
       },
     });
   }

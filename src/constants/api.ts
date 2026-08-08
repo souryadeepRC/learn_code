@@ -48,3 +48,9 @@ export const ERROR_CODE = {
 } as const;
 
 export type ErrorCode = keyof typeof ERROR_CODE;
+
+// Shared defaults for cursor-paginated list endpoints (technologies, notes, ...).
+export const PAGINATION = {
+  DEFAULT_LIMIT: 12,
+  MAX_LIMIT: 50,
+} as const;

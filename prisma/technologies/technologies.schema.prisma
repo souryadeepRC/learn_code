@@ -5,18 +5,82 @@ generator techClient {
 
 datasource techDb {
     provider = "mongodb"
-    url      = env("CODING_TECH_DB_URI") // This warning is for v7, you're on v6
+    url      = env("TECHNOLOGIES_DB_URI") // This warning is for v7, you're on v6
 }
 
-model Technologies {
-    // MongoDB requires this exact setup for the primary key
-    id             String   @id @default(auto()) @map("_id") @techDb.ObjectId
-    name           String   @unique
-    description    String?
-    icon           String?
-    quiz           String[]
-    mcqQuestion    Int
-    codingQuestion Int
+enum DifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
 
-    @@map("technologies")
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Category {
+  id          String  @id @default(auto()) @map("_id") @techDb.ObjectId
+  name        String  @unique
+  slug        String  @unique
+  description String?
+  icon        String?
+  order       Int     @default(0)
+
+  technologies Technology[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([order])
+  @@map("categories")
+}
+
+/// Cached content counts, updated async whenever a Quiz/Note/Challenge in
+/// another domain is created/published against this technology. Avoids a
+/// cross-domain fan-out count query on every technology list/detail render
+/// (SPEC.md "Cache technology list: 1 hour" caching strategy relies on this
+/// being cheap to read).
+type TechnologyContentCounts {
+  quizCount      Int @default(0)
+  noteCount      Int @default(0)
+  challengeCount Int @default(0)
+}
+
+model Technology {
+  id          String  @id @default(auto()) @map("_id") @techDb.ObjectId
+  name        String  @unique
+  slug        String  @unique
+  description String?
+  icon        String?
+
+  categoryId String   @techDb.ObjectId
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  difficulty DifficultyLevel @default(BEGINNER)
+
+  /// Self-referential prerequisite graph. NOT a Prisma relation — Mongo has
+  /// no native many-to-many join table, and a self-relation here would
+  /// require an intermediate collection for no real benefit at this scale.
+  /// Resolved by the service layer (fetch by ids, batch). Document this
+  /// explicitly: if this ever moves to Postgres, this becomes a
+  /// `technology_prerequisites (technology_id, prerequisite_id)` join table.
+  prerequisiteIds String[] @techDb.ObjectId
+
+  tags       String[]
+  isFeatured Boolean @default(false)
+  isPremium  Boolean @default(false)
+  status     ContentStatus @default(DRAFT)
+
+  cachedContentCounts TechnologyContentCounts?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId, difficulty])
+  @@index([status, isFeatured])
+  @@index([tags])
+  @@map("technologies")
 }

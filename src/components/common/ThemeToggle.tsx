@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useTheme } from '@/context/ThemeContext';
@@ -35,32 +36,34 @@ export const ThemeToggle = () => {
   }
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleTheme}
-          aria-label={
-            isDarkTheme ? 'Switch to light mode' : 'Switch to dark mode'
-          }
-        >
-          {isDarkTheme ? (
-            <MdOutlineDarkMode
-              className="h-4 w-4 text-blue-400"
-              aria-hidden="true"
-            />
-          ) : (
-            <MdOutlineLightMode
-              className="h-4 w-4 text-amber-500"
-              aria-hidden="true"
-            />
-          )}
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent side="bottom">
-        {isDarkTheme ? 'Switch to Light' : 'Switch to Dark'}
-      </TooltipContent>
-    </Tooltip>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            aria-label={
+              isDarkTheme ? 'Switch to light mode' : 'Switch to dark mode'
+            }
+          >
+            {isDarkTheme ? (
+              <MdOutlineDarkMode
+                className="h-4 w-4 text-blue-400"
+                aria-hidden="true"
+              />
+            ) : (
+              <MdOutlineLightMode
+                className="h-4 w-4 text-amber-500"
+                aria-hidden="true"
+              />
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          {isDarkTheme ? 'Switch to Light' : 'Switch to Dark'}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };

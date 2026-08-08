@@ -14,6 +14,7 @@ export type LoginServiceResult =
       success: true;
       status: 200;
       accessToken: string;
+      expiresIn?: number;
       email: string;
       accountStatus: string;
     }
@@ -47,12 +48,26 @@ export type CallbackType<T = unknown, P = unknown> = (
 
 export type AuthAPICallbackParams<T = unknown, P = unknown> = {
   userId: string;
+  role: string;
+  tier?: string;
   request: NextRequest;
   context?: RouteContext<P>;
   payload: T;
 };
 export type AuthCallbackType<T = unknown, P = unknown> = (
   params: AuthAPICallbackParams<T, P>
+) => Promise<NextResponse>;
+
+export type OptionalAuthAPICallbackParams<T = unknown, P = unknown> = {
+  userId: string | null;
+  role: string | null;
+  tier: string | null;
+  request: NextRequest;
+  context?: RouteContext<P>;
+  payload: T;
+};
+export type OptionalAuthCallbackType<T = unknown, P = unknown> = (
+  params: OptionalAuthAPICallbackParams<T, P>
 ) => Promise<NextResponse>;
 
 export type OAuthProvider = keyof typeof OAuthProviders;

@@ -1,3 +1,4 @@
+import { TOKEN_CONFIG } from '@/config/tokenConfig';
 import jwt from 'jsonwebtoken';
 
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET;
@@ -7,17 +8,19 @@ if (!ACCESS_SECRET || !REFRESH_SECRET) {
   throw new Error('ACCESS_TOKEN_SECRET and REFRESH_TOKEN_SECRET must be set');
 }
 
-type TokenSignId = { userId: string; email: string };
+type TokenSignId = { id: string; email: string; role: string; tier?: string };
 
-export const signAccessTokens = (userId: string, email: string) => {
-  // Access Token expires in 15 minutes
-  return jwt.sign({ userId, email }, ACCESS_SECRET, {
-    expiresIn: '15m',
+export const signAccessTokens = (userDetails: TokenSignId) => {
+  // Access Token expiration is handled by config
+  return jwt.sign(userDetails, ACCESS_SECRET, {
+    expiresIn: TOKEN_CONFIG.ACCESS_TOKEN_EXPIRY_SECONDS,
   });
 };
 
 export const signRefreshToken = (userId: string) => {
-  return jwt.sign({ userId }, REFRESH_SECRET, { expiresIn: '7d' });
+  return jwt.sign({ id: userId }, REFRESH_SECRET, {
+    expiresIn: TOKEN_CONFIG.REFRESH_TOKEN_EXPIRY_SECONDS,
+  });
 };
 
 export const verifyAccessToken = (token: string) => {
@@ -36,9 +39,9 @@ export const verifyRefreshToken = (token: string) => {
   }
 };
 
-export const generateTokens = (userId: string, email: string) => {
+export const generateTokens = (userDetails: TokenSignId) => {
   return {
-    accessToken: signAccessTokens(userId, email),
-    refreshToken: signRefreshToken(userId),
+    accessToken: signAccessTokens(userDetails),
+    refreshToken: signRefreshToken(userDetails.id),
   };
 };

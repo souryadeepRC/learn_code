@@ -1,6 +1,11 @@
-/** Supported icon identifiers mapped in AppHeaderNavLink. */
+/** Supported icon identifiers mapped in AppSidebar. */
 export type NavIconType =
-  'github' | 'technologies' | 'scorecard' | 'dashboard' | 'practice';
+  | 'github'
+  | 'technologies'
+  | 'scorecard'
+  | 'dashboard'
+  | 'practice'
+  | 'notes';
 
 /** Who is allowed to see a nav item. */
 export type NavAccessLevel = 'public' | 'auth' | 'premium';
@@ -23,7 +28,7 @@ export type NavItem = {
 
 /**
  * Default application nav items.
- * Import and spread in any layout that uses <AppHeader />.
+ * Consumed by AppShell/AppSidebar to render navigation.
  *
  * To add a new link:
  *   { id: 'dashboard', label: 'Dashboard', href: '/dashboard', requiredAccess: 'auth', icon: 'dashboard' }
@@ -34,6 +39,13 @@ export const NAV_ITEMS: NavItem[] = [
     icon: 'technologies',
     label: 'Technologies',
     href: '/technologies',
+    requiredAccess: 'public',
+  },
+  {
+    id: 'notes',
+    icon: 'notes',
+    label: 'Notes',
+    href: '/notes',
     requiredAccess: 'public',
   },
   {

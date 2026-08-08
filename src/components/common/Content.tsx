@@ -3,7 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import React from 'react';
 
 const contentVariants = cva(
-  'text-muted-foreground leading-relaxed transition-colors',
+  'py-10 md:py-16 px-4 md:px-16 max-w-6xl mx-auto space-y-2 w-full min-w-0 max-w-full text-muted-foreground leading-relaxed transition-colors',
   {
     variants: {
       size: {
@@ -23,7 +23,7 @@ const contentVariants = cva(
 export type ContentProps = React.HTMLAttributes<HTMLParagraphElement> &
   VariantProps<typeof contentVariants> & {
     /** Overrides the rendered HTML tag (defaults to <p>). */
-    as?: 'p' | 'div' | 'span' | 'article' | 'section';
+    as?: 'p' | 'div' | 'span' | 'article' | 'section' | 'main';
     children?: React.ReactNode;
   };
 
@@ -34,7 +34,7 @@ export type ContentProps = React.HTMLAttributes<HTMLParagraphElement> &
 export const Content = ({
   className,
   size = 'default',
-  as: Tag = 'div',
+  as: Tag = 'main',
   children,
   ...props
 }: ContentProps) => {

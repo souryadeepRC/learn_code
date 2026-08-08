@@ -1,7 +1,6 @@
 import { Content } from '@/components/common/Content';
-import { Heading } from '@/components/common/Heading';
-import { AppHeader } from '@/root/src/components/common/AppHeader';
-import { TechnologiesGrid } from '@/root/src/components/features/technologies/TechnologiesGrid';
+import PageHeader from '@/components/common/PageHeader';
+import { TechnologiesGrid } from '@/components/features/technologies/TechnologiesGrid';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -16,25 +15,16 @@ export const metadata: Metadata = {
  */
 const TechnologiesPage = () => {
   return (
-    <main id="main-content" className="min-h-screen bg-background">
-      <AppHeader />
-
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <header className="mb-10 flex flex-col gap-3">
-          {/* Headline */}
-          <Heading variant="h1">Technologies</Heading>
-
-          {/* Subtitle */}
-          <Content size="default" className="max-w-2xl">
-            Discover our full library of technologies — each packed with MCQ
-            challenges and coding problems to level up your skills.
-          </Content>
-        </header>
-
-        {/* ── Infinite scroll grid ── */}
+    <Content>
+      <PageHeader
+        title="Technologies"
+        description="Discover our full library of technologies — each packed with MCQ
+            challenges and coding problems to level up your skills."
+      />
+      <div className="mx-auto max-w-7xl px-4  sm:px-6 lg:px-8">
         <TechnologiesGrid />
       </div>
-    </main>
+    </Content>
   );
 };
 

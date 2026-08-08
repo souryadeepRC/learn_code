@@ -1,0 +1,62 @@
+generator progressClient {
+    provider = "prisma-client-js"
+    output   = "../../node_modules/@prisma-custom/progress"
+}
+
+datasource progressDb {
+    provider = "mongodb"
+    url      = env("PROGRESS_DB_URI")
+}
+
+enum ProgressEntityType {
+  TECHNOLOGY
+  QUIZ
+  CHALLENGE
+  LEARNING_PATH
+  NOTE
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+}
+
+model UserProgress {
+  id String @id @default(auto()) @map("_id") @progressDb.ObjectId
+
+  /// Maps to User.id (@prisma-custom/users). Cross-DB, app-layer, from JWT.
+  userId String @progressDb.ObjectId
+
+  /// Polymorphic cross-domain reference — entityType picks which domain
+  /// entityId points into (see docs/roadmap/04-personalization.md and
+  /// SPEC.md's UserProgress description). Kept generic on purpose so new
+  /// content types never require a schema change here.
+  entityType ProgressEntityType
+  entityId   String @progressDb.ObjectId
+
+  status          ProgressStatus @default(NOT_STARTED)
+  progressPercent Int            @default(0)
+
+  /// Free-form extra state per entityType (e.g. { lastQuestionIndex } for a
+  /// quiz-in-progress, { currentStepId } for a learning path). Deliberately
+  /// untyped Json — this is the "escape hatch" field the polymorphic model
+  /// exists for; do not promote ad-hoc keys here into top-level columns
+  /// unless they're needed across all entityTypes.
+  metadata Json?
+
+  startedAt      DateTime?
+  completedAt    DateTime?
+  lastActivityAt DateTime  @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// One progress row per (user, entity) — writes are upserts keyed on this.
+  @@unique([userId, entityType, entityId])
+  @@index([userId, entityType, status])
+  @@index([userId, lastActivityAt])
+  @@index([entityType, entityId])
+  @@map("user-progress")
+}

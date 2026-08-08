@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 
 import { isGuestOnlyRoute, ROUTE_CONFIG } from '@/config/routesConfig';
 import apiClient from '@/lib/axios';
+import { setTokenExpiration } from '@/lib/tokenManager';
 import { setCredentials } from '@/store/slices/authSlice';
 import { setUserProfile, type UserProfile } from '@/store/slices/userSlice';
 import { useAppDispatch } from '@/store/storeHooks';
@@ -14,6 +15,7 @@ import type { LoginCredentials } from '@/types/auth';
 type LoginSuccessResponse = {
   message: string;
   accessToken: string;
+  expiresIn?: number;
   email: string;
   accountStatus?: string;
 };
@@ -68,6 +70,9 @@ export const useLogin = () => {
     mutationKey: ['auth', 'login'],
     mutationFn: loginRequest,
     onSuccess: async (data) => {
+      if (data.expiresIn) {
+        setTokenExpiration(data.expiresIn);
+      }
       dispatch(
         setCredentials({
           accessToken: data.accessToken,

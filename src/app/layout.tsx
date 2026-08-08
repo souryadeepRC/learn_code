@@ -1,4 +1,5 @@
 import '@/app/globals.css';
+import { AppShell } from '@/components/common/AppShell';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { AppProviders } from '@/providers/AppProviders';
 import type { Metadata, Viewport } from 'next';
@@ -20,12 +21,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Skill Track AI',
+  title: {
+    default: 'Skill Track AI',
+    template: '%s | Skill Track AI',
+  },
   description: 'Advanced Tech Learning & Practice Portal with Skill Track AI',
   icons: {
-    icon: '/appLogo.png',
-    shortcut: '/appLogo.png',
-    apple: '/appLogo.png',
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+    shortcut: '/favicon.svg',
+    apple: '/favicon.png',
   },
 };
 
@@ -43,7 +50,9 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
     >
       <body>
         <AppProviders>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <AppShell>{children}</AppShell>
+          </ThemeProvider>
         </AppProviders>
       </body>
     </html>

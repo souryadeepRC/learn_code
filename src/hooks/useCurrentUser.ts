@@ -1,16 +1,16 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
 import axios from 'axios';
+import { useEffect } from 'react';
 
 import apiClient from '@/lib/axios';
-import { clearCredentials, setCredentials } from '@/store/slices/authSlice';
 import {
   selectAuthEmail,
   selectIsAuthenticated,
   selectIsPremium,
 } from '@/store/slices/authSelectors';
+import { clearCredentials, setCredentials } from '@/store/slices/authSlice';
 import {
   clearUserProfile,
   setUserError,
@@ -52,6 +52,7 @@ export const useCurrentUser = () => {
     enabled: isAuthenticated,
     staleTime: 1000 * 60 * 10, // 10 mins
     retry: false,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {

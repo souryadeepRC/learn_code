@@ -1,3 +1,4 @@
+import { TOKEN_CONFIG } from '@/config/tokenConfig';
 import { createHash } from 'crypto';
 import { cookies } from 'next/headers';
 
@@ -8,7 +9,10 @@ const revokedRefreshTokenHashes = new Map<string, number>();
 const getRefreshTokenCookieOptions = () => ({
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
+  sameSite:
+    process.env.NODE_ENV === 'production'
+      ? ('strict' as const)
+      : ('lax' as const),
   path: '/',
 });
 
@@ -25,9 +29,32 @@ const cleanupExpiredRevocations = () => {
 const hashToken = (token: string) =>
   createHash('sha256').update(token).digest('hex');
 
+const ACCESS_TOKEN_COOKIE_NAME = 'accessToken';
+
+const getAccessTokenCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite:
+    process.env.NODE_ENV === 'production'
+      ? ('strict' as const)
+      : ('lax' as const),
+  path: '/',
+});
+
+export const setAccessTokenCookie = async (
+  value: string,
+  maxAge = TOKEN_CONFIG.ACCESS_TOKEN_EXPIRY_SECONDS
+) => {
+  const cookieStore = await cookies();
+  cookieStore.set(ACCESS_TOKEN_COOKIE_NAME, value, {
+    ...getAccessTokenCookieOptions(),
+    maxAge,
+  });
+};
+
 export const setRefreshTokenCookie = async (
   value: string,
-  maxAge = 7 * 24 * 60 * 60
+  maxAge = TOKEN_CONFIG.REFRESH_TOKEN_EXPIRY_SECONDS
 ) => {
   const cookieStore = await cookies();
   cookieStore.set(REFRESH_TOKEN_COOKIE_NAME, value, {

@@ -17,8 +17,9 @@ type Props = {
 };
 
 const TechnologyCardComponent = (props: Props) => {
-  const { name, description, mcqQuestion, codingQuestion, quiz } =
-    props.technology;
+  const { name, description, cachedContentCounts } = props.technology;
+  const { quizCount = 0, noteCount = 0, challengeCount = 0 } =
+    cachedContentCounts ?? {};
 
   return (
     <Card
@@ -35,10 +36,9 @@ const TechnologyCardComponent = (props: Props) => {
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent className="pt-4 sm:pt-8 flex flex-wrap gap-2">
-        <Badge>{formatNumber(mcqQuestion)} MCQ</Badge>
-        <Badge>{formatNumber(codingQuestion)} Coding</Badge>
-        <Badge>{formatNumber(quiz.length)} Quiz</Badge>
-        <Badge className="opacity-30">Notes</Badge>
+        <Badge>{formatNumber(quizCount)} Quiz</Badge>
+        <Badge>{formatNumber(challengeCount)} Coding</Badge>
+        <Badge>{formatNumber(noteCount)} Notes</Badge>
       </CardContent>
     </Card>
   );

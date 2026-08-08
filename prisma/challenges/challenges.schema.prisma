@@ -1,0 +1,126 @@
+generator challengesClient {
+    provider = "prisma-client-js"
+    output   = "../../node_modules/@prisma-custom/challenges"
+}
+
+datasource challengesDb {
+    provider = "mongodb"
+    url      = env("CHALLENGES_DB_URI")
+}
+
+enum DifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum SubmissionStatus {
+  PENDING
+  RUNNING
+  PASSED
+  FAILED
+  RUNTIME_ERROR
+  TIMEOUT
+}
+
+/// Embedded in Challenge — bounded (a handful to a few dozen test cases per
+/// challenge), authored once by an admin, always read together with the
+/// challenge (the sandboxed runner needs the full set in one fetch).
+type TestCase {
+  id             String
+  input          Json
+  expectedOutput Json
+  isHidden       Boolean @default(false) // hidden cases withheld from the learner, shown only in results
+  points         Int     @default(1)
+  timeLimitMs    Int     @default(2000)
+  memoryLimitMb  Int     @default(128)
+  order          Int     @default(0)
+}
+
+type ChallengeStats {
+  submissionCount Int   @default(0)
+  passRate        Float @default(0)
+}
+
+model Challenge {
+  id String @id @default(auto()) @map("_id") @challengesDb.ObjectId
+
+  /// Maps to Technology.id (@prisma-custom/technologies). Cross-DB, app-layer.
+  technologyId String @challengesDb.ObjectId
+  /// Maps to User.id (@prisma-custom/users), authoring admin.
+  createdByUserId String @challengesDb.ObjectId
+
+  title       String
+  slug        String @unique
+  description String // markdown problem statement
+  difficulty  DifficultyLevel @default(BEGINNER)
+
+  /// Supported languages + per-language starter code. Embedded: small,
+  /// bounded (one entry per supported language), always read with the
+  /// challenge.
+  starterCode Json // { "python": "...", "javascript": "...", ... }
+  languages   String[]
+
+  testCases TestCase[]
+
+  isPremium Boolean       @default(false)
+  status    ContentStatus @default(DRAFT)
+
+  cachedStats ChallengeStats?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  submissions ChallengeSubmission[]
+
+  @@index([technologyId, status])
+  @@index([status, isPremium, difficulty])
+  @@map("challenges")
+}
+
+/// Embedded in ChallengeSubmission — bounded by the parent challenge's
+/// test-case count, written once per submission by the sandboxed runner.
+type TestResult {
+  testCaseId      String
+  passed          Boolean
+  actualOutput    Json?
+  errorMessage    String?
+  executionTimeMs Int?
+  memoryUsedMb    Int?
+}
+
+model ChallengeSubmission {
+  id String @id @default(auto()) @map("_id") @challengesDb.ObjectId
+
+  challengeId String    @challengesDb.ObjectId
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  /// Maps to User.id (@prisma-custom/users). Cross-DB, app-layer, from JWT.
+  userId String @challengesDb.ObjectId
+
+  language String
+  code     String // submitted source, size-guarded at the API layer
+
+  status       SubmissionStatus @default(PENDING)
+  testResults  TestResult[]
+  scorePercent Float @default(0)
+
+  executionTimeMs Int?
+  memoryUsedMb    Int?
+
+  submittedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, challengeId, submittedAt])
+  @@index([challengeId, status])
+  @@index([userId, submittedAt])
+  @@map("challenge-submissions")
+}

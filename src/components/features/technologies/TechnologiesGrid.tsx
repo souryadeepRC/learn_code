@@ -94,7 +94,6 @@ export const TechnologiesGrid = () => {
 
   const allTechnologies =
     data?.pages.flatMap((page: TechnologiesApiResponse) => page.data) ?? [];
-  const total = data?.pages[0]?.meta.total ?? 0;
 
   // ── Empty state ────────────────────────────────────────────────────────────
   if (allTechnologies.length === 0) {
@@ -119,12 +118,12 @@ export const TechnologiesGrid = () => {
       <p aria-live="polite" aria-atomic="true" className="sr-only">
         {isFetchingNextPage
           ? 'Loading more technologies…'
-          : `Showing ${allTechnologies.length} of ${total} technologies`}
+          : `Showing ${allTechnologies.length} technologies`}
       </p>
 
       {/* Grid */}
       <section
-        aria-label={`Technologies list — ${allTechnologies.length} of ${total} shown`}
+        aria-label={`Technologies list — ${allTechnologies.length} shown`}
         className={cn(
           'grid gap-4',
           'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3'
