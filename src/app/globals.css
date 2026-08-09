@@ -118,12 +118,12 @@
   --chart-5: #f43f5e;
 
   /* Sidebar */
-  --sidebar: #ebf3ef;
+  --sidebar: #fcfcfc;
   --sidebar-foreground: #091710;
   --sidebar-primary: #0b6e4f;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #d8f8e5;
-  --sidebar-accent-foreground: #0b6e4f;
+  --sidebar-accent: #f2f9f0;
+  --sidebar-accent-foreground: #033222;
   --sidebar-border: #d0e2d8;
   --sidebar-ring: #0b6e4f;
 }

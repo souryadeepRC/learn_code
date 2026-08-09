@@ -82,9 +82,9 @@ export const AppSidebar = ({
               aria-current={isActive ? 'page' : undefined}
               title={isRail ? item.label : undefined}
               className={cn(
-                'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                'flex items-center gap-2.5 rounded-lg px-3 py-2 text-md font-medium transition-colors',
                 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-                isActive && 'bg-sidebar-accent text-sidebar-accent-foreground',
+                isActive && 'font-bold  text-primary',
                 isRail && 'justify-center lg:justify-start'
               )}
             >

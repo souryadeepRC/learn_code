@@ -71,14 +71,20 @@ export const AppShell = ({ children }: Props) => {
         </header>
 
         <div className="flex flex-1">
-          <aside className="hidden shrink-0 border-r border-sidebar-border bg-sidebar md:block md:w-16 lg:w-60">
+          <aside className="hidden shrink-0 shadow-lg bg-sidebar md:block md:w-16 lg:w-60">
             <AppSidebar variant="rail" />
           </aside>
 
           <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-            <SheetContent side="left" id="mobile-nav" className="w-64 bg-sidebar p-0">
-              <SheetHeader className="sr-only">
-                <SheetTitle>Navigation</SheetTitle>
+            <SheetContent
+              side="left"
+              id="mobile-nav"
+              className="w-64 bg-sidebar p-0 border-none"
+            >
+              <SheetHeader className="shadow-md">
+                <SheetTitle className="text-primary font-bold">
+                  Skill Track AI
+                </SheetTitle>
               </SheetHeader>
               <AppSidebar
                 variant="drawer"

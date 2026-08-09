@@ -1,5 +1,4 @@
 import '@/app/globals.css';
-import { AppShell } from '@/components/common/AppShell';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { AppProviders } from '@/providers/AppProviders';
 import type { Metadata, Viewport } from 'next';
@@ -50,9 +49,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
     >
       <body>
         <AppProviders>
-          <ThemeProvider>
-            <AppShell>{children}</AppShell>
-          </ThemeProvider>
+          <ThemeProvider>{children}</ThemeProvider>
         </AppProviders>
       </body>
     </html>

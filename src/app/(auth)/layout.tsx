@@ -13,7 +13,8 @@ export const metadata: Metadata = {
  *
  * Wraps all authentication pages (/join, /forgot-password, /reset-password, /verify-email)
  * in AuthGuard (guest access) so logged-in users are redirected away.
- * The header/sidebar chrome comes from the root AppShell.
+ * Auth pages intentionally render without the AppShell header/sidebar chrome
+ * (that chrome is scoped to the `(app)` route group for authenticated screens).
  */
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
